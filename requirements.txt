@@ -1,0 +1,68 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Robust Topology Optimization — Python Dependencies
+# Base image: dolfinx/dolfinx:v0.9.0-cuda
+# dolfinx, petsc4py, mpi4py, numpy, ufl, basix, ffcx — pre-installed in image
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ── FEA / mesh I/O ─────────────────────────────────────────────────────────────
+meshio==5.3.5
+h5py==3.11.0
+netCDF4==1.7.1
+gmsh==4.13.1
+
+# ── Visualization ──────────────────────────────────────────────────────────────
+pyvista==0.44.2
+vtk==9.3.1
+trame==3.6.5
+trame-vtk==2.8.10
+trame-vuetify==2.7.2
+
+# ── UQ / surrogate ─────────────────────────────────────────────────────────────
+# PCE, random field distributions, polynomial bases
+chaospy==4.3.21
+# Random fields, KL expansion, OpenTURNS distribution framework
+openturns==1.24
+# Sobol sensitivity indices
+SALib==1.5.1
+
+# ── Sampling & DOE ─────────────────────────────────────────────────────────────
+pyDOE3==1.0.4
+scikit-learn==1.5.2
+
+# ── Optimization ───────────────────────────────────────────────────────────────
+# MMA (Method of Moving Asymptotes) and SLSQP
+nlopt==2.8.0
+# Convex sub-problem fallback
+cvxpy==1.5.3
+# PyOptSparse — installed separately in Dockerfile (requires Fortran build)
+# pyoptsparse==2.11.2
+
+# ── Parallel / distributed ─────────────────────────────────────────────────────
+# mpi4py pre-installed in base image; pin here to prevent pip from overwriting
+mpi4py==4.0.1
+joblib==1.4.2
+
+# ── GPU arrays ─────────────────────────────────────────────────────────────────
+# cupy-cuda12x installed separately in Dockerfile (CUDA version-sensitive)
+# Declare here for documentation; Dockerfile handles the actual install
+nvidia-ml-py==12.560.30
+pynvml==11.5.3
+
+# ── Data & config ──────────────────────────────────────────────────────────────
+pyyaml==6.0.2
+jsonschema==4.23.0
+pandas==2.2.3
+rich==13.9.4
+
+# ── Profiling ──────────────────────────────────────────────────────────────────
+py-spy==0.3.14
+memray==1.5.0
+
+# ── Dev / testing ──────────────────────────────────────────────────────────────
+pytest==8.3.5
+pytest-cov==5.0.0
+pytest-xdist==3.6.1
+black==24.10.0
+ruff==0.6.9
+mypy==1.13.0
+pre-commit==3.8.0

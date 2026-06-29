@@ -1,0 +1,22 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# MPI Hostfile — DGX A100
+# GPUs active on slots: 0, 1, 2, 4 (slot 3 offline)
+# One MPI rank per GPU = 4 total ranks
+# ═══════════════════════════════════════════════════════════════════════════════
+localhost slots=4
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Usage examples:
+#
+# Standard 4-GPU FEA solve:
+#   mpirun -n 4 --hostfile mpi_settings/hostfile python3 src/fea/solve.py config.yaml
+#
+# With explicit GPU-to-rank pinning (recommended for FEA):
+#   mpirun -n 4 --hostfile mpi_settings/hostfile \
+#     -x CUDA_VISIBLE_DEVICES=0,1,2,4 \
+#     python3 src/fea/solve.py config.yaml
+#
+# Oversubscribed Monte Carlo batch (8 processes, 2 per GPU):
+#   mpirun -n 8 --hostfile mpi_settings/hostfile --oversubscribe \
+#     python3 src/validation/monte_carlo.py config.yaml
+# ═══════════════════════════════════════════════════════════════════════════════

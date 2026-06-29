@@ -1,0 +1,89 @@
+{
+  "name": "Robust Topo-Opt [DGX A100]",
+  "build": {
+    "context": "../..",
+    "dockerfile": "../../Dockerfile.gpu",
+    "args": {
+      "USERNAME": "devuser",
+      "USER_UID": "1000",
+      "USER_GID": "1000"
+    }
+  },
+
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+
+  "remoteUser": "devuser",
+
+  // CDI-based GPU passthrough — works with rootless Docker, no sudo needed
+  "runArgs": [
+    "--device", "nvidia.com/gpu=0",
+    "--device", "nvidia.com/gpu=1",
+    "--device", "nvidia.com/gpu=2",
+    "--device", "nvidia.com/gpu=4",
+    "--shm-size=64g",
+    "--ulimit", "memlock=-1",
+    "--ulimit", "stack=67108864",
+    "--ipc=host",
+    "--net=host"
+  ],
+
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+
+  "mounts": [
+    "source=robust-topo-pip-cache-dgx,target=/home/devuser/.cache/pip,type=volume"
+  ],
+
+  "containerEnv": {
+    "CUDA_VISIBLE_DEVICES": "0,1,2,4",
+    "NVIDIA_VISIBLE_DEVICES": "0,1,2,4",
+    "NVIDIA_DRIVER_CAPABILITIES": "compute,utility",
+    "PETSC_OPTIONS": "-vec_type cuda -mat_type aijcusparse",
+    "NCCL_P2P_LEVEL": "NVL",
+    "OMPI_MCA_opal_cuda_support": "true",
+    "PYVISTA_OFF_SCREEN": "true",
+    "DISPLAY": ":99",
+    "OMP_NUM_THREADS": "8",
+    "MKL_NUM_THREADS": "8",
+    "MACHINE_PROFILE": "dgx"
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.debugpy",
+        "ms-python.black-formatter",
+        "charliermarsh.ruff",
+        "ms-toolsai.jupyter",
+        "ms-toolsai.jupyter-keymap",
+        "nvidia.nsight-vscode-edition",
+        "redhat.vscode-yaml",
+        "eamodio.gitlens",
+        "mhutchie.git-graph",
+        "usernamehw.errorlens"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/bin/python3",
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "ruff.enable": true,
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "python.testing.pytestEnabled": true,
+        "python.testing.pytestArgs": ["-x", "--tb=short", "-n", "4"]
+      }
+    }
+  },
+
+  "postCreateCommand": "bash .devcontainer/dgx/postCreate.sh",
+  "postStartCommand": "nvidia-smi --query-gpu=index,name,memory.total --format=csv,noheader",
+
+  "forwardPorts": [8888, 8080],
+  "portsAttributes": {
+    "8888": { "label": "Jupyter Lab" },
+    "8080": { "label": "Trame VTK" }
+  }
+}

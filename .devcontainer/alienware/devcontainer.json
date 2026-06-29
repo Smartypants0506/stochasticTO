@@ -1,0 +1,81 @@
+{
+  "name": "Robust Topo-Opt [Alienware RTX 3060 Ti]",
+  "build": {
+    "context": "../..",
+    "dockerfile": "../../Dockerfile.dev",
+    "args": {
+      "USERNAME": "devuser",
+      "USER_UID": "1000",
+      "USER_GID": "1000"
+    }
+  },
+
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+
+  "remoteUser": "devuser",
+
+  // --gpus all is required for WSL2 + Docker Desktop on Windows 11
+  "runArgs": [
+    "--gpus", "all",
+    "--shm-size=16g",
+    "--ulimit", "memlock=-1",
+    "--ipc=host"
+  ],
+
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+
+  "mounts": [
+    "source=robust-topo-pip-cache-alienware,target=/home/devuser/.cache/pip,type=volume"
+  ],
+
+  "containerEnv": {
+    "CUDA_VISIBLE_DEVICES": "0",
+    "NVIDIA_VISIBLE_DEVICES": "all",
+    "NVIDIA_DRIVER_CAPABILITIES": "compute,utility,graphics",
+    "PETSC_OPTIONS": "-vec_type cuda -mat_type aijcusparse",
+    "PYVISTA_OFF_SCREEN": "false",
+    "OMP_NUM_THREADS": "4",
+    "MKL_NUM_THREADS": "4",
+    "MACHINE_PROFILE": "alienware"
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.debugpy",
+        "ms-python.black-formatter",
+        "charliermarsh.ruff",
+        "ms-toolsai.jupyter",
+        "ms-toolsai.jupyter-keymap",
+        "nvidia.nsight-vscode-edition",
+        "redhat.vscode-yaml",
+        "eamodio.gitlens",
+        "mhutchie.git-graph",
+        "usernamehw.errorlens"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/bin/python3",
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "ruff.enable": true,
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "python.testing.pytestEnabled": true,
+        "python.testing.pytestArgs": ["-x", "--tb=short"]
+      }
+    }
+  },
+
+  "postCreateCommand": "bash .devcontainer/alienware/postCreate.sh",
+  "postStartCommand": "nvidia-smi --query-gpu=index,name,memory.total --format=csv,noheader",
+
+  "forwardPorts": [8888, 8080],
+  "portsAttributes": {
+    "8888": { "label": "Jupyter Lab" },
+    "8080": { "label": "Trame VTK" }
+  }
+}
