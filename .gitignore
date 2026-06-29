@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+dist/
+build/
+.mypy_cache/
+.ruff_cache/
+
+# Results & data (too large for git)
+results/
+data/cad/*.step
+data/cad/*.iges
+data/cad/*.stl
+data/metrology/*.csv
+data/metrology/*.xyz
+
+# Jupyter
+.ipynb_checkpoints/
+notebooks/*.html
+
+# Docker
+.docker/
+
+# VS Code
+.vscode/settings.json
+
+# OS
+.DS_Store
+Thumbs.db
