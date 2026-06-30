@@ -17,10 +17,11 @@
 
   // --gpus all is required for WSL2 + Docker Desktop on Windows 11
   "runArgs": [
-    "--gpus all",
-    "--shm-size=16g",
-    "--ulimit", "memlock=-1",
-    "--ipc=host"
+  "--gpus=all",
+  "--shm-size=16g",
+  "--ulimit",
+  "memlock=-1",
+  "--ipc=host"
   ],
 
   "features": {
@@ -70,6 +71,7 @@
     }
   },
 
+  "postCreateUser": "root",
   "postCreateCommand": "bash .devcontainer/alienware/postCreate.sh",
   "postStartCommand": "nvidia-smi --query-gpu=index,name,memory.total --format=csv,noheader",
 

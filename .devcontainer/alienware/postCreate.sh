@@ -3,7 +3,7 @@ set -euo pipefail
 
 bash /workspace/.devcontainer/common/postCreate_common.sh
 
-python3 - <<'EOF'
+/dolfinx-env/bin/python3 - <<'EOF'
 import cupy as cp
 props = cp.cuda.runtime.getDeviceProperties(0)
 mem = props['totalGlobalMem'] // 1024**3
