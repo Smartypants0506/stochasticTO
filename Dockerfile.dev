@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM dolfinx/dolfinx:v0.9.0-cuda
+FROM benpachev/cudolfinx:v0.9.0-cuda12.6
 
 LABEL description="Robust Topo-Opt — Alienware m13 RTX 3060 Ti"
 
@@ -15,15 +15,15 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git curl wget vim htop tmux sudo \
-    libglu1-mesa libgl1-mesa-glx libxrender1 xvfb \
+    libglu1-mesa libgl1 libglx-mesa0 libxrender1 xvfb \
     openmpi-bin libopenmpi-dev \
     libhdf5-dev libnetcdf-dev libmetis-dev \
     cmake ninja-build build-essential gfortran pkg-config \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ARG USERNAME=devuser
-ARG USER_UID=1000
-ARG USER_GID=1000
+ARG USER_UID=1001
+ARG USER_GID=1001
 
 RUN groupadd --gid ${USER_GID} ${USERNAME} \
     && useradd --uid ${USER_UID} --gid ${USER_GID} -m -s /bin/bash ${USERNAME} \
@@ -36,11 +36,15 @@ USER ${USERNAME}
 ENV PATH="/home/${USERNAME}/.local/bin:${PATH}"
 
 COPY --chown=${USERNAME}:${USERNAME} requirements.txt .
+USER root
 RUN pip install --upgrade pip setuptools wheel \
     && pip install -r requirements.txt \
-    && pip install gmsh pyoptsparse openturns \
+    && pip install gmsh openturns \
     && pip install cupy-cuda12x \
-    && pip install cuda-dolfinx \
     && pip install nvidia-ml-py pynvml
+
+RUN git clone https://github.com/mdolab/pyoptsparse.git /tmp/pyoptsparse \
+    && cd /tmp/pyoptsparse \
+    && pip install .
 
 CMD ["bash"]
