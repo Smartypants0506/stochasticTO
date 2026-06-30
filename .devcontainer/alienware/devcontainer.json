@@ -5,8 +5,8 @@
     "dockerfile": "../../Dockerfile.dev",
     "args": {
       "USERNAME": "devuser",
-      "USER_UID": "1000",
-      "USER_GID": "1000"
+      "USER_UID": "1001",
+      "USER_GID": "1001"
     }
   },
 
@@ -17,7 +17,7 @@
 
   // --gpus all is required for WSL2 + Docker Desktop on Windows 11
   "runArgs": [
-    "--gpus", "all",
+    "--gpus all",
     "--shm-size=16g",
     "--ulimit", "memlock=-1",
     "--ipc=host"

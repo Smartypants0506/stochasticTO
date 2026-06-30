@@ -2,7 +2,7 @@
 set -euo pipefail
 
 if [ -f /workspace/pyproject.toml ]; then
-  pip install --user -e /workspace
+  pip install -e /workspace
 fi
 
 if [ -f /workspace/.pre-commit-config.yaml ]; then
