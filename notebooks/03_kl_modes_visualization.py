@@ -77,6 +77,8 @@ def load_metrology_data(xlsx_path: str, sheet_name: str) -> MetrologyProfile:
 
 def _fit_correlation_length(positions: np.ndarray, cov_matrix: np.ndarray,
                              sigma: float) -> float:
+    
+    
     """
     Fits an isotropic squared-exponential length scale l to the empirical
     covariance via nonlinear least squares (variogram-style fit), per
@@ -169,6 +171,9 @@ def build_kl_random_field(mesh: VolumeMesh, profile: MetrologyProfile,
     Truncation order chosen so retained modes explain >= variance_target
     of total variance.
     """
+
+    ot.ResourceMap.SetAsString("KarhunenLoeveP1Algorithm-CovarianceMatrixStorage", "DENSE")
+    
     coords = mesh.vertices
     span = coords[:, mesh.span_axis]
     span_norm = (span - span.min()) / (span.max() - span.min() + 1e-12)
@@ -176,7 +181,7 @@ def build_kl_random_field(mesh: VolumeMesh, profile: MetrologyProfile,
     mu_x = np.interp(span_norm, profile.station_positions, profile.mean_profile)
 
     ot_mesh = ot.Mesh(coords.tolist(), mesh.tetrahedra.tolist(), True)
-    cov_model = ot.SquaredExponential([profile.correlation_length], [profile.sigma])
+    cov_model = ot.SquaredExponential([profile.correlation_length] * 3, [profile.sigma])
 
     algo = ot.KarhunenLoeveP1Algorithm(ot_mesh, cov_model, 1e-3)
     algo.run()

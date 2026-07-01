@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM dolfinx/dolfinx:v0.9.0-cuda
+FROM benpachev/cudolfinx:v0.9.0-cuda12.6
 
 LABEL description="Robust Topo-Opt — DGX A100 80GB"
 
@@ -7,11 +7,11 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
-    PETSC_OPTIONS="-vec_type cuda -mat_type aijcusparse" \
-    CUDA_VISIBLE_DEVICES=0,1,2,4 \
+    PETSC_OPTIONS="-vec_type cuda -mat_type aijcusparse use_gpu_aware_mpi 0" \
+    CUDA_VISIBLE_DEVICES=0 \
     NCCL_P2P_LEVEL=NVL \
     NCCL_IB_DISABLE=0 \
-    OMPI_MCA_opal_cuda_support=true \
+    OMPI_MCA_opal_cuda_support=false \
     PYVISTA_OFF_SCREEN=true \
     DISPLAY=:99 \
     OMP_NUM_THREADS=8 \
@@ -19,8 +19,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git curl wget vim htop nvtop tmux \
-    libglu1-mesa libgl1-mesa-glx libxrender1 xvfb \
-    openmpi-bin libopenmpi-dev \
+    libglu1-mesa libgl1 libxrender1 xvfb \
     libhdf5-dev libnetcdf-dev libmetis-dev \
     cmake ninja-build build-essential gfortran pkg-config \
     libnuma-dev numactl \
@@ -28,14 +27,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # No sudo user needed — container runs as the DGX user via rootless Docker
 ARG USERNAME=devuser
-ARG USER_UID=1000
-ARG USER_GID=1000
+ARG USER_UID=82488
+ARG USER_GID=19249
 
 RUN groupadd --gid ${USER_GID} ${USERNAME} 2>/dev/null || true \
     && useradd --uid ${USER_UID} --gid ${USER_GID} -m -s /bin/bash ${USERNAME} 2>/dev/null || true
 
 WORKDIR /workspace
 RUN chown ${USERNAME}:${USERNAME} /workspace
+RUN chown -R ${USERNAME}:${USERNAME} /dolfinx-env
 
 USER ${USERNAME}
 ENV PATH="/home/${USERNAME}/.local/bin:${PATH}"
@@ -43,9 +43,12 @@ ENV PATH="/home/${USERNAME}/.local/bin:${PATH}"
 COPY --chown=${USERNAME}:${USERNAME} requirements.txt .
 RUN pip install --upgrade pip setuptools wheel \
     && pip install -r requirements.txt \
-    && pip install gmsh pyoptsparse openturns \
+    && pip install gmsh openturns \
     && pip install cupy-cuda12x \
-    && pip install cuda-dolfinx \
     && pip install nvidia-ml-py pynvml
+
+    RUN git clone https://github.com/mdolab/pyoptsparse.git /tmp/pyoptsparse \
+    && cd /tmp/pyoptsparse \
+    && pip install .
 
 CMD ["bash"]

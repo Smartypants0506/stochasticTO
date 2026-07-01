@@ -5,8 +5,8 @@
     "dockerfile": "../../Dockerfile.gpu",
     "args": {
       "USERNAME": "devuser",
-      "USER_UID": "1000",
-      "USER_GID": "1000"
+      "USER_UID": "82488",
+      "USER_GID": "19249"
     }
   },
 
@@ -17,16 +17,13 @@
 
   // CDI-based GPU passthrough — works with rootless Docker, no sudo needed
   "runArgs": [
-    "--device", "nvidia.com/gpu=0",
-    "--device", "nvidia.com/gpu=1",
-    "--device", "nvidia.com/gpu=2",
-    "--device", "nvidia.com/gpu=4",
-    "--shm-size=64g",
-    "--ulimit", "memlock=-1",
-    "--ulimit", "stack=67108864",
-    "--ipc=host",
-    "--net=host"
-  ],
+  "--runtime=nvidia",
+  "--shm-size=64g",
+  "--ulimit", "memlock=-1",
+  "--ulimit", "stack=67108864",
+  "--ipc=host",
+  "--net=host"
+],
 
   "features": {
     "ghcr.io/devcontainers/features/git:1": {}
@@ -37,18 +34,16 @@
   ],
 
   "containerEnv": {
-    "CUDA_VISIBLE_DEVICES": "0,1,2,4",
-    "NVIDIA_VISIBLE_DEVICES": "0,1,2,4",
-    "NVIDIA_DRIVER_CAPABILITIES": "compute,utility",
+    "NVIDIA_VISIBLE_DEVICES": "0",
     "PETSC_OPTIONS": "-vec_type cuda -mat_type aijcusparse",
     "NCCL_P2P_LEVEL": "NVL",
-    "OMPI_MCA_opal_cuda_support": "true",
+    "OMPI_MCA_opal_cuda_support": "false",
     "PYVISTA_OFF_SCREEN": "true",
     "DISPLAY": ":99",
     "OMP_NUM_THREADS": "8",
     "MKL_NUM_THREADS": "8",
     "MACHINE_PROFILE": "dgx"
-  },
+},
 
   "customizations": {
     "vscode": {

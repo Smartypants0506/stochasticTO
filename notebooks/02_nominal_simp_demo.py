@@ -319,6 +319,7 @@ print("OpenMDAO problem configured: design vars =", nelx * nely)
 
 
 t0 = time.time()
+prob.driver.options['debug_print'] = ['desvars', 'objs', 'nl_cons']
 prob.run_driver()
 elapsed = time.time() - t0
 

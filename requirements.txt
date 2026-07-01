@@ -41,7 +41,7 @@ cvxpy==1.5.3
 
 # ── Parallel / distributed ─────────────────────────────────────────────────────
 # mpi4py pre-installed in base image; pin here to prevent pip from overwriting
-mpi4py==4.0.1
+#mpi4py==4.0.1
 joblib==1.4.2
 
 # ── GPU arrays ─────────────────────────────────────────────────────────────────
