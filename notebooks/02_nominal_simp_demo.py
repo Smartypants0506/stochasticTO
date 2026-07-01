@@ -136,10 +136,19 @@ a_form = ufl.inner(sigma(u_, rho_h), eps(v_)) * ufl.dx
 f_zero = fem.Function(V)          # zero body force; point load applied to RHS vector directly
 L_form = ufl.inner(f_zero, v_) * ufl.dx
 
-problem = LinearProblem(
-    a_form, L_form, bcs=bcs,
-    petsc_options={"ksp_type": "preonly", "pc_type": "lu"},
-)
+# Compile forms once outside the loop
+a_compiled = fem.form(a_form)
+L_compiled = fem.form(L_form)
+
+# Allocate static PETSc matrix and vector layouts
+A = fem.petsc.create_matrix(a_compiled)
+b = fem.petsc.create_vector(L_compiled)
+
+# Set up a dedicated PETSc KSP linear solver
+ksp = PETSc.KSP().create(domain.comm)
+ksp.setType("preonly")
+pc = ksp.getPC()
+pc.setType("lu")
 
 # Locate top-left corner DOF for nodal point load
 coords = V.tabulate_dof_coordinates()
@@ -150,22 +159,42 @@ print("Top-left load DOF node index:", top_left_node)
 
 
 def fea_solve(rho_array: np.ndarray):
-    """Solve K U = F for a given density field; return compliance, displacement, strain-energy density."""
+    """Solve K U = F explicitly; return compliance, displacement, strain-energy density."""
     rho_h.x.array[:] = rho_array
 
-    uh = problem.solve()
-    b = problem.b
+    # 1. Assemble the stiffness matrix A with boundary conditions
+    A.zeroEntries()
+    fem.petsc.assemble_matrix(A, a_compiled, bcs=bcs)
+    A.assemble()
+
+    # 2. Assemble the base RHS vector b (resets to zero entries)
+    with b.localForm() as loc_b:
+        loc_b.set(0.0)
+    fem.petsc.assemble_vector(b, L_compiled)
+    
+    # Apply lifting and boundary condition constraints to the vector
+    fem.petsc.apply_lifting(b, [a_compiled], [bcs])
+    b.ghostUpdate(addv=PETSc.InsertMode.ADD_VALUES, mode=PETSc.ScatterMode.REVERSE)
+    fem.petsc.set_bc(b, bcs)
+
+    # 3. Inject point load SAFELY after assembly but before solving
     if len(top_left_node):
         b.array[2 * top_left_node[0] + 1] += F_load
-    uh = problem.solve()
 
-    C = float(problem.b.dot(uh.x.petsc_vec))
+    # 4. Pass the operators to the KSP solver and calculate displacement
+    ksp.setOperators(A)
+    uh = fem.Function(V)
+    ksp.solve(b, uh.x.petsc_vec)
+    uh.x.scatter_forward()
+
+    # 5. Compute compliance using the actual loaded vector
+    C = float(b.dot(uh.x.petsc_vec))
 
     # Elementwise strain energy density (vectorized via UFL form on DG0 space)
     w_ = ufl.TestFunction(V0)
     energy_form = fem.form(ufl.inner(sigma(uh, rho_h), eps(uh)) * w_ * ufl.dx)
     energy_vec = fem.assemble_vector(energy_form)
-    energy_vec.scatter_reverse(dolfinx.la.InsertMode.add)
+    energy_vec.scatter_reverse(dolfinx.la.InsertMode.add) if hasattr(energy_vec, "scatter_reverse") else None
     strain_energy_e = energy_vec.array.copy()
 
     return C, uh, strain_energy_e
