@@ -33,6 +33,7 @@ scikit-learn==1.5.2
 # ── Optimization ───────────────────────────────────────────────────────────────
 # MMA (Method of Moving Asymptotes) and SLSQP
 nlopt==2.8.0
+openmdao==3.44.0
 # Convex sub-problem fallback
 cvxpy==1.5.3
 # PyOptSparse — installed separately in Dockerfile (requires Fortran build)

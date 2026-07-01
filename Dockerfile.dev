@@ -9,7 +9,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PIP_NO_CACHE_DIR=1 \
     PETSC_OPTIONS="-vec_type cuda -mat_type aijcusparse" \
     CUDA_VISIBLE_DEVICES=0 \
-    PYVISTA_OFF_SCREEN=false \
+    PYVISTA_OFF_SCREEN=true \
     OMP_NUM_THREADS=4 \
     MKL_NUM_THREADS=4
 
