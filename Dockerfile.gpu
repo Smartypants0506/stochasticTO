@@ -18,12 +18,60 @@ ENV DEBIAN_FRONTEND=noninteractive \
     MKL_NUM_THREADS=8
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git curl wget vim htop nvtop tmux \
-    libglu1-mesa libgl1 libxrender1 xvfb \
+    git curl wget vim htop tmux sudo \
+    libglu1-mesa libgl1 libglx-mesa0 libxrender1 xvfb \
     libhdf5-dev libnetcdf-dev libmetis-dev \
     cmake ninja-build build-essential gfortran pkg-config \
-    libnuma-dev numactl \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN set -e; \
+    CUDA_HOME=""; \
+    if command -v nvcc >/dev/null 2>&1; then \
+        NVCC_BIN=$(readlink -f "$(command -v nvcc)"); \
+        CUDA_HOME=$(dirname "$(dirname "$NVCC_BIN")"); \
+    fi; \
+    if [ -z "$CUDA_HOME" ] || [ ! -f "$CUDA_HOME/include/cuda_runtime.h" ]; then \
+        CUDA_HOME=$(dirname "$(dirname "$(find / -xdev -name cuda_runtime.h 2>/dev/null | head -n1)")"); \
+    fi; \
+    if [ -z "$CUDA_HOME" ] || [ "$CUDA_HOME" = "." ] || [ ! -f "$CUDA_HOME/include/cuda_runtime.h" ]; then \
+        echo "ERROR: could not auto-detect the CUDA toolkit in this base image."; \
+        echo "--- diagnostics ---"; \
+        echo "which nvcc: $(command -v nvcc || echo 'not found')"; \
+        echo "cuda_runtime.h anywhere on disk:"; \
+        find / -xdev -name 'cuda_runtime.h' 2>/dev/null; \
+        echo "libcudart anywhere on disk:"; \
+        find / -xdev -name 'libcudart.so*' 2>/dev/null; \
+        echo "-------------------"; \
+        exit 1; \
+    fi; \
+    echo "Detected CUDA_HOME=$CUDA_HOME"; \
+    echo "$CUDA_HOME" > /tmp/cuda_home.txt
+
+ARG OMPI_VER=5.0.7
+RUN set -e; \
+    CUDA_HOME=$(cat /tmp/cuda_home.txt); \
+    CUDA_STUBS="$CUDA_HOME/lib64/stubs"; \
+    [ -d "$CUDA_STUBS" ] || CUDA_STUBS="$CUDA_HOME/lib/stubs"; \
+    [ -d "$CUDA_STUBS" ] || CUDA_STUBS="$CUDA_HOME/targets/x86_64-linux/lib/stubs"; \
+    echo "Using CUDA_HOME=$CUDA_HOME, CUDA_STUBS=$CUDA_STUBS"; \
+    OMPI_SERIES=$(echo ${OMPI_VER} | cut -d. -f1,2) && \
+    wget -q https://download.open-mpi.org/release/open-mpi/v${OMPI_SERIES}/openmpi-${OMPI_VER}.tar.gz && \
+    tar xf openmpi-${OMPI_VER}.tar.gz && \
+    cd openmpi-${OMPI_VER} && \
+    ./configure --prefix=/usr/local \
+        --with-cuda="$CUDA_HOME" \
+        --with-cuda-libdir="$CUDA_STUBS" \
+    && make -j"$(nproc)" \
+    && make install \
+    && ldconfig \
+    && cd .. && rm -rf openmpi-${OMPI_VER} openmpi-${OMPI_VER}.tar.gz
+
+# Fail the build loudly (rather than surfacing a mystery warning at runtime) if the
+# rebuilt Open MPI isn't actually CUDA-aware, or if anything later shadows it.
+RUN which mpirun mpicc && mpirun --version \
+    && ompi_info --parsable --all | grep -i 'mpi_built_with_cuda_support:value' \
+    && ompi_info --parsable --all | grep -i 'mpi_built_with_cuda_support:value:true' \
+        || (echo "ERROR: Open MPI in this image is not CUDA-aware — GPU-aware MPI check failed." && exit 1)
 
 # No sudo user needed — container runs as the DGX user via rootless Docker
 ARG USERNAME=devuser
