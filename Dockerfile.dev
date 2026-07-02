@@ -3,23 +3,109 @@ FROM benpachev/cudolfinx:v0.9.0-cuda12.6
 
 LABEL description="Robust Topo-Opt — Alienware m13 RTX 3060 Ti"
 
+# -use_gpu_aware_mpi 1 makes PETSc *require* real GPU-aware transport instead of
+# silently degrading to a host staging copy if MPI ever regresses.
+#
+# OMPI_MCA_opal_cuda_support: Open MPI's CUDA support is opt-in at runtime even
+# on a --with-cuda build — without this var it still falls back to host-staged
+# copies.
+#
+# UCX_TLS / UCX_MEMTYPE_CACHE: harmless no-ops if the rebuilt Open MPI ends up
+# using its own "common cuda"/vader transport instead of UCX for this single-node
+# setup; kept set in case `./configure` below autodetects UCX on the system and
+# selects it as the PML.
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
-    PETSC_OPTIONS="-vec_type cuda -mat_type aijcusparse" \
+    PETSC_OPTIONS="-vec_type cuda -mat_type aijcusparse -use_gpu_aware_mpi 1" \
     CUDA_VISIBLE_DEVICES=0 \
     PYVISTA_OFF_SCREEN=true \
     OMP_NUM_THREADS=4 \
-    MKL_NUM_THREADS=4
+    MKL_NUM_THREADS=4 \
+    OMPI_MCA_opal_cuda_support=true \
+    UCX_TLS=rc,cuda_copy,cuda_ipc,sm,self \
+    UCX_MEMTYPE_CACHE=n
 
+# NOTE: openmpi-bin / libopenmpi-dev are deliberately NOT installed via apt here.
+# Investigation showed benpachev/cudolfinx:v0.9.0-cuda12.6's bundled Open MPI 5.0.7
+# (at /usr/local) was never actually compiled with CUDA support in the first place —
+# so there was no CUDA-aware build to shadow. The real fix (below) is to rebuild
+# that exact same Open MPI version from source with --with-cuda, into the same
+# /usr/local prefix. Reinstalling the identical version preserves ABI compatibility
+# with the PETSc/mpi4py/petsc4py binaries the base image already compiled against
+# it, so nothing else needs to be rebuilt. Do NOT apt-install openmpi-bin/
+# libopenmpi-dev instead — those are separate, also non-CUDA-aware packages that
+# would just add a second, still-broken MPI to the image.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git curl wget vim htop tmux sudo \
     libglu1-mesa libgl1 libglx-mesa0 libxrender1 xvfb \
-    openmpi-bin libopenmpi-dev \
     libhdf5-dev libnetcdf-dev libmetis-dev \
     cmake ninja-build build-essential gfortran pkg-config \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Rebuild the base image's own Open MPI version with CUDA support, in place.
+# --with-cuda enables Open MPI's native CUDA support (CUDA IPC / cuda_copy via the
+# "common cuda" framework) — sufficient for a single-node, single-GPU dev box; no
+# UCX rebuild required. --with-cuda-libdir points at the CUDA toolkit's stub
+# libcuda.so, since the real driver library isn't present at build time (Docker
+# doesn't have --gpus all during `docker build`) — it's supplied by the NVIDIA
+# Container Toolkit at container *run* time.
+# Locate the CUDA toolkit wherever this particular base image actually put it —
+# PETSc/dolfinx clearly built against CUDA in here (that's the whole point of the
+# image), so nvcc/cuda_runtime.h exist *somewhere*; /usr/local/cuda just isn't a
+# valid assumption for every base image layout. Detect via nvcc's real location
+# first (most reliable), then fall back to a filesystem search for cuda_runtime.h.
+# If neither finds anything, dump enough diagnostics to fix the path in one more
+# pass instead of guessing again.
+RUN set -e; \
+    CUDA_HOME=""; \
+    if command -v nvcc >/dev/null 2>&1; then \
+        NVCC_BIN=$(readlink -f "$(command -v nvcc)"); \
+        CUDA_HOME=$(dirname "$(dirname "$NVCC_BIN")"); \
+    fi; \
+    if [ -z "$CUDA_HOME" ] || [ ! -f "$CUDA_HOME/include/cuda_runtime.h" ]; then \
+        CUDA_HOME=$(dirname "$(dirname "$(find / -xdev -name cuda_runtime.h 2>/dev/null | head -n1)")"); \
+    fi; \
+    if [ -z "$CUDA_HOME" ] || [ "$CUDA_HOME" = "." ] || [ ! -f "$CUDA_HOME/include/cuda_runtime.h" ]; then \
+        echo "ERROR: could not auto-detect the CUDA toolkit in this base image."; \
+        echo "--- diagnostics ---"; \
+        echo "which nvcc: $(command -v nvcc || echo 'not found')"; \
+        echo "cuda_runtime.h anywhere on disk:"; \
+        find / -xdev -name 'cuda_runtime.h' 2>/dev/null; \
+        echo "libcudart anywhere on disk:"; \
+        find / -xdev -name 'libcudart.so*' 2>/dev/null; \
+        echo "-------------------"; \
+        exit 1; \
+    fi; \
+    echo "Detected CUDA_HOME=$CUDA_HOME"; \
+    echo "$CUDA_HOME" > /tmp/cuda_home.txt
+
+ARG OMPI_VER=5.0.7
+RUN set -e; \
+    CUDA_HOME=$(cat /tmp/cuda_home.txt); \
+    CUDA_STUBS="$CUDA_HOME/lib64/stubs"; \
+    [ -d "$CUDA_STUBS" ] || CUDA_STUBS="$CUDA_HOME/lib/stubs"; \
+    [ -d "$CUDA_STUBS" ] || CUDA_STUBS="$CUDA_HOME/targets/x86_64-linux/lib/stubs"; \
+    echo "Using CUDA_HOME=$CUDA_HOME, CUDA_STUBS=$CUDA_STUBS"; \
+    OMPI_SERIES=$(echo ${OMPI_VER} | cut -d. -f1,2) && \
+    wget -q https://download.open-mpi.org/release/open-mpi/v${OMPI_SERIES}/openmpi-${OMPI_VER}.tar.gz && \
+    tar xf openmpi-${OMPI_VER}.tar.gz && \
+    cd openmpi-${OMPI_VER} && \
+    ./configure --prefix=/usr/local \
+        --with-cuda="$CUDA_HOME" \
+        --with-cuda-libdir="$CUDA_STUBS" \
+    && make -j"$(nproc)" \
+    && make install \
+    && ldconfig \
+    && cd .. && rm -rf openmpi-${OMPI_VER} openmpi-${OMPI_VER}.tar.gz
+
+# Fail the build loudly (rather than surfacing a mystery warning at runtime) if the
+# rebuilt Open MPI isn't actually CUDA-aware, or if anything later shadows it.
+RUN which mpirun mpicc && mpirun --version \
+    && ompi_info --parsable --all | grep -i 'mpi_built_with_cuda_support:value' \
+    && ompi_info --parsable --all | grep -i 'mpi_built_with_cuda_support:value:true' \
+        || (echo "ERROR: Open MPI in this image is not CUDA-aware — GPU-aware MPI check failed." && exit 1)
 
 ARG USERNAME=devuser
 ARG USER_UID=1001

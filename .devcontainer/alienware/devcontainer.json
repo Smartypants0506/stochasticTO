@@ -36,7 +36,17 @@
     "CUDA_VISIBLE_DEVICES": "0",
     "NVIDIA_VISIBLE_DEVICES": "all",
     "NVIDIA_DRIVER_CAPABILITIES": "compute,utility,graphics",
-    "PETSC_OPTIONS": "-vec_type cuda -mat_type aijcusparse",
+    // Keep this in sync with Dockerfile.dev's ENV — containerEnv overrides the
+    // image's ENV at container start, so if this list only redeclares part of a
+    // key set there (e.g. PETSC_OPTIONS) it will silently drop the rest of that
+    // value. -use_gpu_aware_mpi 1 forces PETSc to fail loudly instead of quietly
+    // falling back to a slow host-staged copy if GPU-aware MPI ever breaks.
+    "PETSC_OPTIONS": "-vec_type cuda -mat_type aijcusparse -use_gpu_aware_mpi 1",
+    // Open MPI's CUDA support is opt-in at runtime even on a --with-cuda build.
+    "OMPI_MCA_opal_cuda_support": "true",
+    // Selects CUDA-aware transports on the base image's UCX-based Open MPI.
+    "UCX_TLS": "rc,cuda_copy,cuda_ipc,sm,self",
+    "UCX_MEMTYPE_CACHE": "n",
     "PYVISTA_OFF_SCREEN": "false",
     "OMP_NUM_THREADS": "4",
     "MKL_NUM_THREADS": "4",

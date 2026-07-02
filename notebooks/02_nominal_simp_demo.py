@@ -29,6 +29,10 @@ import ufl
 from mpi4py import MPI
 from petsc4py import PETSc
 
+opts = PETSc.Options()
+opts.setValue("mat_type", "aijcusparse")
+opts.setValue("vec_type", "cuda")
+
 import openmdao
 import openmdao.api as om
 
@@ -49,14 +53,14 @@ L, H = 3.0, 1.0          # length, height
 nelx, nely = 120, 40      # element grid resolution
 
 # --- Material (SIMP) ---
-E0, Emin = 1.0, 1e-9      # solid / void Young's modulus
+E0, Emin = 1.0, 1e-3      # solid / void Young's modulus
 nu = 0.3                  # Poisson's ratio
 p_penal = 3.0              # SIMP penalization exponent
 
 # --- Optimization settings ---
 volfrac = 0.5              # target volume fraction
 rmin = 1.5                  # filter radius (elements)
-beta_heaviside = 4.0        # Heaviside projection sharpness
+beta_heaviside = 2.0        # Heaviside projection sharpness
 eta_heaviside = 0.5         # Heaviside projection threshold
 
 F_load = -1.0               # point load at top-left corner (downward)
@@ -144,11 +148,13 @@ L_compiled = fem.form(L_form)
 A = fem.petsc.create_matrix(a_compiled)
 b = fem.petsc.create_vector(L_compiled)
 
-# Set up a dedicated PETSc KSP linear solver
 ksp = PETSc.KSP().create(domain.comm)
 ksp.setType("preonly")
+ksp.setTolerances(max_it=1)
 pc = ksp.getPC()
 pc.setType("lu")
+
+#pc.setFactorSolverType("cusolver")
 
 # Locate top-left corner DOF for nodal point load
 coords = V.tabulate_dof_coordinates()
@@ -212,9 +218,11 @@ print("FEA solver function ready.")
 # In[ ]:
 
 
-from scipy.sparse import coo_matrix
+import cupy as cp
+from cupyx.scipy.sparse import coo_matrix as cp_coo_matrix
 
 def build_filter(nelx: int, nely: int, rmin: float):
+    # Perform the distance calculations on the CPU (runs once)
     ii, jj = np.meshgrid(np.arange(nelx), np.arange(nely), indexing="ij")
     ii = ii.flatten(); jj = jj.flatten()
     rows, cols, vals = [], [], []
@@ -229,37 +237,36 @@ def build_filter(nelx: int, nely: int, rmin: float):
             rows.append((ii * nely + jj)[valid])
             cols.append((ni * nely + nj)[valid])
             vals.append(np.full(valid.sum(), rmin - dist))
-    rows = np.concatenate(rows); cols = np.concatenate(cols); vals = np.concatenate(vals)
-    H_mat = coo_matrix((vals, (rows, cols)), shape=(nelx * nely, nelx * nely)).tocsc()
-    Hs = np.array(H_mat.sum(axis=1)).flatten()
-    return H_mat, Hs
+            
+    rows = np.concatenate(rows)
+    cols = np.concatenate(cols)
+    vals = np.concatenate(vals)
+    
+    # --- NEW: Build the sparse matrix directly on the GPU ---
+    H_mat_cp = cp_coo_matrix((cp.asarray(vals), (cp.asarray(rows), cp.asarray(cols))), 
+                             shape=(nelx * nely, nelx * nely)).tocsc()
+    Hs_cp = cp.array(H_mat_cp.sum(axis=1)).flatten()
+    return H_mat_cp, Hs_cp
 
 H_filter, Hs_filter = build_filter(nelx, nely, rmin)
-print("Filter matrix built:", H_filter.shape)
 
-# In[ ]:
+# --- NEW: All math below is now executed via CuPy on the GPU ---
+def filter_density(rho: cp.ndarray) -> cp.ndarray:
+    return (H_filter @ rho) / Hs_filter
 
-
-def filter_density(rho: np.ndarray) -> np.ndarray:
-    """Linear density filter: rho_tilde = H * rho / Hs."""
-    return np.asarray(H_filter @ rho) / Hs_filter
-
-def heaviside_project(rho_tilde: np.ndarray, beta: float, eta: float) -> np.ndarray:
-    """Smooth Heaviside projection toward 0/1 densities."""
-    num = np.tanh(beta * eta) + np.tanh(beta * (rho_tilde - eta))
-    den = np.tanh(beta * eta) + np.tanh(beta * (1 - eta))
+def heaviside_project(rho_tilde: cp.ndarray, beta: float, eta: float) -> cp.ndarray:
+    num = cp.tanh(beta * eta) + cp.tanh(beta * (rho_tilde - eta))
+    den = cp.tanh(beta * eta) + cp.tanh(beta * (1 - eta))
     return num / den
 
-def heaviside_derivative(rho_tilde: np.ndarray, beta: float, eta: float) -> np.ndarray:
-    """d(rho_phys)/d(rho_tilde) for chain-rule sensitivity."""
-    den = np.tanh(beta * eta) + np.tanh(beta * (1 - eta))
-    return beta * (1 - np.tanh(beta * (rho_tilde - eta)) ** 2) / den
+def heaviside_derivative(rho_tilde: cp.ndarray, beta: float, eta: float) -> cp.ndarray:
+    den = cp.tanh(beta * eta) + cp.tanh(beta * (1 - eta))
+    return beta * (1 - cp.tanh(beta * (rho_tilde - eta)) ** 2) / den
 
-def filter_sensitivity(rho: np.ndarray, drho_phys: np.ndarray, rho_tilde: np.ndarray) -> np.ndarray:
-    """Chain sensitivity back through Heaviside projection and density filter."""
+def filter_sensitivity(rho: cp.ndarray, drho_phys: cp.ndarray, rho_tilde: cp.ndarray) -> cp.ndarray:
     dH = heaviside_derivative(rho_tilde, beta_heaviside, eta_heaviside)
     d_via_filter = drho_phys * dH
-    return np.asarray(H_filter @ (d_via_filter / Hs_filter))
+    return (H_filter @ (d_via_filter / Hs_filter))
 
 # ## 5. OpenMDAO Component — SIMP Topology Optimization Loop
 # 
@@ -278,23 +285,33 @@ class SIMPComponent(om.ExplicitComponent):
         self.history = []
 
     def compute(self, inputs, outputs):
-        rho = inputs["rho"]
-        rho_tilde = filter_density(rho)
-        rho_phys = heaviside_project(rho_tilde, beta_heaviside, eta_heaviside)
+        # 1. Push OpenMDAO input to GPU
+        rho_cp = cp.asarray(inputs["rho"])
+        
+        # 2. Process filters natively on GPU
+        rho_tilde_cp = filter_density(rho_cp)
+        rho_phys_cp = heaviside_project(rho_tilde_cp, beta_heaviside, eta_heaviside)
 
-        # Map (nelx*nely,) element ordering -> DG0 dof ordering expected by fea_solve
-        rho_dg0 = rho_phys  # assumed consistent column-major element ordering with mesh generation
-
+        # 3. Pull physical density back to CPU solely for FEniCSx DOFs mapping
+        rho_dg0 = cp.asnumpy(rho_phys_cp)  
         C, uh, strain_energy_e = fea_solve(rho_dg0)
 
-        drho_phys = -p_penal * np.maximum(rho_phys, 1e-3) ** (p_penal - 1) * (E0 - Emin) * strain_energy_e
-        self._dC_drho = filter_sensitivity(rho, drho_phys, rho_tilde)
+        # 4. Push strain energy results to GPU for sensitivity math
+        strain_energy_e_cp = cp.asarray(strain_energy_e)
+
+        # 5. Calculate derivatives natively on GPU
+        drho_phys_cp = -p_penal * cp.maximum(rho_phys_cp, 1e-3) ** (p_penal - 1) * (E0 - Emin) * strain_energy_e_cp
+        dC_drho_cp = filter_sensitivity(rho_cp, drho_phys_cp, rho_tilde_cp)
+
+        # 6. Pull sensitivity back to CPU so OpenMDAO can consume it
+        self._dC_drho = cp.asnumpy(dC_drho_cp)
 
         outputs["compliance"] = C
-        outputs["volume_frac"] = np.mean(rho_phys)
-        self.history.append((C, np.mean(rho_phys)))
+        outputs["volume_frac"] = float(cp.mean(rho_phys_cp))
+        self.history.append((C, outputs["volume_frac"]))
 
     def compute_partials(self, inputs, partials):
+        # OpenMDAO uses the CPU arrays we generated at the end of `compute`
         partials["compliance", "rho"] = self._dC_drho
         partials["volume_frac", "rho"] = np.ones(nelx * nely) / (nelx * nely)
 

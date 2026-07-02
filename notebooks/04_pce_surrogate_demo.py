@@ -1,4 +1,3 @@
-# %%
 import numpy as np
 import openturns as ot
 import matplotlib.pyplot as plt
@@ -9,8 +8,8 @@ from dolfinx import mesh, fem, default_scalar_type
 from dolfinx.fem.petsc import LinearProblem
 from petsc4py import PETSc
 
-ot.RandomGenerator.SetSeed(42)
-np.random.seed(42)
+ot.RandomGenerator.SetSeed(43)
+np.random.seed(43)
 
 # %%
 nelx, nely = 60, 20
@@ -47,18 +46,21 @@ def sigma(u, E):
 def left_boundary(x):
     return np.isclose(x[0], 0.0)
 
-
 def bottom_right_point(x):
     return np.logical_and(np.isclose(x[0], L), np.isclose(x[1], 0.0))
 
+# Collapse the sub-spaces to cleanly isolate individual coordinate components
+V_x, _ = V.sub(0).collapse()
+V_y, _ = V.sub(1).collapse()
 
+# Correct left boundary: Map through the collapsed tuple and unpack index [0] to get true parent X DOFs
 facets_left = mesh.locate_entities_boundary(domain, domain.topology.dim - 1, left_boundary)
-dofs_left_x = fem.locate_dofs_topological(V.sub(0), domain.topology.dim - 1, facets_left)
+dofs_left_x = fem.locate_dofs_topological((V.sub(0), V_x), domain.topology.dim - 1, facets_left)[0]
 bc_left = fem.dirichletbc(default_scalar_type(0.0), dofs_left_x, V.sub(0))
 
-V_y, _ = V.sub(1).collapse() # Collapse the subspace first
-dofs_corner_y = fem.locate_dofs_geometrical((V.sub(1), V_y), bottom_right_point) # Pass as a tuple
-bc_corner = fem.dirichletbc(default_scalar_type(0.0), dofs_corner_y[0], V.sub(1))
+# Correct corner boundary: Pin the bottom right corner in Y to prevent rigid body rotation
+dofs_corner_y = fem.locate_dofs_geometrical((V.sub(1), V_y), bottom_right_point)[0]
+bc_corner = fem.dirichletbc(default_scalar_type(0.0), dofs_corner_y, V.sub(1))
 
 bcs = [bc_left, bc_corner]
 
