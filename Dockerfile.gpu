@@ -75,7 +75,7 @@ RUN which mpirun mpicc && mpirun --version \
 
 # No sudo user needed — container runs as the DGX user via rootless Docker
 ARG USERNAME=devuser
-ARG USER_UID=82488
+ARG USER_UID=84884
 ARG USER_GID=19249
 
 RUN groupadd --gid ${USER_GID} ${USERNAME} 2>/dev/null || true \
@@ -84,6 +84,7 @@ RUN groupadd --gid ${USER_GID} ${USERNAME} 2>/dev/null || true \
 WORKDIR /workspace
 RUN chown ${USERNAME}:${USERNAME} /workspace
 RUN chown -R ${USERNAME}:${USERNAME} /dolfinx-env
+RUN chmod -R g+w /dolfinx-env
 
 USER ${USERNAME}
 ENV PATH="/home/${USERNAME}/.local/bin:${PATH}"

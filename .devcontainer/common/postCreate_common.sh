@@ -17,12 +17,12 @@ if [ -f /workspace/pyproject.toml ]; then
   find /workspace -maxdepth 1 -name '*.egg-info' -exec rm -rf {} + 2>/dev/null || true
   rm -rf /workspace/build
 
-  if ! sudo "$PIP" install -e /workspace; then
+  if ! "$PIP" install -e /workspace; then
     echo "pip install -e failed — retrying once after a permission fix on egg-info/build artifacts."
     find /workspace -maxdepth 1 -name '*.egg-info' -exec chown -R "$(id -u):$(id -g)" {} + 2>/dev/null || true
     find /workspace -maxdepth 1 -name '*.egg-info' -exec rm -rf {} + 2>/dev/null || true
     rm -rf /workspace/build
-    sudo "$PIP" install -e /workspace
+    "$PIP" install -e /workspace
   fi
 fi
 
