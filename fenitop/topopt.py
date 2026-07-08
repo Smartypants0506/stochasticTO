@@ -72,7 +72,7 @@ def topopt(fem, opt):
         heaviside.forward(beta)
 
         # Solve FEM
-        linear_problem.solve_fem()
+        linear_problem.solve_fem(is_first_iteration=(opt_iter == 1), opt_iter=opt_iter, refresh_interval=20)
 
         # Compute function values and sensitivities
         [C_value, V_value, U_value], sensitivities = sens_problem.evaluate()

@@ -45,10 +45,7 @@ fem = {  # FEA parameters
                          & np.greater(x[2], 4.5) & np.less(x[2], 5.5))]],
     "body_force": (0, 0, 0),
     "quadrature_degree": 2,
-    "petsc_options": {
-        "ksp_type": "cg",
-        "pc_type": "gamg",
-    },
+    "petsc_options": {"ksp_type": "cg", "pc_type": "gamg", "ksp_max_it": 50},
 }
 
 opt = {  # Topology optimization parameters

@@ -87,14 +87,27 @@ class LinearProblem:
         self.rhs_vec.ghostUpdate(addv=PETSc.InsertMode.ADD, mode=PETSc.ScatterMode.REVERSE)
         set_bc(self.rhs_vec, self.bcs)
 
-    def solve_fem(self):
-        """Solve K*x=F for FEM."""
+    def solve_fem(self, is_first_iteration=False, refresh_interval=20, opt_iter=0):
+        """Solve Kx=F for FEM."""
         self.lhs_mat.zeroEntries()
         assemble_matrix(self.lhs_mat, self.lhs_form, bcs=self.bcs)
         self.lhs_mat.assemble()
         if self.spring_vec is not None:
-            self.lhs_mat.setDiagonal(self.lhs_mat.getDiagonal()+self.spring_vec)
+            self.lhs_mat.setDiagonal(self.lhs_mat.getDiagonal() + self.spring_vec)
+            
+        if is_first_iteration or (opt_iter % refresh_interval == 0):
+            pc = self.solver.getPC()
+            pc.setReusePreconditioner(False)  # allow refactorization this cycle
+        else:
+            pc = self.solver.getPC()
+            pc.setReusePreconditioner(True)
+            
         self.solver.solve(self.rhs_vec, self.u_wrap)
+        reason = self.solver.getConvergedReason()
+        its = self.solver.getIterationNumber()
+        res = self.solver.getResidualNorm()
+        if reason < 0:
+            print(f"WARNING: KSP did NOT converge. Reason={reason}, its={its}, residual={res}")
         self.u.x.scatter_forward()
 
     def solve_adjoint(self):
