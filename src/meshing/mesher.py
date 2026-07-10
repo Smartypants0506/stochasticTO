@@ -143,16 +143,18 @@ def import_to_dolfinx(comm: MPI.Comm) -> TaggedMesh:
 
     name_to_tag: dict[str, int] = {}
     if comm.rank == 0:
-        mesh, cell_tags, facet_tags = dolfinx.io.gmshio.model_to_mesh(
-            gmsh.model, comm, rank=0)
-        mesh_serial, _, _ = dolfinx.io.gmshio.model_to_mesh(
-            gmsh.model, MPI.COMM_SELF, rank=0)
+        mesh_data = dolfinx.io.gmsh.model_to_mesh(gmsh.model, comm, rank=0)
+        mesh, cell_tags, facet_tags = mesh_data.mesh, mesh_data.cell_tags, mesh_data.facet_tags
+
+        mesh_serial_data = dolfinx.io.gmsh.model_to_mesh(gmsh.model, MPI.COMM_SELF, rank=0)
+        mesh_serial = mesh_serial_data.mesh
+
         for dim, tag in gmsh.model.getPhysicalGroups():
             name = gmsh.model.getPhysicalName(dim, tag)
             name_to_tag[name] = tag
     else:
-        mesh, cell_tags, facet_tags = dolfinx.io.gmshio.model_to_mesh(
-            None, comm, rank=0)
+        mesh_data = dolfinx.io.gmsh.model_to_mesh(None, comm, rank=0)
+        mesh, cell_tags, facet_tags = mesh_data.mesh, mesh_data.cell_tags, mesh_data.facet_tags
         mesh_serial = None
 
     name_to_tag = comm.bcast(name_to_tag, root=0)
@@ -198,7 +200,7 @@ def extract_simplices(tagged_mesh: TaggedMesh) -> "np.ndarray":
     """
     import numpy as np
     mesh_serial = tagged_mesh.mesh_serial
-    return mesh_serial.geometry.dofmap.reshape(
+    return mesh_serial.geometry.dofmaps[0].reshape(
         mesh_serial.topology.index_map(mesh_serial.topology.dim).size_local, -1
     )
 

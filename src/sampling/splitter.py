@@ -15,6 +15,14 @@ Use this instead of sampler.generate_train_test_samples when you want a
 single sampling design (e.g. one LHS pool) partitioned post hoc, rather
 than two independently-drawn designs.
 """
+
+"""
+NOTE: This module is retained for standalone use cases but the canonical
+sampling path for the robust loop is sampler.generate_train_test_samples(),
+which draws INDEPENDENT train/test sets (LHS train, MC test) rather than
+partitioning a single pool. See review item #13.
+"""
+
 from __future__ import annotations
 
 import json

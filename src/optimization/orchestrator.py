@@ -35,6 +35,14 @@ rather than silently skipped):
   additional constraints exist in mma_component.py's design, this must
   be extended, not silently dropped.
 """
+
+"""
+WARNING: THIS MODULE IS DEPRECATED AND NON-AUTHORITATIVE.
+The canonical Stage-5 robust loop is src/optimization/dolfiny_mma_driver.py.
+This file is retained for reference only and is NOT called by main.py.
+"""
+
+
 from __future__ import annotations
 
 import logging

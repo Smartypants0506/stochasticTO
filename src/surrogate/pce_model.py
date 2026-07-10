@@ -140,6 +140,19 @@ def build_pce_gradient_model(
     """
     chaos_result = pce_result.chaos_result
     coefficients = np.array(chaos_result.getCoefficients()).ravel()
+
+    # Verify orthonormal basis: OpenTURNS standard polynomial factories produce
+    # orthonormal coefficients. Validate by checking the reduced basis norms.
+    reduced_basis = chaos_result.getReducedBasis()
+    test_point = ot.Point([0.0] * pce_result.n_kl)
+    # Spot-check: first basis function at origin should equal 1.0 (constant term)
+    phi0_val = float(reduced_basis[0](test_point)[0])
+    if abs(phi0_val - 1.0) > 1e-8:
+        raise RuntimeError(
+            f"PCE basis function 0 at origin = {phi0_val}, expected 1.0 for "
+            "orthonormal Hermite basis. Variance/gradient math requires orthonormality."
+        )
+        
     n_active = coefficients.size
 
     if dC_drho_train.shape[0] != xi_train.shape[0]:
@@ -162,9 +175,10 @@ def build_pce_gradient_model(
     # rather than re-selecting a basis independently for the gradient field.
     dc_drho, residuals, rank, _ = np.linalg.lstsq(psi, dC_drho_train, rcond=None)
     if rank < n_active:
-        logger.warning(
-            "Gradient-coefficient regression is rank-deficient (rank=%d, "
-            "n_active=%d); dc_drho may be poorly conditioned.", rank, n_active,
+        raise RuntimeError(
+            f"Gradient-coefficient regression is rank-deficient (rank={rank}, "
+            f"n_active={n_active}). dc_drho is unreliable -- increase n_train "
+            f"or reduce hyperbolic_q to lower n_active."
         )
 
     mu_C = float(coefficients[0])

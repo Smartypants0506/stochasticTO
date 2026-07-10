@@ -117,9 +117,6 @@ def _retrain_pce_pair(
             this is a hard verification gate per masterContext Section 7
             and must never be bypassed, even mid-optimization.
     """
-    n_train = opt["pce_n_train"]
-    sample_set = generate_samples(kl_result, n_train, strategy="lhs", seed=opt.get("pce_seed", 0))
-    xi_train = sample_set.xi
 
     logger.info(
         "Retraining PCE pair at outer_iteration checkpoint: n_train=%d, beta=%.3g",
@@ -250,7 +247,7 @@ def run_robust_topopt(
         # is rho_current, consistent with the trained PCE's rho_nominal only if
         # a refresh has just occurred -- enforced below.
 
-        if state.refresh_policy.needs_refresh(state.outer_iteration) or state.compliance_pce is None:
+        if state.refresh_policy.needs_refresh(state.outer_iteration):
             state.compliance_pce, state.volume_pce = _retrain_pce_pair(
     fem, opt, rho_current, density_filter, rf_heaviside, sens_problem, state.beta, kl_result)
             state.refresh_policy.last_refresh_iteration = state.outer_iteration
@@ -317,6 +314,10 @@ def run_robust_topopt(
     tao.setTolerances(gatol=opt["opt_tol"])
     tao.setMaximumIterations(opt["max_iter"])
     tao.setFromOptions()
+    state.compliance_pce, state.volume_pce = _retrain_pce_pair(
+        fem, opt, rho_warm_start, density_filter, rf_heaviside, sens_problem,
+        state.beta, kl_result)
+    state.refresh_policy.last_refresh_iteration = 0
     tao.solve()
 
     converged_reason = tao.getConvergedReason()

@@ -1,0 +1,65 @@
+step_file: "data/cad/ge_bracket_rotated_nonds.step"
+mesh_out_path: "output/meshes/ge_bracket_rotated_nonds.xdmf"
+mesh_size_max: 3.0e-3
+snap_tol: 1.0e-4
+
+material:
+  youngs_modulus: 68900000000
+  poissons_ratio: 0.33
+
+petsc:
+  ksp_type: "cg"
+  pc_type: "gamg"
+
+load_cases:
+  - group_name: "load_1"
+    vector: [0.0, -1000000.0, 0.0]
+
+optimization:
+  max_iter: 20
+  opt_tol: 1.0e-5
+  vol_frac: 0.1
+  penalty: 3.0
+  epsilon: 1.0e-6
+  filter_radius: 1.2
+  beta_interval: 50
+  beta_max: 128
+  use_oc: true
+  move: 0.02
+  opt_compliance: true
+  quadrature_degree: 2
+  body_force: [0.0, 0.0, 0.0]
+  lambda_sweep: [0.0, 0.5, 1.0]
+
+color_targets:
+  fixed: [0, 255, 0, 255]
+  load_1: [255, 0, 0, 255]
+
+solid_volume_color: [255, 255, 0, 255]
+
+random_field:
+  sigma: 0.01
+  length_scale: 0.05
+  spatial_dim: 3
+  eta_min: 0.3
+  eta_max: 0.7
+  alpha: 2.0
+  beta: 2.0
+  variance_threshold: 0.95
+  n_kl_hint: 20
+  seed: 42
+
+surrogate:
+  n_train: 20
+  n_test: 20
+  hyperbolic_q: 0.75
+  max_degree_attempts: 4
+  q2_threshold: 0.99
+
+mc_validation:
+  n_samples: 50
+  beta: 128.0
+  seed: 0
+  percentile_low: 5.0
+  percentile_high: 95.0
+  output_dir: "output/mc_validation"

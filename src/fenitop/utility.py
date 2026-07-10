@@ -23,7 +23,7 @@ from scipy.spatial import cKDTree
 from petsc4py import PETSc
 import dolfinx.io
 from dolfinx.fem import form, Function
-from dolfinx import la
+import dolfinx.la.petsc as la_petsc
 from dolfinx.fem.petsc import (create_vector, create_matrix,
                                assemble_vector, assemble_matrix, set_bc)
 import pyvista
@@ -31,8 +31,8 @@ import pyvista
 
 def create_mechanism_vectors(func_space, in_spring, out_spring):
     """Create vectors for compliant mechanism design."""
-    index_map = func_space.dofmap.index_map
-    block_size = func_space.dofmap.index_map_bs
+    index_map = func_space.dofmaps[0].index_map
+    block_size = func_space.dofmaps[0].index_map_bs
     spring_vec = la.create_petsc_vector(index_map, block_size)
     l_vec = spring_vec.copy()
 
@@ -58,11 +58,11 @@ class LinearProblem:
         """Initialize a linear problem."""
         # Initialization
         self.u, self.lam = u, lam
-        self.u_wrap = la.create_petsc_vector_wrap(self.u.x)
-        self.lam_wrap = la.create_petsc_vector_wrap(self.lam.x)
+        self.u_wrap = la_petsc.create_vector_wrap(self.u.x)
+        self.lam_wrap = la_petsc.create_vector_wrap(self.lam.x)
         self.lhs_form, self.rhs_form = form(lhs), form(rhs)
         self.lhs_mat = create_matrix(self.lhs_form)
-        self.rhs_vec = create_vector(self.rhs_form)
+        self.rhs_vec = create_vector(self.rhs_form.function_spaces[0])
         self.bcs, self.l_vec, self.spring_vec = bcs, l_vec, spring_vec
 
         # Construct a linear solver
@@ -119,11 +119,11 @@ class Communicator():
     def __init__(self, func_space, mesh_serial, size=1):
         self.size = size
         self.comm = func_space.mesh.comm
-        idx_map = func_space.dofmap.index_map
+        idx_map = func_space.dofmaps[0].index_map
 
         num_local_nodes = idx_map.size_local
         num_global_nodes = idx_map.size_global
-        num_nodal_dofs = func_space.dofmap.index_map_bs
+        num_nodal_dofs = func_space.dofmaps[0].index_map_bs
         self.num_global_dofs = num_global_nodes * num_nodal_dofs
 
         local_nodal_range = np.asarray(idx_map.local_range, dtype=np.int32)  # [start, end]

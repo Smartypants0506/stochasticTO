@@ -37,7 +37,7 @@ class SobolReport:
         n_kl: Input dimensionality (number of KL modes).
         n_kl_effective: Smallest number of modes (ranked by first-order
             index, descending) whose cumulative sum reaches
-            CUMULATIVE_VARIANCE_TARGET -- a candidate for re-truncating
+            CUMULATIVE_VARIANCE_TARGET -- a candidate foroptimizationConfig re-truncating
             the KL expansion if n_kl_effective < n_kl.
     """
     first_order: np.ndarray

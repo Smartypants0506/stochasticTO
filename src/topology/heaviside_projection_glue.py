@@ -36,7 +36,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from src.random_fields.kernel import KernelParams
-from src.random_fields.kl_expansion import KLExpansionResult, compute_kl_expansion, sample_gaussian_field
+from src.random_fields.kl_expansion import KLExpansionResult, compute_kl_expansion, sample_gaussian_field, evaluate_field_from_xi
 from src.random_fields.threshold_transform import MarginalTransformParams, ThresholdMarginalTransform
 
 logger = logging.getLogger(__name__)

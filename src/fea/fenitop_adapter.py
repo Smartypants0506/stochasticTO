@@ -56,7 +56,7 @@ def build_fem_dict(tagged_mesh: TaggedMesh, bc: BoundaryConditions,
     }
 
 
-def build_opt_dict(bc: BoundaryConditions, config: ProjectConfig, kl_result: "KLExpansionResult") -> dict:
+def build_opt_dict(bc: BoundaryConditions, config: ProjectConfig, kl_result: "KLExpansionResult | None" = None) -> dict:
     """Build the `opt` dict exactly as form_fem()/topopt() expect it, extended
     with the Stage 3/4/5 robust-loop keys consumed by
     src/optimization/dolfiny_mma_driver.py.
@@ -130,7 +130,7 @@ def build_opt_dict(bc: BoundaryConditions, config: ProjectConfig, kl_result: "KL
         "pce_n_train": surrogate_cfg.n_train,
         "pce_n_test": surrogate_cfg.n_test,
         "pce_hyperbolic_q": surrogate_cfg.hyperbolic_q,
-        "pce_max_degree_attempts": surrogate_cfg.max_degree,
+        "pce_max_degree_attempts": surrogate_cfg.max_degree_attempts,
         "pce_q2_threshold": surrogate_cfg.q2_threshold,
 
         # Stage 5 robust-loop scheduling key
@@ -139,7 +139,7 @@ def build_opt_dict(bc: BoundaryConditions, config: ProjectConfig, kl_result: "KL
 
 
 def build_fenitop_dicts(tagged_mesh: TaggedMesh, bc: BoundaryConditions,
-                         config: ProjectConfig) -> tuple[dict, dict]:
+                         config: ProjectConfig, kl_result: "KLExpansionResult | None" = None) -> tuple[dict, dict]:
     """Single entry point: returns (fem, opt) dicts ready for
     src.fenitop.fem.form_fem() or src.fenitop.topopt.topopt()."""
     fem_dict = build_fem_dict(tagged_mesh, bc, config)

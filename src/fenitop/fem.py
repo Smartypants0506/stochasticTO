@@ -21,8 +21,7 @@ Reference:
 import numpy as np
 import ufl
 from dolfinx.mesh import locate_entities_boundary, meshtags
-from dolfinx.fem import (VectorFunctionSpace, FunctionSpace, Function, Constant,
-                         dirichletbc, locate_dofs_topological)
+from dolfinx.fem import functionspace, Function, Constant, dirichletbc, locate_dofs_topological
 
 from src.fenitop.utility import create_mechanism_vectors
 from src.fenitop.utility import LinearProblem
@@ -32,9 +31,9 @@ def form_fem(fem, opt):
     """Form an FEA problem."""
     # Function spaces and functions
     mesh = fem["mesh"]
-    V = VectorFunctionSpace(mesh, ("CG", 1))
-    S0 = FunctionSpace(mesh, ("DG", 0))
-    S = FunctionSpace(mesh, ("CG", 1))
+    V = functionspace(mesh, ("Lagrange", 1, (mesh.geometry.dim,)))
+    S0 = functionspace(mesh, ("DG", 0))
+    S = functionspace(mesh, ("Lagrange", 1))
     u, v = ufl.TrialFunction(V), ufl.TestFunction(V)
     u_field = Function(V)  # Displacement field
     lambda_field = Function(V)  # Adjoint variable field

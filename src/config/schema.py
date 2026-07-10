@@ -180,4 +180,4 @@ class ProjectConfig:
     surrogate: SurrogateConfig
     color_targets: dict = field(default_factory=dict)
     solid_volume_color: tuple[int, int, int, int] = (255, 255, 0, 255)
-    mc_validation: MonteCarloValidationConfig
+    mc_validation: MonteCarloValidationConfig = field(default_factory=MonteCarloValidationConfig)

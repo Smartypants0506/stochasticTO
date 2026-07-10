@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 VARIANCE_EXPLAINED_THRESHOLD = 0.95  # Section 3.3: ">= 95% of total variance"
 
 
+
 @dataclass
 class KLExpansionResult:
     """Container for a fitted KL expansion.
@@ -101,8 +102,13 @@ def compute_kl_expansion(
     mesh = _build_ot_mesh(node_coordinates, simplices)
     covariance_model = build_squared_exponential(kernel_params)
 
+    ot.ResourceMap.SetAsString("KarhunenLoeveP1Algorithm-EigenvaluesSolver", "SPECTRA")
+    ot.TBB.Enable()
+    ot.ResourceMap.SetAsUnsignedInteger("TBB-ThreadsNumber", 64)
+
     algo = ot.KarhunenLoeveP1Algorithm(mesh, covariance_model)
     algo.setThreshold(1e-3)  # discard numerically negligible eigenvalues early
+    algo.setNbModes(max_modes)
     algo.run()
     result = algo.getResult()
 
@@ -243,7 +249,7 @@ def verify_sample_covariance(
     passed = relative_error < rtol
     logger.info(
         "KL covariance verification: empirical_var_mean=%.4g, theoretical_var=%.4g, "
-        "relative_error=%.2%%, passed=%s",
+        "relative_error=%.2f%, passed=%s",
         empirical_var.mean(), theoretical_var, relative_error * 100, passed,
     )
     return {
