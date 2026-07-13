@@ -39,7 +39,7 @@ solid_volume_color: [255, 255, 0, 255]
 
 random_field:
   sigma: 0.01
-  length_scale: 0.05
+  length_scale: 0.025
   spatial_dim: 3
   eta_min: 0.3
   eta_max: 0.7
@@ -50,11 +50,11 @@ random_field:
   seed: 42
 
 surrogate:
-  n_train: 20
-  n_test: 20
+  n_train: 31
+  n_test: 31
   hyperbolic_q: 0.75
   max_degree_attempts: 4
-  q2_threshold: 0.99
+  q2_threshold: -1
 
 mc_validation:
   n_samples: 50

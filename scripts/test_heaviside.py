@@ -64,14 +64,14 @@ def main() -> None:
     print("PASS: constant-array eta matches original scalar-eta Heaviside exactly")
 
     print("\n=== Step 4: Resample eta(x) and run forward() with a real random field ===")
-    rho_phys.vector.array[:] = 0.5  # reset
+    rho_phys.x.petsc_vec.array[:] = 0.5  # reset
     eta_sample = rf_heaviside.resample(seed=7)
     print(f"eta(x) sample: min={eta_sample.min():.4f}, max={eta_sample.max():.4f}, "
           f"mean={eta_sample.mean():.4f}")
     rf_heaviside.forward(beta=4.0)
-    print(f"rho_phys after projection: min={rho_phys.vector.array.min():.4f}, "
-          f"max={rho_phys.vector.array.max():.4f}")
-    assert np.all(rho_phys.vector.array >= 0.0) and np.all(rho_phys.vector.array <= 1.0), (
+    print(f"rho_phys after projection: min={rho_phys.x.petsc_vec.array.min():.4f}, "
+          f"max={rho_phys.x.petsc_vec.array.max():.4f}")
+    assert np.all(rho_phys.x.petsc_vec.array >= 0.0) and np.all(rho_phys.x.petsc_vec.array <= 1.0), (
         "Projected density out of [0, 1] bounds"
     )
     print("PASS: projected density stays within [0, 1]")
@@ -84,11 +84,11 @@ def main() -> None:
     print("PASS: backward() ran and scaled sensitivities by drho")
 
     print("\n=== Step 6: Verify set_deterministic_eta() fallback path ===")
-    rho_phys.vector.array[:] = 0.5
+    rho_phys.x.petsc_vec.array[:] = 0.5
     rf_heaviside.set_deterministic_eta(0.5)
     rf_heaviside.forward(beta=4.0)
-    print(f"Deterministic-mode rho_phys range: [{rho_phys.vector.array.min():.4f}, "
-          f"{rho_phys.vector.array.max():.4f}]")
+    print(f"Deterministic-mode rho_phys range: [{rho_phys.x.petsc_vec.array.min():.4f}, "
+          f"{rho_phys.x.petsc_vec.array.max():.4f}]")
     print("PASS: deterministic fallback path works")
 
     print("\n=== ALL CHECKS PASSED ===")

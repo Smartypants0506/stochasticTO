@@ -115,6 +115,7 @@ node_coordinates = rho_phys_field.function_space.tabulate_dof_coordinates()[:, :
 
 domain_size = node_coordinates.max(axis=0) - node_coordinates.min(axis=0)
 length_scale = 0.2 * domain_size.min()
+
 logger.info("Domain size: %s, length_scale set to: %.4g", domain_size, length_scale)
 
 # Coarse auxiliary grid sized relative to length_scale (NOT the full FEA mesh)
@@ -194,12 +195,12 @@ except FileNotFoundError:
         "Run topopt.py (with the np.save addition) first for a real converged design.",
         rho_converged_path, opt_config["vol_frac"],
     )
-    rho_current = np.full(rho_field.vector.array.shape, opt_config["vol_frac"])
+    rho_current = np.full(rho_field.x.petsc_vec.array.shape, opt_config["vol_frac"])
 
-if rho_current.shape != rho_field.vector.array.shape:
+if rho_current.shape != rho_field.x.petsc_vec.array.shape:
     raise ValueError(
         f"rho_converged.npy shape {rho_current.shape} does not match this "
-        f"mesh's dof shape {rho_field.vector.array.shape}. Ensure NX, NY here "
+        f"mesh's dof shape {rho_field.x.petsc_vec.array.shape}. Ensure NX, NY here "
         "match the resolution used to generate that file."
     )
 

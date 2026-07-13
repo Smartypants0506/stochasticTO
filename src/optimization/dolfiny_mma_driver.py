@@ -80,14 +80,16 @@ class RobustLoopState:
 
 
 def _retrain_pce_pair(
-    fem: dict,
-    opt: dict,
-    rho_current: np.ndarray,
+    fem: dict, 
+    opt: dict, 
+    rho_current: np.ndarray, 
     density_filter: DensityFilter,
-    rf_heaviside: RandomFieldHeaviside,
-    sens_problem: Sensitivity,
+    rf_heaviside: RandomFieldHeaviside, 
+    sens_problem: Sensitivity, 
     beta: float,
-    kl_result: "KLExpansionResult",
+    kl_result: KLExpansionResult, 
+    linear_problem, 
+    rho_field,
 ) -> tuple:
     """Retrain the compliance+volume PCE pair at the current design iterate.
 
@@ -118,6 +120,8 @@ def _retrain_pce_pair(
             and must never be bypassed, even mid-optimization.
     """
 
+    n_train = opt["pce_n_train"]
+
     logger.info(
         "Retraining PCE pair at outer_iteration checkpoint: n_train=%d, beta=%.3g",
         n_train, beta,
@@ -130,13 +134,13 @@ def _retrain_pce_pair(
     xi_train, xi_test = train_set.xi, test_set.xi
 
     training_data = run_fea_at_samples(
-        fem, opt, rho_current, density_filter, rf_heaviside, sens_problem,
-        xi_train, beta,
-    )
+    fem, opt, rho_current, density_filter, rf_heaviside, sens_problem, xi_train, beta,
+    linear_problem, rho_field,
+)
     test_data = run_fea_at_samples(
-        fem, opt, rho_current, density_filter, rf_heaviside, sens_problem,
-        xi_test, beta,
-    )
+    fem, opt, rho_current, density_filter, rf_heaviside, sens_problem, xi_test, beta,
+    linear_problem, rho_field,
+)
 
     compliance_pce_result = build_pce_surrogate(
         xi_train, training_data.compliance_samples,
@@ -221,8 +225,8 @@ def run_robust_topopt(
     )
     sens_problem = Sensitivity(comm, opt, linear_problem, u_field, lambda_field, rho_phys_field)
 
-    n_elems = rho_field.vector.array.size
-    rho_field.vector.array[:] = rho_warm_start
+    n_elems = rho_field.x.petsc_vec.array.size
+    rho_field.x.petsc_vec.array[:] = rho_warm_start
 
     robust_config = RobustObjectiveConfig(lambda_tradeoff=lambda_tradeoff)
     state = RobustLoopState(
@@ -233,7 +237,7 @@ def run_robust_topopt(
 
     def objective_gradient_callback(tao: PETSc.TAO, x: PETSc.Vec, g: PETSc.Vec) -> float:
         """TAO objective+gradient callback for the robust scalarized objective J."""
-        rho_current = x.getArray().copy()
+        rho_current = x.getArray(readonly=True).copy()
 
         if (state.outer_iteration % opt["beta_interval"] == 0
                 and state.beta < opt["beta_max"] and state.outer_iteration > 0):
@@ -249,7 +253,8 @@ def run_robust_topopt(
 
         if state.refresh_policy.needs_refresh(state.outer_iteration):
             state.compliance_pce, state.volume_pce = _retrain_pce_pair(
-    fem, opt, rho_current, density_filter, rf_heaviside, sens_problem, state.beta, kl_result)
+    fem, opt, rho_current, density_filter, rf_heaviside, sens_problem, state.beta, kl_result,
+    linear_problem, rho_field)
             state.refresh_policy.last_refresh_iteration = state.outer_iteration
 
         result = evaluate_from_pce(state.compliance_pce, state.volume_pce, n_elems)
@@ -291,7 +296,7 @@ def run_robust_topopt(
     tao.setType(PETSc.TAO.Type.PYTHON)
     tao.setPythonContext(MMA())
 
-    x0 = rho_field.vector.copy()
+    x0 = rho_field.x.petsc_vec.copy()
     x0.setArray(rho_warm_start)
     tao.setSolution(x0)
 
@@ -303,20 +308,21 @@ def run_robust_topopt(
     tao.setObjectiveGradient(objective_gradient_callback, grad_vec)
 
     constraint_vec = PETSc.Vec().createSeq(1, comm=comm)
-    tao.setInequalityConstraints(constraint_vec, (inequality_constraint_callback, (), {}))
+    tao.setInequalityConstraints(inequality_constraint_callback, constraint_vec)
 
     jacobian_mat = PETSc.Mat().createDense((1, n_elems), comm=comm)
     jacobian_mat.setUp()
-    tao.setJacobianInequality(
-        jacobian_mat, jacobian_mat, (jacobian_inequality_callback, (), {})
-    )
+    tao.setJacobianInequality(jacobian_inequality_callback, jacobian_mat, jacobian_mat)
 
     tao.setTolerances(gatol=opt["opt_tol"])
     tao.setMaximumIterations(opt["max_iter"])
     tao.setFromOptions()
+
+    #print("Domain size:", domain_size, "length_scale:", length_scale, config.kernel_params.spatial_dim)
+
     state.compliance_pce, state.volume_pce = _retrain_pce_pair(
-        fem, opt, rho_warm_start, density_filter, rf_heaviside, sens_problem,
-        state.beta, kl_result)
+    fem, opt, rho_warm_start, density_filter, rf_heaviside, sens_problem, state.beta, kl_result,
+    linear_problem, rho_field)
     state.refresh_policy.last_refresh_iteration = 0
     tao.solve()
 
@@ -327,7 +333,7 @@ def run_robust_topopt(
             "Check iteration_log for divergence pattern before trusting rho_robust."
         )
 
-    rho_robust = tao.getSolution().getArray().copy()
+    rho_robust = tao.getSolution().getArray(readonly=True).copy()
 
     S_comm = Communicator(rho_phys_field.function_space, fem["mesh_serial"])
     if comm.rank == 0:

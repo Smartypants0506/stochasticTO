@@ -107,13 +107,13 @@ def mma_optimizer(m, n, opt_iter, xval, xmin, xmax, xold1, xold2, df0dx, fval,
     tao.solve()
     
     # Extract results
-    x_new = x.getArray().copy()
+    x_new = x.getArray(readonly=True).copy()
     change = comm.allreduce(np.max(np.abs(x_new - xval), initial=0), op=MPI.MAX)
     
     # Attempt to extract internal asymptotes for continuity in external loops
     try:
-        low_new = mma_ctx._L.getArray().copy()
-        upp_new = mma_ctx._U.getArray().copy()
+        low_new = mma_ctx._L.getArray(readonly=True).copy()
+        upp_new = mma_ctx._U.getArray(readonly=True).copy()
     except AttributeError:
         # Fallback if TAO did not take a step or attributes aren't populated
         low_new = low

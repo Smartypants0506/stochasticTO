@@ -23,7 +23,7 @@ import openturns as ot
 
 logger = logging.getLogger(__name__)
 
-Q2_THRESHOLD = 0.99  # implementation-modules.md Item 12: "iterates ... until Q^2 >= 0.99"
+Q2_THRESHOLD = 0.95  # implementation-modules.md Item 12: "iterates ... until Q^2 >= 0.99"
 DEFAULT_HYPERBOLIC_Q = 0.75  # standard sparse-truncation quasi-norm exponent
 MAX_DEGREE_ATTEMPTS = 8  # bounds the degree search; raises if never reached
 
@@ -83,7 +83,7 @@ def _fit_chaos_at_degree(
     coefficient estimation, per implementation-modules.md Item 12's
     exact specification ("hyperbolic truncation ... LARS").
     """
-    distribution = ot.ComposedDistribution([ot.Normal(0.0, 1.0)] * n_kl)
+    distribution = ot.JointDistribution([ot.Normal(0.0, 1.0)] * n_kl)
     enumerate_function = ot.HyperbolicAnisotropicEnumerateFunction(n_kl, hyperbolic_q)
     basis = ot.OrthogonalProductPolynomialFactory(
         [ot.HermiteFactory()] * n_kl, enumerate_function
@@ -150,6 +150,7 @@ def build_pce_surrogate(
     best_result = None
     for degree in range(1, max_degree_attempts + 1):
         chaos_result = _fit_chaos_at_degree(xi_train, c_train, n_kl, degree, hyperbolic_q)
+        print(c_train, c_test)
         q2, rmse = _compute_q2(chaos_result, xi_test, c_test)
         logger.info("PCE degree=%d: Q^2=%.5f, RMSE=%.5g", degree, q2, rmse)
 

@@ -20,7 +20,7 @@ Reference:
 
 import numpy as np
 import ufl
-from dolfinx import la
+from dolfinx.la.petsc import create_vector_wrap
 from dolfinx.fem import Function, form
 from dolfinx.fem.petsc import create_matrix, assemble_matrix
 from petsc4py import PETSc
@@ -35,9 +35,9 @@ class DensityFilter():
         v, self.af = ufl.TestFunction(S), Function(S)
 
         self.rho, self.rho_tilde = rho, rho_tilde
-        self.rho_tilde_wrap = la.create_petsc_vector_wrap(self.rho_tilde.x)
-        self.af_wrap = la.create_petsc_vector_wrap(self.af.x)
-        self.vec_s0, self.vec_s = rho.vector.copy(), rho_tilde.vector.copy()
+        self.rho_tilde_wrap = create_vector_wrap(self.rho_tilde.x)
+        self.af_wrap = create_vector_wrap(self.af.x)
+        self.vec_s0, self.vec_s = rho.x.petsc_vec.copy(), rho_tilde.x.petsc_vec.copy()
 
         # Construct Kf and T matrices based on the Helmholtz PDE
         dx = ufl.Measure("dx", metadata={"quadrature_degree": 2})
@@ -72,7 +72,7 @@ class DensityFilter():
 
     def forward(self):
         """Compute the filtered variables."""
-        self.T_mat.mult(self.rho.vector, self.vec_s)
+        self.T_mat.mult(self.rho.x.petsc_vec, self.vec_s)
         self.solver.solve(self.vec_s, self.rho_tilde_wrap)
         self.rho_tilde.x.scatter_forward()
         return self.rho_tilde
@@ -84,7 +84,7 @@ class DensityFilter():
             if sf is not None:
                 self.solver.solve(sf, self.af_wrap)
                 self.af.x.scatter_forward()
-                self.T_mat_transpose.mult(self.af.vector, self.vec_s0)
+                self.T_mat_transpose.mult(self.af.x.petsc_vec, self.vec_s0)
                 values.append(self.vec_s0.array.copy())
             else:
                 values.append(None)
@@ -97,9 +97,9 @@ class Heaviside():
 
     def forward(self, beta, eta=0.5):
         denominator = np.tanh(beta*eta) + np.tanh(beta*(1-eta))
-        self.drho = beta*(1-np.tanh(beta*(self.rho_phys.vector-eta))**2) / denominator
-        self.rho_phys.vector.array = (
-            np.tanh(beta*eta)+np.tanh(beta*(self.rho_phys.vector-eta))) / denominator
+        self.drho = beta*(1-np.tanh(beta*(self.rho_phys.x.petsc_vec-eta))**2) / denominator
+        self.rho_phys.x.petsc_vec.array = (
+            np.tanh(beta*eta)+np.tanh(beta*(self.rho_phys.x.petsc_vec-eta))) / denominator
         self.rho_phys.x.scatter_forward()
 
     def backward(self, vectors):

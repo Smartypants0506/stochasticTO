@@ -72,8 +72,8 @@ def run_cantilever_check(
     }
 
     linear_problem, u_field, _, rho_field, rho_phys_field = form_fem(fem_dict, opt_dict)
-    rho_field.vector.array[:] = 1.0       # fully solid: no SIMP penalization effect
-    rho_phys_field.vector.array[:] = 1.0
+    rho_field.x.petsc_vec.array[:] = 1.0       # fully solid: no SIMP penalization effect
+    rho_phys_field.x.petsc_vec.array[:] = 1.0
     linear_problem.solve_fem()
 
     tip_dofs = np.isclose(mesh.geometry.x[:, 0], length) & \

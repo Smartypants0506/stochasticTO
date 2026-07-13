@@ -17,10 +17,13 @@ from mpi4py import MPI
 from src.meshing.mapper import build_boundary_conditions
 from src.fea.fenitop_adapter import build_fenitop_dicts
 
+from src.topology.heaviside_projection_glue import RandomHeavisideConfig
+from src.random_fields.threshold_transform import MarginalTransformParams
+
 logging.basicConfig(level=logging.INFO, force=True)
 logger = logging.getLogger(__name__)
 
-def main(config_path: str = "src/config/configSmoke.yaml") -> None:
+def main(config_path: str = "src/config/config.yaml") -> None:
     cfg = load_config(config_path)
     entities = import_and_heal(cfg.step_file)
     mesh_cfg = MeshingConfig(mesh_size_max=cfg.mesh_size_max,
@@ -63,15 +66,30 @@ def main(config_path: str = "src/config/configSmoke.yaml") -> None:
 
     logger.info("Stage 6: full-scale MC validation on final robust design")
     final_design = pareto_results[-1]
+
     mc_config = MCConfig(
         n_samples=cfg.mc_validation.n_samples,
         beta=cfg.optimization.beta_max,
         seed=cfg.mc_validation.seed,
     )
+
+    heaviside_cfg = RandomHeavisideConfig(
+    kernel_params=kernel_params,
+    transform_params=MarginalTransformParams(
+        eta_min=0.3, eta_max=0.7, alpha=2.0, beta=2.0
+    ),
+    variance_threshold=0.95,
+    seed=cfg.mc_validation.seed,
+    )
+
     mc_result = run_monte_carlo_validation(
         fem, opt_nominal, final_design["rho_robust"], node_coordinates, simplices,
-        heaviside_config=kl_result, mc_config=mc_config,
+        heaviside_config=heaviside_cfg, mc_config=mc_config,
     )
+
+    mc_result.to_csv(Path("output/mc_validation/compliance_samples.csv"))
+    plot_cdf(mc_result, Path("output/mc_validation/cdf.png"))
+    logger.info("Stage 6 complete: mean=%.6g, std=%.6g", mc_result.mean, mc_result.std)
     # PCE-vs-MC comparison requires the last trained PCE pair from this lambda's run
     # (must be returned/exposed by run_robust_topopt -- see gap below)
 

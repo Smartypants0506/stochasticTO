@@ -180,13 +180,13 @@ logger.info(
 )
 
 # --- STEP 5: Initialize the design variable, matching topopt.py's passive-zone pattern ---
-num_elems = rho_field.vector.array.size
+num_elems = rho_field.x.petsc_vec.array.size
 centers = rho_field.function_space.tabulate_dof_coordinates()[:num_elems].T
 solid, void = opt_config["solid_zone"](centers), opt_config["void_zone"](centers)
 
 rho_ini = np.full(num_elems, opt_config["vol_frac"])
 rho_ini[solid], rho_ini[void] = 0.995, 0.005
-rho_field.vector.array[:] = rho_ini
+rho_field.x.petsc_vec.array[:] = rho_ini
 
 rho_min, rho_max = np.zeros(num_elems), np.ones(num_elems)
 rho_min[solid], rho_max[void] = 0.99, 0.01
@@ -225,7 +225,7 @@ while opt_iter < opt_config["max_iter"] and change > opt_config["opt_tol"]:
     # correction for the optimization loop, not a shortcut or deviation from Step 6's math.
     robust_config.seed = opt_iter * robust_config.n_mc_samples
 
-    rho_values = rho_field.vector.array.copy()
+    rho_values = rho_field.x.petsc_vec.array.copy()
     result = evaluate_robust_samples(
         rho_values, linear_problem, density_filter, rf_heaviside,
         sens_problem, rho_field, robust_config,
@@ -242,7 +242,7 @@ while opt_iter < opt_config["max_iter"] and change > opt_config["opt_tol"]:
     rho_new, change = optimality_criteria(
     rho_values, rho_min, rho_max, g_vec[0], dJdrho, dgdrho_mat[0], opt_config["move"],
 )
-    rho_field.vector.array[:] = rho_new
+    rho_field.x.petsc_vec.array[:] = rho_new
 
     iter_time = time.perf_counter() - iter_start
     logger.info(
@@ -254,9 +254,9 @@ while opt_iter < opt_config["max_iter"] and change > opt_config["opt_tol"]:
     history.append([opt_iter, iter_time, beta, J_value, result.mu_C,
                      result.sigma_C, result.mean_volume, g_value, change])
 
-    plotter.plot([rho_phys_field.vector.array], path="output/")
+    plotter.plot([rho_phys_field.x.petsc_vec.array], path="output/")
     save_xdmf(mesh, rho_phys_field, path="output/")
-    np.save("output/rho_converged.npy", rho_field.vector.array)
+    np.save("output/rho_converged.npy", rho_field.x.petsc_vec.array)
 
 # --- STEP 9: Save iteration history ---
 history_arr = np.array(history)

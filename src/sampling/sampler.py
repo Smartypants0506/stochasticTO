@@ -53,7 +53,7 @@ def _standard_normal_distribution(n_kl: int) -> ot.Distribution:
     Matches the xi_i ~ N(0,1) convention in kl_expansion.sample_gaussian_field.
     """
     marginals = [ot.Normal(0.0, 1.0) for _ in range(n_kl)]
-    return ot.ComposedDistribution(marginals)
+    return ot.JointDistribution(marginals)
 
 
 def generate_samples(
@@ -95,7 +95,7 @@ def generate_samples(
         # raw LHS -- required so training points actually cover the input
         # space rather than clustering, which would bias the PCE fit.
         optimal_lhs = ot.SimulatedAnnealingLHS(
-            experiment, ot.GeometricProfile(), ot.SpaceFillingC2()
+            experiment, ot.SpaceFillingC2(), ot.GeometricProfile()
         )
         sample = optimal_lhs.generate()
     elif strategy == "monte_carlo":

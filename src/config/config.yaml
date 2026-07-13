@@ -1,11 +1,11 @@
-step_file: "data/cad/cantilever.step"
-mesh_out_path: "output/meshes/cantilever.xdmf"
+step_file: "data/cad/ge_bracket_rotated_nonds.step"
+mesh_out_path: "output/meshes/ge_bracket_rotated_nonds.xdmf"
 mesh_size_max: 1.0e-3
 snap_tol: 1.0e-4
 
 material:
-  youngs_modulus: 100.0
-  poissons_ratio: 0.25
+  youngs_modulus: 68900000000
+  poissons_ratio: 0.33
 
 petsc:
   ksp_type: "cg"
@@ -13,7 +13,7 @@ petsc:
 
 load_cases:
   - group_name: "load_1"
-    vector: [0.0, -0.2, 0.0]
+    vector: [0.0, -1000000.0, 0.0]
 
 optimization:
   max_iter: 400
@@ -39,7 +39,7 @@ solid_volume_color: [255, 255, 0, 255]
 
 random_field:
   sigma: 0.01
-  length_scale: 0.05
+  length_scale: 0.015
   spatial_dim: 3
   eta_min: 0.3
   eta_max: 0.7

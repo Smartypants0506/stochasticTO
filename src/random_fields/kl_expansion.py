@@ -8,6 +8,13 @@ OpenTURNS's KarhunenLoeveP1Algorithm, exactly as specified ("eigenfunctions
 approximated via FEM on a nodal grid whose spacing is proportional to the
 correlation length l"). Truncation order N_KL is chosen so retained modes
 explain >= 95% of total variance (Section 3.3 verbatim requirement).
+
+MPI note: the OpenTURNS KarhunenLoeveP1Algorithm solve is performed ONLY on
+rank 0 (it requires the full serial node/simplex arrays, which only rank 0
+holds -- see mesher.py's mesh_serial convention). The resulting eigenvalues/
+modes/node_coordinates are then broadcast to every other rank via comm.bcast,
+so all ranks end up with an identical KLExpansionResult without redundantly
+repeating the (expensive, single-threaded-per-rank) eigensolve.
 """
 from __future__ import annotations
 
@@ -16,6 +23,7 @@ from dataclasses import dataclass
 
 import numpy as np
 import openturns as ot
+from mpi4py import MPI
 
 from src.random_fields.kernel import KernelParams, build_squared_exponential
 
@@ -24,11 +32,10 @@ logger = logging.getLogger(__name__)
 VARIANCE_EXPLAINED_THRESHOLD = 0.95  # Section 3.3: ">= 95% of total variance"
 
 
-
 @dataclass
 class KLExpansionResult:
     """Container for a fitted KL expansion.
-= np.array(result.getEigenvalues())  # lowercase "v"
+
     Attributes:
         eigenvalues: [N_kl] retained eigenvalues lambda_i, descending order.
         modes: [N_nodes x N_kl] eigenfunctions phi_i evaluated at mesh nodes.
@@ -70,33 +77,18 @@ def _build_ot_mesh(node_coordinates: np.ndarray, simplices: np.ndarray) -> ot.Me
     return mesh
 
 
-def compute_kl_expansion(
+def _compute_kl_expansion_local(
     node_coordinates: np.ndarray,
     simplices: np.ndarray,
     kernel_params: KernelParams,
-    variance_threshold: float = VARIANCE_EXPLAINED_THRESHOLD,
-    max_modes: int = 200,
-) -> KLExpansionResult:
-    """Compute the FEM-based KL expansion of a centered Gaussian field on a mesh.
-
-    Implements master-context Section 3.3's KL expansion step:
-        G(x) = mu(x) + sum_i sqrt(lambda_i) * phi_i(x) * xi_i
-    with mu(x) = 0 for the MVP (unbiased manufacturing error field).
-
-    Args:
-        node_coordinates: [N_nodes x spatial_dim] FEA mesh node coordinates.
-        simplices: [N_elems x (spatial_dim+1)] element connectivity.
-        kernel_params: Squared-exponential kernel hyperparameters.
-        variance_threshold: Minimum fraction of total variance to retain
-            (default 0.95 per Section 3.3).
-        max_modes: Upper bound on eigenmodes requested from OpenTURNS, to
-            bound compute cost; increase if variance_threshold is not met.
+    variance_threshold: float,
+    max_modes: int,
+) -> tuple:
+    """Do the actual OpenTURNS KL solve on the calling rank (no MPI logic).
 
     Returns:
-        A KLExpansionResult with eigenvalues/modes truncated at N_kl modes.
-
-    Raises:
-        RuntimeError: If variance_threshold cannot be met within max_modes.
+        (eigenvalues, modes, mean_field, variance_explained, n_kl) tuple of
+        plain NumPy/float values, ready to be broadcast via comm.bcast.
     """
     n_nodes = node_coordinates.shape[0]
     mesh = _build_ot_mesh(node_coordinates, simplices)
@@ -104,7 +96,10 @@ def compute_kl_expansion(
 
     ot.ResourceMap.SetAsString("KarhunenLoeveP1Algorithm-EigenvaluesSolver", "SPECTRA")
     ot.TBB.Enable()
-    ot.ResourceMap.SetAsUnsignedInteger("TBB-ThreadsNumber", 64)
+    # NOTE: deliberately NOT setting "TBB-ThreadsNumber" here. Leaving it at
+    # OpenTURNS's default lets it size itself to the single rank's allotted
+    # cores rather than hardcoding a thread count that would oversubscribe
+    # the node once multiple MPI ranks are active.
 
     algo = ot.KarhunenLoeveP1Algorithm(mesh, covariance_model)
     algo.setThreshold(1e-3)  # discard numerically negligible eigenvalues early
@@ -138,15 +133,103 @@ def compute_kl_expansion(
         mode_field = modes_process.getField(i).getValues()
         modes[:, i] = np.array(mode_field).ravel()
 
+    mean_field = np.zeros(n_nodes)
+
     logger.info(
         "KL expansion truncated at N_kl=%d modes (%.2f%% variance explained, "
         "threshold=%.0f%%)", n_kl, variance_explained * 100, variance_threshold * 100,
     )
 
+    return eigenvalues, modes, mean_field, variance_explained, n_kl
+
+
+def compute_kl_expansion(
+    node_coordinates: np.ndarray | None,
+    simplices: np.ndarray | None,
+    kernel_params: KernelParams,
+    variance_threshold: float = VARIANCE_EXPLAINED_THRESHOLD,
+    max_modes: int = 200,
+    comm: MPI.Comm | None = None,
+) -> KLExpansionResult:
+    """Compute the FEM-based KL expansion of a centered Gaussian field on a mesh.
+
+    Implements master-context Section 3.3's KL expansion step:
+        G(x) = mu(x) + sum_i sqrt(lambda_i) * phi_i(x) * xi_i
+    with mu(x) = 0 for the MVP (unbiased manufacturing error field).
+
+    MPI behavior: only rank 0 performs the OpenTURNS eigensolve (it is the
+    only rank guaranteed to hold a non-None, fully-populated
+    node_coordinates/simplices pair -- see mesher.py's mesh_serial
+    convention). All other ranks may safely pass node_coordinates=None and
+    simplices=None; they will receive the identical KLExpansionResult via
+    broadcast. This must be called collectively by every rank in `comm`
+    (default MPI.COMM_WORLD) -- it is a collective operation, not a
+    rank-0-only convenience function.
+
+    Args:
+        node_coordinates: [N_nodes x spatial_dim] FEA mesh node coordinates.
+            Required (non-None) on rank 0 only.
+        simplices: [N_elems x (spatial_dim+1)] element connectivity.
+            Required (non-None) on rank 0 only.
+        kernel_params: Squared-exponential kernel hyperparameters.
+        variance_threshold: Minimum fraction of total variance to retain
+            (default 0.95 per Section 3.3).
+        max_modes: Upper bound on eigenmodes requested from OpenTURNS, to
+            bound compute cost; increase if variance_threshold is not met.
+        comm: MPI communicator to broadcast the result across. Defaults to
+            MPI.COMM_WORLD.
+
+    Returns:
+        A KLExpansionResult with eigenvalues/modes truncated at N_kl modes,
+        identical on every rank in `comm`.
+
+    Raises:
+        RuntimeError: If variance_threshold cannot be met within max_modes,
+            or if rank 0 hits any other error during the eigensolve. Raised
+            identically on every rank (not just rank 0) to avoid deadlocks.
+        ValueError: If rank 0 is called with node_coordinates=None or
+            simplices=None.
+    """
+    if comm is None:
+        comm = MPI.COMM_WORLD
+
+    error_message: str | None = None
+    payload = None
+
+    if comm.rank == 0:
+        if node_coordinates is None or simplices is None:
+            error_message = (
+                "compute_kl_expansion: rank 0 requires non-None "
+                "node_coordinates and simplices."
+            )
+        else:
+            try:
+                eigenvalues, modes, mean_field, variance_explained, n_kl = (
+                    _compute_kl_expansion_local(
+                        node_coordinates, simplices, kernel_params,
+                        variance_threshold, max_modes,
+                    )
+                )
+                payload = (
+                    eigenvalues, modes, mean_field, variance_explained, n_kl,
+                    node_coordinates,
+                )
+            except Exception as exc:  # noqa: BLE001 - re-raised on all ranks below
+                error_message = f"{type(exc).__name__}: {exc}"
+
+    error_message = comm.bcast(error_message, root=0)
+    if error_message is not None:
+        raise RuntimeError(
+            f"compute_kl_expansion failed on rank 0: {error_message}"
+        )
+
+    payload = comm.bcast(payload, root=0)
+    eigenvalues, modes, mean_field, variance_explained, n_kl, node_coordinates = payload
+
     return KLExpansionResult(
         eigenvalues=eigenvalues,
         modes=modes,
-        mean_field=np.zeros(n_nodes),
+        mean_field=mean_field,
         variance_explained=variance_explained,
         n_kl=n_kl,
         node_coordinates=node_coordinates,

@@ -23,7 +23,6 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from src.fenitop.fem import form_fem
 from src.topology.heaviside_projection_glue import RandomFieldHeaviside
 
 logger = logging.getLogger(__name__)
@@ -57,6 +56,8 @@ def run_fea_at_samples(
     sens_problem,
     xi_train: np.ndarray,
     beta: float,
+    linear_problem,
+    rho_field,
 ) -> SurrogateTrainingData:
     """Evaluate compliance and volume at each training sample's perturbed density field.
 
@@ -87,9 +88,6 @@ def run_fea_at_samples(
         RuntimeError: If any sample produces a non-finite compliance or
             volume value.
     """
-    linear_problem, u_field, lambda_field, rho_field, rho_phys_field = form_fem(
-        fem_dict, opt_dict
-    )
 
     n_train = xi_train.shape[0]
     n_elems = rho_nominal.size
@@ -99,7 +97,7 @@ def run_fea_at_samples(
     dV_drho_samples = np.empty((n_train, n_elems))
 
     for j in range(n_train):
-        rho_field.vector.array[:] = rho_nominal
+        rho_field.x.petsc_vec.array[:] = rho_nominal
         density_filter.forward()  # deterministic Helmholtz filter: rho -> rho_tilde
 
         heaviside.set_eta_from_xi(xi_train[j])

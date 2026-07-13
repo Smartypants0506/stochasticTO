@@ -101,7 +101,7 @@ class RandomFieldHeaviside:
             ValueError: If node_coordinates row count does not match
                 rho_phys's local dof array size.
         """
-        n_dofs = rho_phys.vector.array.size
+        n_dofs = rho_phys.x.petsc_vec.array.size
         if node_coordinates.shape[0] != n_dofs:
             raise ValueError(
                 f"node_coordinates has {node_coordinates.shape[0]} rows but "
@@ -183,7 +183,7 @@ class RandomFieldHeaviside:
                 "before forward(), or pass eta explicitly."
             )
 
-        rho_tilde = self.rho_phys.vector.array  # NumPy view, local dofs
+        rho_tilde = self.rho_phys.x.petsc_vec.array  # NumPy view, local dofs
         if isinstance(eta, np.ndarray) and eta.shape != rho_tilde.shape:
             raise ValueError(
                 f"eta array shape {eta.shape} does not match rho_phys local "
@@ -194,7 +194,7 @@ class RandomFieldHeaviside:
         interior = np.tanh(beta * (rho_tilde - eta))
 
         self.drho = beta * (1.0 - interior ** 2) / denom
-        self.rho_phys.vector.array = (np.tanh(beta * eta) + interior) / denom
+        self.rho_phys.x.petsc_vec.array = (np.tanh(beta * eta) + interior) / denom
         self.rho_phys.x.scatter_forward()
 
     def backward(self, vectors: list) -> None:
@@ -234,17 +234,17 @@ class RandomFieldHeaviside:
             True if scalar-eta and constant-array-eta produce identical
             rho_phys and drho outputs within rtol.
         """
-        rho_before = self.rho_phys.vector.array.copy()
+        rho_before = self.rho_phys.x.petsc_vec.array.copy()
 
-        self.rho_phys.vector.array[:] = rho_before
+        self.rho_phys.x.petsc_vec.array[:] = rho_before
         self.forward(beta, eta=eta_value)
-        rho_scalar = self.rho_phys.vector.array.copy()
+        rho_scalar = self.rho_phys.x.petsc_vec.array.copy()
         drho_scalar = self.drho.copy()
 
-        self.rho_phys.vector.array[:] = rho_before
+        self.rho_phys.x.petsc_vec.array[:] = rho_before
         eta_array = np.full_like(rho_before, eta_value)
         self.forward(beta, eta=eta_array)
-        rho_array = self.rho_phys.vector.array.copy()
+        rho_array = self.rho_phys.x.petsc_vec.array.copy()
         drho_array = self.drho.copy()
 
         rho_match = np.allclose(rho_scalar, rho_array, rtol=rtol)
@@ -297,6 +297,7 @@ def build_random_heaviside_from_function_space(rho_phys, mesh_simplices: np.ndar
         A ready-to-use RandomFieldHeaviside instance.
     """
     node_coordinates = rho_phys.function_space.tabulate_dof_coordinates()
+    #print(node_coordinates.min(), node_coordinates.max())
     spatial_dim = config.kernel_params.spatial_dim
     node_coordinates = node_coordinates[:, :spatial_dim]  # drop unused z for 2D
     return RandomFieldHeaviside(rho_phys, node_coordinates, mesh_simplices, config)

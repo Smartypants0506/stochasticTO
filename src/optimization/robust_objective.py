@@ -142,7 +142,7 @@ def evaluate_robust_samples(
     dV_drho_samples = np.zeros((config.n_mc_samples, n_elems))
 
     for i in range(config.n_mc_samples):
-        rho_field.vector.array[:] = rho_values
+        rho_field.x.petsc_vec.array[:] = rho_values
         density_filter.forward()  # deterministic Helmholtz filter: rho -> rho_tilde
 
         eta_i = rf_heaviside.resample(seed=config.seed + i)

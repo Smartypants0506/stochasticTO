@@ -61,7 +61,7 @@ class MCConfig:
         seed: Base RNG seed; sample i uses seed + i for reproducibility.
         output_dir: Directory to write results CSV/plot to.
     """
-    n_samples: int = 100
+    n_samples: int = 2500
     beta: float = 8.0
     percentiles: tuple[float, float] = (5.0, 95.0)
     seed: int = 0
@@ -215,7 +215,7 @@ def run_monte_carlo_validation(
         opt_config["filter_radius"], fem_config["petsc_options"],
     )
 
-    expected_shape = rho_field.vector.array.shape
+    expected_shape = rho_field.x.petsc_vec.array.shape
     if rho_converged.shape != expected_shape:
         raise ValueError(
             f"rho_converged shape {rho_converged.shape} does not match "
@@ -237,7 +237,7 @@ def run_monte_carlo_validation(
     xi_samples_all = np.zeros((mc_config.n_samples, rf_heaviside.kl_result.n_kl))
 
     for i in range(mc_config.n_samples):
-        rho_field.vector.array[:] = rho_converged
+        rho_field.x.petsc_vec.array[:] = rho_converged
         density_filter.forward()
 
         rng = np.random.default_rng(mc_config.seed + i)

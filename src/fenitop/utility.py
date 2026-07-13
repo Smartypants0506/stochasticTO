@@ -137,7 +137,7 @@ class Communicator():
 
         element = func_space.ufl_element()
         if self.comm.rank == 0:
-            func_space_serial = dolfinx.fem.FunctionSpace(mesh_serial, element)
+            func_space_serial = dolfinx.fem.functionspace(mesh_serial, element)
             nodes_serial = func_space_serial.tabulate_dof_coordinates()
 
             nodes_collect = np.zeros((num_global_nodes, 3))
@@ -161,14 +161,14 @@ class Communicator():
 
     def bcast(self, func, global_values):
         """Broadcast data from Process 0 to all the other processes."""
-        if func.vector.size != global_values.size:
+        if func.x.petsc_vec.size != global_values.size:
             raise ValueError("Mismatched sizes.")
-        func.vector.array = global_values[self.idx]
+        func.x.petsc_vec.array = global_values[self.idx]
 
     def gather(self, func):
         """Gather data to Process 0 from all the other processes."""
         if type(func) is Function:
-            values_gather = self.comm.gather(func.vector.array, root=0)
+            values_gather = self.comm.gather(func.x.petsc_vec.array, root=0)
         elif type(func) is PETSc.Vec:
             values_gather = self.comm.gather(func.array, root=0)
         elif type(func) is np.ndarray:
@@ -196,7 +196,6 @@ class Plotter():
     def __init__(self, mesh):
         """Initialize a plotter."""
         pyvista.OFF_SCREEN = True
-        pyvista.start_xvfb()
         self.dim = mesh.topology.dim
         elements, cell_types, nodes = dolfinx.plot.vtk_mesh(mesh, self.dim)
         self.grid = pyvista.UnstructuredGrid(elements, cell_types, nodes)

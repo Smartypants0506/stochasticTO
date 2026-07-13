@@ -65,8 +65,8 @@ def run_sensitivity_fd_check(
     sens_problem = Sensitivity(comm, opt_dict, linear_problem, u_field, lambda_field, rho_phys_field)
 
     rng = np.random.default_rng(seed)
-    n_elems = rho_field.vector.array.size
-    rho_field.vector.array[:] = 0.5
+    n_elems = rho_field.x.petsc_vec.array.size
+    rho_field.x.petsc_vec.array[:] = 0.5
 
     def compute_compliance() -> float:
         density_filter.forward()
@@ -86,12 +86,12 @@ def run_sensitivity_fd_check(
     check_indices = rng.choice(n_elems, size=min(n_check_elements, n_elems), replace=False)
     rel_errors = []
     for idx in check_indices:
-        base = rho_field.vector.array[idx]
-        rho_field.vector.array[idx] = base + FD_STEP
+        base = rho_field.x.petsc_vec.array[idx]
+        rho_field.x.petsc_vec.array[idx] = base + FD_STEP
         C_plus = compute_compliance()
-        rho_field.vector.array[idx] = base - FD_STEP
+        rho_field.x.petsc_vec.array[idx] = base - FD_STEP
         C_minus = compute_compliance()
-        rho_field.vector.array[idx] = base
+        rho_field.x.petsc_vec.array[idx] = base
 
         fd_grad = (C_plus - C_minus) / (2 * FD_STEP)
         adjoint_grad = dCdrho[idx]
