@@ -20,7 +20,6 @@ import logging
 from src.config.schema import ProjectConfig
 from src.meshing.mapper import BoundaryConditions
 from src.meshing.mesher import TaggedMesh
-from src.meshing.mesher import extract_simplices
 
 from src.random_fields.kernel import KernelParams
 from src.random_fields.threshold_transform import MarginalTransformParams
@@ -36,16 +35,23 @@ def build_fem_dict(tagged_mesh: TaggedMesh, bc: BoundaryConditions,
     ratio", "disp_bc", "traction_bcs", "body_force", "quadrature_degree",
     "petsc_options". "mesh_serial" is additionally required by topopt()
     (topopt-17.py) for plotting, so it is included here too.
+
+    NOTE: "mesh_simplices" is intentionally NOT included here. It is not
+    part of form_fem()/topopt()'s required key set, and tagged_mesh.mesh_serial
+    is only populated on rank 0 -- calling extract_simplices(tagged_mesh)
+    unconditionally here crashes with AttributeError on every non-root rank
+    under `mpirun -n 64`. Simplex extraction for the KL expansion is done
+    separately, once, in main.py -- gated behind `if comm.rank == 0:` and
+    followed by an explicit comm.bcast inside compute_kl_expansion() itself
+    (see src/random_fields/kl_expansion.py).
     """
     traction_bcs = [[list(lc.vector), fn]
                      for lc, fn in zip(config.load_cases,
                                         [t[1] for t in bc.traction_bcs])]
 
-    
     return {
         "mesh": tagged_mesh.mesh,
         "mesh_serial": tagged_mesh.mesh_serial,
-        "mesh_simplices": extract_simplices(tagged_mesh),
         "young's modulus": config.material.youngs_modulus,
         "poisson's ratio": config.material.poissons_ratio,
         "disp_bc": bc.disp_bc,

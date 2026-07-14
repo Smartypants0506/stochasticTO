@@ -74,6 +74,15 @@ def topopt(fem, opt):
         # Solve FEM
         linear_problem.solve_fem()
 
+        u_array = u_field.x.petsc_vec.array  # local dofs, interleaved [ux,uy,uz,...]
+        u_reshaped = u_array.reshape(-1, 3)  # 3D problem
+        disp_mag = np.linalg.norm(u_reshaped, axis=1)
+        local_max_disp = disp_mag.max() if disp_mag.size > 0 else 0.0
+        global_max_disp = comm.allreduce(local_max_disp, op=MPI.MAX)
+        if comm.rank == 0 and opt_iter % 10 == 0:  # print every 10 iters to avoid spam
+            print(f"  [diag] opt_iter {opt_iter}: max |u| = {global_max_disp:.6e} m "
+                f"({global_max_disp*1000:.6f} mm)", flush=True)
+                
         # Compute function values and sensitivities
         [C_value, V_value, U_value], sensitivities = sens_problem.evaluate()
         heaviside.backward(sensitivities)
@@ -110,5 +119,7 @@ def topopt(fem, opt):
         plotter.plot(values)
     save_xdmf(fem["mesh"], rho_phys_field)
 
+    rho_S0_comm = Communicator(rho_field.function_space, fem["mesh_serial"])
+    rho_global = rho_S0_comm.gather(rho_field)
     if comm.rank == 0:
-        np.save("output/rho_converged.npy", rho_field.x.petsc_vec.array.copy())
+        np.save("output/rho_converged.npy", rho_global)

@@ -31,8 +31,9 @@ def optimality_criteria(rho, rho_min, rho_max, V, dCdrho, dVdrho, move=0.05):
     comm = MPI.COMM_WORLD
     while ub-lb > 1e-4:
         mid = (lb+ub) / 2.0
+        ratio = np.maximum(-dCdrho/(dVdrho+1e-12)/mid, 0.0)
         rho_new = np.maximum.reduce([np.minimum.reduce(
-            [rho*(-dCdrho/(dVdrho+1e-12)/mid)**0.5, rho+move, rho_max]), rho-move, rho_min])
+            [rho*ratio**0.5, rho+move, rho_max]), rho-move, rho_min])
         dV = comm.allreduce(dVdrho@(rho_new-rho), op=MPI.SUM)
         if V + dV > 0:
             lb = mid

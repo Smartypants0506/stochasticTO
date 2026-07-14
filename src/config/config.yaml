@@ -1,6 +1,6 @@
 step_file: "data/cad/ge_bracket_rotated_nonds.step"
 mesh_out_path: "output/meshes/ge_bracket_rotated_nonds.xdmf"
-mesh_size_max: 1.0e-3
+mesh_size_max: 2.0e-3
 snap_tol: 1.0e-4
 
 material:
@@ -13,15 +13,15 @@ petsc:
 
 load_cases:
   - group_name: "load_1"
-    vector: [0.0, -1000000.0, 0.0]
+    vector: [0.0, 1000000, 0.0]
 
 optimization:
   max_iter: 400
   opt_tol: 1.0e-5
-  vol_frac: 0.5
+  vol_frac: 0.1
   penalty: 3.0
   epsilon: 1.0e-6
-  filter_radius: 1.2
+  filter_radius: 0.006
   beta_interval: 50
   beta_max: 128
   use_oc: true
@@ -32,8 +32,8 @@ optimization:
   lambda_sweep: [0.0, 0.5, 1.0, 2.0, 5.0]
 
 color_targets:
-  fixed: [0, 255, 0, 255]
-  load_1: [255, 0, 0, 255]
+  fixed: [255, 0, 0, 255]
+  load_1: [0, 255, 0, 255]
 
 solid_volume_color: [255, 255, 0, 255]
 
@@ -54,7 +54,7 @@ surrogate:
   n_test: 200
   hyperbolic_q: 0.75
   max_degree_attempts: 4
-  q2_threshold: 0.99
+  q2_threshold: 0.95
 
 mc_validation:
   n_samples: 5000

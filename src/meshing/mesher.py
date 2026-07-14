@@ -28,8 +28,8 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 DEFAULT_COLOR_TARGETS: dict[str, tuple[int, int, int, int]] = {
-    "fixed": (0, 255, 0, 255),
-    "load_1": (255, 0, 0, 255),
+    "fixed": (255, 0, 0, 255),
+    "load_1": (0, 255, 0, 255),
     "load_2": (0, 0, 255, 255),
 }
 DEFAULT_SOLID_VOLUME_COLOR: tuple[int, int, int, int] = (255, 255, 0, 255)
@@ -58,7 +58,9 @@ class TaggedMesh:
     mesh: object            # dolfinx.mesh.Mesh (parallel, comm.size ranks)
     mesh_serial: object     # dolfinx.mesh.Mesh on COMM_SELF (rank 0 only)
     cell_tags: object       # dolfinx.mesh.MeshTags (volume physical groups)
-    facet_tags: object      # dolfinx.mesh.MeshTags (surface physical groups)
+    facet_tags: object
+    cell_tags_serial: object    # ADD
+    facet_tags_serial: object       # dolfinx.mesh.MeshTags (surface physical groups)
     name_to_tag: dict[str, int]
 
 
@@ -148,6 +150,8 @@ def import_to_dolfinx(comm: MPI.Comm) -> TaggedMesh:
 
         mesh_serial_data = dolfinx.io.gmsh.model_to_mesh(gmsh.model, MPI.COMM_SELF, rank=0)
         mesh_serial = mesh_serial_data.mesh
+        cell_tags_serial = mesh_serial_data.cell_tags     # ADD
+        facet_tags_serial = mesh_serial_data.facet_tags   # ADD
 
         for dim, tag in gmsh.model.getPhysicalGroups():
             name = gmsh.model.getPhysicalName(dim, tag)
@@ -156,14 +160,16 @@ def import_to_dolfinx(comm: MPI.Comm) -> TaggedMesh:
         mesh_data = dolfinx.io.gmsh.model_to_mesh(None, comm, rank=0)
         mesh, cell_tags, facet_tags = mesh_data.mesh, mesh_data.cell_tags, mesh_data.facet_tags
         mesh_serial = None
+        cell_tags_serial = None     # ADD
+        facet_tags_serial = None    # ADD
 
     name_to_tag = comm.bcast(name_to_tag, root=0)
-    for name in name_to_tag:
-        logger.info("%s: physical group tag = %d", name, name_to_tag[name])
 
     return TaggedMesh(mesh=mesh, mesh_serial=mesh_serial,
-                       cell_tags=cell_tags, facet_tags=facet_tags,
-                       name_to_tag=name_to_tag)
+                    cell_tags=cell_tags, facet_tags=facet_tags,
+                    cell_tags_serial=cell_tags_serial,     # ADD
+                    facet_tags_serial=facet_tags_serial,   # ADD
+                    name_to_tag=name_to_tag)
 
 
 def export_mesh(tagged_mesh: TaggedMesh, out_path: str | Path) -> None:
@@ -188,17 +194,28 @@ def extract_simplices(tagged_mesh: TaggedMesh) -> "np.ndarray":
     expansion. dolfinx stores this in mesh.geometry.dofmap; this function
     converts it to the plain NumPy array shape OpenTURNS expects.
 
+    RANK-0-ONLY: this function reads tagged_mesh.mesh_serial, which is a
+    COMM_SELF mesh populated only on rank 0 (see import_to_dolfinx()'s
+    mesh_serial convention). It will raise AttributeError on every other
+    rank. Callers under MPI must gate this call behind `if comm.rank == 0:`
+    and broadcast the result themselves if every rank needs it -- see
+    main.py's usage before compute_kl_expansion(), which relies on that
+    function's own internal comm.bcast rather than broadcasting here.
+
     Args:
         tagged_mesh: Output of mesh_from_geometry/import_to_dolfinx.
 
     Returns:
         [N_elems x (dim+1)] array of node indices per element (triangles
-        for 2D, tetrahedra for 3D), using tagged_mesh.mesh_serial so the
-        result is available identically on every MPI rank (mesh_serial
-        is a COMM_SELF, rank-0-only mesh, matching this module's existing
-        serial-execution convention for the random-field glue).
+        for 2D, tetrahedra for 3D). Only valid to call on rank 0.
     """
     import numpy as np
+    if tagged_mesh.mesh_serial is None:
+        raise RuntimeError(
+            "extract_simplices() requires tagged_mesh.mesh_serial, which is "
+            "only populated on rank 0 (see import_to_dolfinx()'s mesh_serial "
+            "convention). Gate this call behind `if comm.rank == 0:`."
+        )
     mesh_serial = tagged_mesh.mesh_serial
     return mesh_serial.geometry.dofmaps[0].reshape(
         mesh_serial.topology.index_map(mesh_serial.topology.dim).size_local, -1

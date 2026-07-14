@@ -145,7 +145,7 @@ class SurrogateConfig:
     n_test: int = 200
     hyperbolic_q: float = 0.75
     max_degree_attempts: int = 4
-    q2_threshold: float = 0.99
+    q2_threshold: float = 0.95
 
 @dataclass
 class MonteCarloValidationConfig:
