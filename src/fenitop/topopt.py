@@ -96,53 +96,83 @@ def topopt(fem, opt, load_cases: dict[str, list]):
     """
 
     # Initialization
+    def _ck(msg):
+        print(f"[rank {comm.rank}] CK: {msg}", flush=True)
+
     comm = MPI.COMM_WORLD
+    
+    #_ck("entered topopt")
     problems, rho_field, rho_phys_field = form_fem_multi_case(fem, opt, load_cases)
-    density_filter = DensityFilter(comm, rho_field, rho_phys_field,
-                                   opt["filter_radius"], fem["petsc_options"])
-    heaviside = Heaviside(rho_phys_field)
-    S_comm = Communicator(rho_phys_field.function_space, fem["mesh_serial"])
-    if comm.rank == 0:
-        plotter = Plotter(fem["mesh_serial"])
+    #_ck("after form_fem_multi_case")
+
     num_consts = 1 if opt["opt_compliance"] else 2
     num_elems = rho_field.x.petsc_vec.array.size
+
+    density_filter = DensityFilter(comm, rho_field, rho_phys_field,
+                                opt["filter_radius"], fem["petsc_options"])
+    #_ck("after DensityFilter")
+    heaviside = Heaviside(rho_phys_field)
+    #_ck("after Heaviside")
+    S_comm = Communicator(rho_phys_field.function_space, fem["mesh_serial"])
+    #_ck("after Communicator")
+    if comm.rank == 0:
+        plotter = Plotter(fem["mesh_serial"])
+    #_ck("after Plotter (rank0 built plotter)")
+
+    # ... your solid-mask block ...
+    #_ck("after solid mask block")
+
+    centers = rho_field.function_space.tabulate_dof_coordinates()[:num_elems].T
+    #_ck("after tabulate centers")
+    solid, void = opt["solid_zone"](centers), opt["void_zone"](centers)
+    #_ck("after solid_zone / void_zone")
     if not opt["use_oc"]:
         rho_old1, rho_old2 = np.zeros(num_elems), np.zeros(num_elems)
         low, upp = None, None
 
     # --- Solid mask for rho_phys_field (CG1 / nodal) --------------------------
-    # rho_phys_field lives in a Lagrange-1 (nodal) space, NOT DG0 -- see fem.py:
-    #   S = functionspace(mesh, ("Lagrange", 1)).  Its dofs are VERTICES, not
-    #   cells, so a cell-index mask (correct for rho_field/DG0) cannot index it.
-    # We pin the VERTEX dofs of every solid-tagged cell. This protects a
-    # one-element-thick nodal halo of the solid region, which is the correct
-    # analogue of the reference script's post-filter re-pin for a nodal density.
+    # rho_phys_field is Lagrange-1 (nodal), NOT DG0 -- see fem.py. Its dofs are
+    # VERTICES, so we pin the vertex dofs of every solid-tagged cell.
+    #
+    # MPI CORRECTNESS: every collective below (create_connectivity,
+    # locate_dofs_topological, allreduce) is called UNCONDITIONALLY on all ranks.
+    # Small solid regions mean some ranks legitimately own zero solid cells; we
+    # must NOT guard the collectives behind `len(solid_cells) > 0` or those ranks
+    # skip the collective and the others deadlock.
     solid_cell_mask = np.zeros(rho_phys_field.x.petsc_vec.array.size, dtype=bool)
     cell_tags = fem.get("cell_tags")
     solid_tag = fem.get("solid_tag")
+
     if cell_tags is not None and solid_tag is not None:
         Vp = rho_phys_field.function_space
         mesh_p = Vp.mesh
         tdim = mesh_p.topology.dim
         n_local_cells = mesh_p.topology.index_map(tdim).size_local
 
-        # Restrict to owned solid cells (cell_tags is in this mesh's cell space;
-        # solid_cells.max() was 132391 < n_local_cells, so this is the right space).
+        # Collective on some backends -- call on ALL ranks, unconditionally.
+        mesh_p.topology.create_connectivity(tdim, 0)
+        c_to_v = mesh_p.topology.connectivity(tdim, 0)
+
         solid_cells = cell_tags.find(solid_tag)
         solid_cells = solid_cells[solid_cells < n_local_cells].astype(np.int32)
 
-        # Map solid CELLS -> their VERTICES -> CG1 dofs.
-        mesh_p.topology.create_connectivity(tdim, 0)
-        c_to_v = mesh_p.topology.connectivity(tdim, 0)
+        # Build the local vertex list. Empty on ranks that own no solid cells --
+        # that's fine, but we still fall through to the (collective) dof lookup.
         if len(solid_cells) > 0:
             solid_vertices = np.unique(
                 np.concatenate([c_to_v.links(c) for c in solid_cells])
             ).astype(np.int32)
-            # CG1: one dof per vertex; locate_dofs_topological gives local dof ids.
-            solid_dofs = locate_dofs_topological(Vp, 0, solid_vertices)
-            solid_dofs = solid_dofs[solid_dofs < solid_cell_mask.size]
-            solid_cell_mask[solid_dofs] = True
+        else:
+            solid_vertices = np.empty(0, dtype=np.int32)
 
+        # locate_dofs_topological is collective in dolfinx -- ALL ranks must call
+        # it, even with an empty entity list. Passing an empty array is valid and
+        # returns an empty dof array on that rank.
+        solid_dofs = locate_dofs_topological(Vp, 0, solid_vertices)
+        solid_dofs = solid_dofs[solid_dofs < solid_cell_mask.size]
+        solid_cell_mask[solid_dofs] = True
+
+        # Collective -- ALL ranks, unconditionally.
         n_solid = comm.allreduce(int(solid_cell_mask.sum()), op=MPI.SUM)
         if comm.rank == 0:
             logger.info(
@@ -167,7 +197,10 @@ def topopt(fem, opt, load_cases: dict[str, list]):
 
     # Apply passive zones
     centers = rho_field.function_space.tabulate_dof_coordinates()[:num_elems].T
+    #_ck("after tabulate centers")
     solid, void = opt["solid_zone"](centers), opt["void_zone"](centers)
+    #_ck("after solid_zone / void_zone")
+
     rho_ini = np.full(num_elems, opt["vol_frac"])
     rho_ini[solid], rho_ini[void] = 0.995, 0.005
     rho_field.x.petsc_vec.array[:] = rho_ini
@@ -194,15 +227,17 @@ def topopt(fem, opt, load_cases: dict[str, list]):
     while opt_iter < opt["max_iter"] and change > opt["opt_tol"]:
         opt_start_time = time.perf_counter()
         opt_iter += 1
-
-        # Density filter and Heaviside projection
+        #_ck(f"iter {opt_iter}: top")
         density_filter.forward()
+        #_ck(f"iter {opt_iter}: after filter.forward")
         _pin_solid(rho_phys_field)
+        #_ck(f"iter {opt_iter}: after pin (forward)")
         if opt_iter % opt["beta_interval"] == 0 and beta < opt["beta_max"]:
             beta *= 2
             change = opt["opt_tol"] * 2
         heaviside.forward(beta)
         _pin_solid(rho_phys_field)
+        #_ck(f"iter {opt_iter}: after heaviside+pin")
 
         # Solve FEM: each load case is its own independent equilibrium
         # problem sharing rho_phys_field. Compliances and sensitivities
@@ -218,7 +253,9 @@ def topopt(fem, opt, load_cases: dict[str, list]):
         V_value, dVdrho = None, None  # volume is case-independent; take from case 0
         max_disp_over_cases = 0.0
         for i, lcp in enumerate(problems):
+            #_ck(f"iter {opt_iter}: solving case {i} ({lcp.name})")
             lcp.linear_problem.solve_fem()
+            #_ck(f"iter {opt_iter}: solved case {i} ({lcp.name})")
             (C_i, V_i, U_i), (dCdrho_i, dVdrho_i, dUdrho_i) = lcp.sens_problem.evaluate()
             C_total += C_i
             U_total += U_i
