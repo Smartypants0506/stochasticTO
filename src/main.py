@@ -80,7 +80,15 @@ def main(config_path: str = "src/config/config.yaml") -> None:
     tagged_mesh, load_cases_input,
     snap_tol=cfg.snap_tol,
     protected_face_groups=["fixed", "load_1", "load_2"],  # red bolt faces + blue pin face
-    protected_buffer_radius=4e-3,  # 5mm buffer; tune to your mesh_size_max (2mm)
+    protected_buffer_radius=15e-3,  # 5mm buffer; tune to your mesh_size_max (2mm)
+    keep_alive_corridors=(
+        {
+            "mounting_groups": config.keep_alive_corridors.mounting_groups,
+            "load_groups": config.keep_alive_corridors.load_groups,
+            "corridor_radius": config.keep_alive_corridors.corridor_radius,
+        }
+        if cfg.keep_alive_corridors.enabled else None
+    ),
     comm=comm,
 )
     if comm.rank == 0:

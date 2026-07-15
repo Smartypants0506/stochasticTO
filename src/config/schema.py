@@ -140,6 +140,38 @@ class RandomFieldConfig:
     n_kl_hint: int = 20
     seed: int | None = None
 
+@dataclass
+class KeepAliveCorridorsConfig:
+    """Deterministic, load-case-independent connectivity guarantee for
+    non-designable regions (masterContext: mounting-hole retention fix).
+
+    Generic over any facet-group tagging scheme -- mounting_groups covers
+    "red" attachment faces (e.g. bolt bosses), load_groups covers
+    "blue"/"green" load-application faces. Each group may contain multiple
+    physically separate instances (e.g. one "fixed" tag spanning all 4
+    mounting holes); mapper.py's cluster_points_by_mesh_connectivity()
+    splits these into per-instance anchors before the MST is built, so
+    corridor_radius is the only tunable exposed here -- the backbone
+    topology itself is computed, not configured.
+
+    Attributes:
+        mounting_groups: Facet group names representing mounting/attachment
+            faces (red), e.g. ["fixed"]. Each may resolve to multiple
+            disconnected instances at runtime.
+        load_groups: Facet group names representing load-application faces
+            (blue/green), e.g. ["load_1", "load_2"].
+        corridor_radius: Cylindrical buffer radius (m) around each retained
+            MST edge's in-mesh shortest path. Should exceed local mesh
+            element size but stay below bolt boss radius to avoid both
+            path gaps and excess retained mass.
+        enabled: Master switch; corridors are skipped entirely if False,
+            so existing configs without this block keep prior behavior.
+    """
+    mounting_groups: list[str] = field(default_factory=list)
+    load_groups: list[str] = field(default_factory=list)
+    corridor_radius: float = 0.004
+    enabled: bool = False
+
 
 @dataclass
 class SurrogateConfig:
@@ -202,3 +234,4 @@ class ProjectConfig:
     color_targets: dict = field(default_factory=dict)
     solid_volume_color: tuple[int, int, int, int] = (255, 255, 0, 255)
     mc_validation: MonteCarloValidationConfig = field(default_factory=MonteCarloValidationConfig)
+    keep_alive_corridors: KeepAliveCorridorsConfig = field(default_factory=KeepAliveCorridorsConfig)

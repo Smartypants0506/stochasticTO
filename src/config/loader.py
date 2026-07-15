@@ -14,7 +14,7 @@ import yaml
 
 from src.config.schema import (
 LoadCase, MaterialConfig, MonteCarloValidationConfig, OptimizationConfig,
-PetscConfig, ProjectConfig, RandomFieldConfig, SurrogateConfig,
+PetscConfig, ProjectConfig, RandomFieldConfig, SurrogateConfig, KeepAliveCorridorsConfig,
 )
 
 REQUIRED_TOP_KEYS = {"step_file", "mesh_out_path", "mesh_size_max", "snap_tol",
@@ -78,6 +78,22 @@ def load_config(path: str | Path) -> ProjectConfig:
     surrogate = SurrogateConfig(**raw.get("surrogate", {}))
     mc_validation = MonteCarloValidationConfig(**raw.get("mc_validation", {}))
 
+    keep_alive_corridors = KeepAliveCorridorsConfig(**raw.get("keep_alive_corridors", {}))
+
+    if keep_alive_corridors.enabled:
+        if not keep_alive_corridors.mounting_groups:
+            raise KeyError(
+                "config.yaml's keep_alive_corridors.enabled is True but "
+                "mounting_groups is empty -- at least one mounting facet "
+                "group is required to build the connectivity backbone"
+            )
+        if not keep_alive_corridors.load_groups:
+            raise KeyError(
+                "config.yaml's keep_alive_corridors.enabled is True but "
+                "load_groups is empty -- at least one load facet group is "
+                "required to build the connectivity backbone"
+            )
+
     return ProjectConfig(
         step_file=raw["step_file"],
         mesh_out_path=raw["mesh_out_path"],
@@ -91,5 +107,6 @@ def load_config(path: str | Path) -> ProjectConfig:
         surrogate=surrogate,
         color_targets=raw.get("color_targets", {}),
         mc_validation=mc_validation,
+        keep_alive_corridors=keep_alive_corridors,
         solid_volume_color=tuple(raw.get("solid_volume_color", (255, 255, 0, 255))),
     )
