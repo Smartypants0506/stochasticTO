@@ -80,11 +80,29 @@ def tag_physical_groups(entities: GeometryEntities, config: MeshingConfig) -> No
     config.solid_volume_color become the "solid" group (hard-fixed density);
     all remaining volumes become the "volume" (optimizable) group.
 
+    FALLBACK: many CAD exports color faces (for BC groups) but never color
+    the *solid bodies* themselves (for the protected-material group) -- these
+    are independent attributes in most CAD tools, and it's easy to set one
+    and forget the other. If no volume matches `solid_volume_color`, we fall
+    back to a size-based heuristic: the single largest volume (by measure) is
+    assumed to be the main optimizable body, and every other volume is
+    assumed to be a protected mount/bolt boss. This mirrors the common case
+    of "one big structural body + several small fastener bosses" and avoids
+    silently optimizing away attachment points just because a volume-level
+    color tag was never set. This heuristic only fires when volume coloring
+    is completely absent -- if solid_volume_tags is non-empty (even
+    partially), we trust the CAD coloring as authoritative and do not mix in
+    the size heuristic, to avoid double-counting or second-guessing an
+    intentional (if incomplete) coloring choice.
+
     Raises
     ------
     RuntimeError
         If no optimizable volume remains after removing solid-colored volumes
         -- this mirrors the hard failure in the original prototype script.
+        Also raised if the size-based fallback can't identify a sensible
+        split (e.g. fewer than 2 volumes total, so there's no "main body vs.
+        mounts" distinction to make).
     """
     for name, target_color in config.color_targets.items():
         tags = _extract_tags_by_color(entities.surfaces, target_color, config.color_match_tol)
@@ -99,7 +117,34 @@ def tag_physical_groups(entities: GeometryEntities, config: MeshingConfig) -> No
     solid_volume_tags = _extract_tags_by_color(
         entities.volumes, config.solid_volume_color, config.color_match_tol)
     all_volume_tags = [v[1] for v in entities.volumes]
-    optimizable_volume_tags = [v for v in all_volume_tags if v not in solid_volume_tags]
+
+    if not solid_volume_tags:
+        if len(all_volume_tags) < 2:
+            raise RuntimeError(
+                "No solid-colored volumes found, and fewer than 2 volumes "
+                "exist in the geometry -- cannot distinguish a main "
+                "optimizable body from protected mounts. Check CAD coloring "
+                "or geometry decomposition."
+            )
+        volumes_by_size = sorted(
+            all_volume_tags,
+            key=lambda t: gmsh.model.occ.get_mass(3, t),
+            reverse=True,
+        )
+        main_body_tag, fallback_solid_tags = volumes_by_size[0], volumes_by_size[1:]
+        logger.warning(
+            "No volumes matched solid_volume_color=%s -- falling back to "
+            "size-based heuristic: treating the largest volume (tag=%d) as "
+            "the optimizable body and the remaining %d volume(s) as "
+            "protected solid regions (bolts/mounts). Verify this matches "
+            "the intended geometry, or fix CAD volume coloring to make this "
+            "explicit.",
+            config.solid_volume_color, main_body_tag, len(fallback_solid_tags),
+        )
+        optimizable_volume_tags = [main_body_tag]
+        solid_volume_tags = fallback_solid_tags
+    else:
+        optimizable_volume_tags = [v for v in all_volume_tags if v not in solid_volume_tags]
 
     if not optimizable_volume_tags:
         raise RuntimeError(
@@ -108,13 +153,7 @@ def tag_physical_groups(entities: GeometryEntities, config: MeshingConfig) -> No
         )
 
     gmsh.model.addPhysicalGroup(3, optimizable_volume_tags, name="volume")
-    if solid_volume_tags:
-        gmsh.model.addPhysicalGroup(3, solid_volume_tags, name="solid")
-    else:
-        logger.warning(
-            "No solid-colored volumes found -- no bolt/mounting region will "
-            "be protected from optimization."
-        )
+    gmsh.model.addPhysicalGroup(3, solid_volume_tags, name="solid")
 
 
 def generate_mesh(config: MeshingConfig, comm: MPI.Comm) -> None:

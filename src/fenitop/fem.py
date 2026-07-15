@@ -27,18 +27,23 @@ from src.fenitop.utility import create_mechanism_vectors
 from src.fenitop.utility import LinearProblem
 
 
-def form_fem(fem, opt):
-    """Form an FEA problem."""
-    # Function spaces and functions
+def form_fem(fem, opt, rho_field=None, rho_phys_field=None):
+    """Form an FEA problem.
+
+    rho_field / rho_phys_field: pass in existing Functions to share a single
+    design across multiple independently-solved load cases (see
+    form_fem_multi_case below). If omitted, new Functions are created as
+    before (single-load-case / backward-compatible behavior).
+    """
     mesh = fem["mesh"]
     V = functionspace(mesh, ("Lagrange", 1, (mesh.geometry.dim,)))
     S0 = functionspace(mesh, ("DG", 0))
     S = functionspace(mesh, ("Lagrange", 1))
     u, v = ufl.TrialFunction(V), ufl.TestFunction(V)
-    u_field = Function(V)  # Displacement field
-    lambda_field = Function(V)  # Adjoint variable field
-    rho_field = Function(S0)  # Density field
-    rho_phys_field = Function(S)  # Physical density field
+    u_field = Function(V)
+    lambda_field = Function(V)
+    rho_field = rho_field if rho_field is not None else Function(S0)
+    rho_phys_field = rho_phys_field if rho_phys_field is not None else Function(S)
 
     # Material interpolation
     E0, nu = fem["young's modulus"], fem["poisson's ratio"]

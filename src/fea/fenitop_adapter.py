@@ -29,12 +29,24 @@ logger = logging.getLogger(__name__)
 
 def build_fem_dict(tagged_mesh: TaggedMesh, bc: BoundaryConditions,
                     config: ProjectConfig) -> dict:
-    """Build the `fem` dict exactly as form_fem() in fem-11.py expects it.
+    """Build the `fem` TEMPLATE dict for form_fem()/form_fem_multi_case().
 
     Required keys per form_fem(): "mesh", "young's modulus", "poisson's
     ratio", "disp_bc", "traction_bcs", "body_force", "quadrature_degree",
     "petsc_options". "mesh_serial" is additionally required by topopt()
     (topopt-17.py) for plotting, so it is included here too.
+
+    NOTE ON "traction_bcs": intentionally NOT included in this dict.
+    Under the multi-load-case architecture, there is no single flat
+    traction_bcs list -- each named case gets its own. This dict is a
+    template shared across all cases; src.fenitop.topopt.form_fem_multi_case
+    does `fem_case = dict(fem); fem_case["traction_bcs"] = traction_bcs`
+    per case before calling form_fem(). Use build_load_cases_dict() below
+    to get the per-case dict to pass alongside this template. (Calling
+    form_fem() directly, single-case, on this template will KeyError on
+    "traction_bcs" until you add it -- that's intentional, so a stale
+    single-case call site fails loudly instead of silently solving zero
+    load cases.)
 
     NOTE: "mesh_simplices" is intentionally NOT included here. It is not
     part of form_fem()/topopt()'s required key set, and tagged_mesh.mesh_serial
@@ -45,21 +57,26 @@ def build_fem_dict(tagged_mesh: TaggedMesh, bc: BoundaryConditions,
     followed by an explicit comm.bcast inside compute_kl_expansion() itself
     (see src/random_fields/kl_expansion.py).
     """
-    traction_bcs = [[list(lc.vector), fn]
-                     for lc, fn in zip(config.load_cases,
-                                        [t[1] for t in bc.traction_bcs])]
-
     return {
         "mesh": tagged_mesh.mesh,
         "mesh_serial": tagged_mesh.mesh_serial,
         "young's modulus": config.material.youngs_modulus,
         "poisson's ratio": config.material.poissons_ratio,
         "disp_bc": bc.disp_bc,
-        "traction_bcs": traction_bcs,
         "body_force": config.optimization.body_force,
         "quadrature_degree": config.optimization.quadrature_degree,
         "petsc_options": config.petsc.to_options_dict(),
     }
+
+
+def build_load_cases_dict(bc: BoundaryConditions) -> dict[str, list]:
+    """Return the per-case traction_bcs dict, ready to pass as the
+    `load_cases` argument to src.fenitop.topopt.form_fem_multi_case /
+    topopt(). This is a thin named pass-through of bc.traction_bcs (already
+    grouped by case in mapper.py's build_boundary_conditions) -- kept as
+    its own function so there's one place to change if the grouping
+    strategy evolves later (e.g. filtering out empty cases)."""
+    return {name: case_bcs for name, case_bcs in bc.traction_bcs.items() if case_bcs}
 
 
 def build_opt_dict(bc: BoundaryConditions, config: ProjectConfig, kl_result: "KLExpansionResult | None" = None) -> dict:
@@ -145,14 +162,25 @@ def build_opt_dict(bc: BoundaryConditions, config: ProjectConfig, kl_result: "KL
 
 
 def build_fenitop_dicts(tagged_mesh: TaggedMesh, bc: BoundaryConditions,
-                         config: ProjectConfig, kl_result: "KLExpansionResult | None" = None) -> tuple[dict, dict]:
-    """Single entry point: returns (fem, opt) dicts ready for
-    src.fenitop.fem.form_fem() or src.fenitop.topopt.topopt()."""
+                         config: ProjectConfig, kl_result: "KLExpansionResult | None" = None
+                         ) -> tuple[dict, dict, dict[str, list]]:
+    """Single entry point: returns (fem, opt, load_cases).
+
+    fem: the shared fem TEMPLATE dict (no "traction_bcs" key -- see
+        build_fem_dict's docstring).
+    opt: the opt dict, as before.
+    load_cases: dict[case_name, traction_bcs_list], to be passed together
+        with `fem` into src.fenitop.topopt.topopt(fem, opt, load_cases)
+        (which internally calls form_fem_multi_case).
+    """
     fem_dict = build_fem_dict(tagged_mesh, bc, config)
     opt_dict = build_opt_dict(bc, config, kl_result)
+    load_cases = build_load_cases_dict(bc)
+    n_cases = len(load_cases)
+    n_bcs_total = sum(len(v) for v in load_cases.values())
     logger.info(
-        "Built FEniTop dicts: E=%.3g, nu=%.3g, vol_frac=%.3g, %d traction BCs",
+        "Built FEniTop dicts: E=%.3g, nu=%.3g, vol_frac=%.3g, %d load case(s), %d total traction BC entries",
         fem_dict["young's modulus"], fem_dict["poisson's ratio"],
-        opt_dict["vol_frac"], len(fem_dict["traction_bcs"]),
+        opt_dict["vol_frac"], n_cases, n_bcs_total,
     )
-    return fem_dict, opt_dict
+    return fem_dict, opt_dict, load_cases

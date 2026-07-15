@@ -47,12 +47,28 @@ class PetscConfig:
 
 @dataclass
 class LoadCase:
-    """A single named traction load case.
+    """A single (facet group, traction vector) entry within a named load case.
 
-    Confirmed fields: config.yaml's load_cases: list uses group_name,
-    vector [config.yaml]; fenitop_adapter.py's build_fem_dict zips
-    config.load_cases against bc.traction_bcs using lc.vector
-    [fenitop_adapter.py].
+    NOTE ON NESTING: config.yaml's `load_cases:` is now a mapping of
+    case_name -> list[LoadCase], not a flat list -- e.g.:
+
+        load_cases:
+          vertical_up:
+            - group_name: "load_1"
+              vector: [0.0, 0.0, 9.34e7]
+          torsion:
+            - group_name: "load_1"
+              vector: [0.0, -2.9e7, 0.0]
+
+    This supports the common "same facet group(s), different vector per
+    case" pattern (multiple independent load scenarios applied to the same
+    tagged faces) as well as the "different groups per case" pattern, since
+    each case's list can reference any group_name(s) it needs. ProjectConfig
+    (below) stores this as `load_cases: dict[str, list[LoadCase]]`, and
+    loader.py / fenitop_adapter.py / mapper.py / topopt.py all key off case
+    name so each case is solved independently and summed
+    (topopt.py::form_fem_multi_case), instead of all traction BCs being
+    combined into one static-equilibrium RHS.
     """
     group_name: str
     vector: tuple[float, float, float]
@@ -167,6 +183,11 @@ class ProjectConfig:
     solid_volume_color all come directly from loader.py's load_config()
     constructor call [loader-2.py]. random_field and surrogate are new,
     required for the Stage 3/4/5 driver wiring.
+
+    load_cases is a dict[case_name, list[LoadCase]] (see LoadCase's
+    docstring) -- NOT a flat list -- so each named case can be solved as
+    its own independent equilibrium problem and summed, rather than all
+    traction BCs being combined into a single static-equilibrium RHS.
     """
     step_file: str
     mesh_out_path: str
@@ -174,7 +195,7 @@ class ProjectConfig:
     snap_tol: float
     material: MaterialConfig
     petsc: PetscConfig
-    load_cases: list[LoadCase]
+    load_cases: dict[str, list[LoadCase]]
     optimization: OptimizationConfig
     random_field: RandomFieldConfig
     surrogate: SurrogateConfig

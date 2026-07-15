@@ -170,31 +170,73 @@ def make_solid_zone_from_cells(tagged_mesh: TaggedMesh, group_name: str,
 @dataclass
 class BoundaryConditions:
     """Bundled BC/zone functions ready to drop into FEniTop's fem_config
-    and opt_config dicts (see fem-11.py's `form_fem` signature)."""
+    and opt_config dicts (see fem-11.py's `form_fem` signature).
+
+    traction_bcs is now dict[case_name, list[[load_vector, membership_fn]]]
+    -- one independent traction_bcs list per named load case -- rather than
+    a single flat list. This is what gets handed directly to
+    src.fenitop.topopt.form_fem_multi_case as its `load_cases` argument;
+    each entry becomes its own independently-solved equilibrium problem
+    sharing one density field, instead of every load being summed into one
+    combined RHS.
+    """
     disp_bc: MembershipFn
-    traction_bcs: list[list]  # [[load_vector, membership_fn], ...]
+    traction_bcs: dict[str, list[list]]  # {case_name: [[load_vector, membership_fn], ...]}
     solid_zone: MembershipFn
     void_zone: MembershipFn
 
 
 def build_boundary_conditions(
     tagged_mesh: TaggedMesh,
-    load_vectors: dict[str, tuple[float, float, float]],
+    load_cases: dict[str, list[tuple[str, tuple[float, float, float]]]],
     snap_tol: float = 1e-4,
     protected_face_groups: list[str] | None = None,
     protected_buffer_radius: float = 5e-3,
     comm: MPI.Comm | None = None,
 ) -> BoundaryConditions:
+    """Build shared disp_bc/solid_zone/void_zone plus a per-case traction_bcs dict.
+
+    load_cases: {case_name: [(group_name, vector), ...], ...} -- e.g.
+    {"vertical_up": [("load_1", (0,0,9.34e7))],
+     "torsion": [("load_1", (0,-2.9e7,0))]}.
+    Multiple cases commonly reuse the same group_name with different
+    vectors (facet lookup is cached per group_name below so that pattern
+    doesn't repeat the KDTree build), but each case's list can also
+    reference entirely different groups.
+    """
     fixed_pts = facet_group_points(tagged_mesh, "fixed", comm=comm)
     disp_bc = make_membership_fn(fixed_pts, snap_tol)
 
-    traction_bcs = []
-    for name, vector in load_vectors.items():
-        pts = facet_group_points(tagged_mesh, name, comm=comm)
-        if len(pts) == 0:
-            logger.warning("No points found for load group '%s'; skipping.", name)
-            continue
-        traction_bcs.append([vector, make_membership_fn(pts, snap_tol)])
+    # Cache membership fns per facet group so cases that reuse the same
+    # tagged group (the common "same group, different vector" pattern)
+    # don't redo the facet lookup + KDTree build for every case.
+    membership_cache: dict[str, MembershipFn | None] = {}
+
+    def _get_membership_fn(group_name: str) -> MembershipFn | None:
+        if group_name not in membership_cache:
+            pts = facet_group_points(tagged_mesh, group_name, comm=comm)
+            if len(pts) == 0:
+                logger.warning("No points found for load group '%s'; skipping.", group_name)
+                membership_cache[group_name] = None
+            else:
+                membership_cache[group_name] = make_membership_fn(pts, snap_tol)
+        return membership_cache[group_name]
+
+    traction_bcs: dict[str, list[list]] = {}
+    for case_name, entries in load_cases.items():
+        case_bcs = []
+        for group_name, vector in entries:
+            fn = _get_membership_fn(group_name)
+            if fn is None:
+                continue
+            case_bcs.append([vector, fn])
+        if not case_bcs:
+            logger.warning(
+                "Load case '%s' resolved to zero valid facet groups; it "
+                "will contribute no traction (check group names/tags).",
+                case_name,
+            )
+        traction_bcs[case_name] = case_bcs
 
     solid_zone_volumes = make_solid_zone_from_cells(tagged_mesh, "solid", comm=comm)
 

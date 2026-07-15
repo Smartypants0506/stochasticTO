@@ -28,18 +28,77 @@ from src.fenitop.parameterize import DensityFilter, Heaviside
 from src.fenitop.sensitivity import Sensitivity
 from src.fenitop.optimize import optimality_criteria, mma_optimizer
 from src.fenitop.utility import Communicator, Plotter, save_xdmf
+from dataclasses import dataclass
+
+import logging
+logger = logging.getLogger(__name__)
+
+@dataclass
+class LoadCaseProblem:
+    name: str
+    linear_problem: object
+    u_field: object
+    lambda_field: object
+    sens_problem: "Sensitivity"
 
 
-def topopt(fem, opt):
-    """Main function for topology optimization."""
+def form_fem_multi_case(fem, opt, load_cases: dict[str, list]):
+    """Build one shared design (rho_field/rho_phys_field) and one
+    independent elasticity problem + Sensitivity object per load case.
+
+    load_cases: {case_name: [[vector, membership_fn], ...]} -- i.e. the
+    per-case traction_bcs list, e.g. {"vertical_up": [[[0,0,9.34e7], fn1],
+    [[0,0,9.34e7], fn2]], "torsion": [[[0,-2.9e7,0], fn1], [[0,2.9e7,0], fn2]], ...}
+    """
+    rho_field, rho_phys_field = None, None
+    problems = []
+    for name, traction_bcs in load_cases.items():
+        fem_case = dict(fem)
+        fem_case["traction_bcs"] = traction_bcs
+        # form_fem() writes opt["compliance"]/opt["f_int"]/opt["volume"]/
+        # opt["total_volume"] into the SAME shared opt dict every call,
+        # keyed to this iteration's own u_field. That looks like it should
+        # be a bug (next iteration overwrites those keys before you'd
+        # "expect" them to be read) -- it isn't, because Sensitivity(...)
+        # is constructed immediately below, in this same iteration, and its
+        # __init__ calls dolfinx.fem.form(...) on those UFL expressions
+        # right away. form() compiles against the specific Function objects
+        # referenced at that moment (this case's u_field/rho_phys_field),
+        # so the compiled Form is unaffected by opt's dict entries being
+        # overwritten on the next iteration. Do not "fix" this by giving
+        # each case its own opt dict -- Sensitivity/DensityFilter/Heaviside
+        # elsewhere rely on this opt dict staying the single shared object.
+        linear_problem, u_field, lambda_field, rho_field, rho_phys_field = form_fem(
+            fem_case, opt, rho_field=rho_field, rho_phys_field=rho_phys_field)
+        sens_problem = Sensitivity(MPI.COMM_WORLD, opt, linear_problem,
+                                    u_field, lambda_field, rho_phys_field)
+        problems.append(LoadCaseProblem(name, linear_problem, u_field,
+                                         lambda_field, sens_problem))
+    return problems, rho_field, rho_phys_field
+
+
+def topopt(fem, opt, load_cases: dict[str, list]):
+    """Main function for topology optimization.
+
+    fem: shared fem TEMPLATE dict (no "traction_bcs" key -- see
+        fenitop_adapter.build_fem_dict).
+    opt: opt dict, as before.
+    load_cases: dict[case_name, traction_bcs_list] -- one independently
+        solved equilibrium problem per case, sharing one density field.
+        Their compliances and sensitivities are summed each iteration
+        (see the Solve FEM section below), NOT combined into a single
+        static-equilibrium RHS -- summing compliances after independent
+        solves is physically correct where summing loads before solving
+        is not, since compliance is quadratic in the load
+        (compliance(f1+f2) != compliance(f1)+compliance(f2) in general).
+    """
 
     # Initialization
     comm = MPI.COMM_WORLD
-    linear_problem, u_field, lambda_field, rho_field, rho_phys_field = form_fem(fem, opt)
+    problems, rho_field, rho_phys_field = form_fem_multi_case(fem, opt, load_cases)
     density_filter = DensityFilter(comm, rho_field, rho_phys_field,
                                    opt["filter_radius"], fem["petsc_options"])
     heaviside = Heaviside(rho_phys_field)
-    sens_problem = Sensitivity(comm, opt, linear_problem, u_field, lambda_field, rho_phys_field)
     S_comm = Communicator(rho_phys_field.function_space, fem["mesh_serial"])
     if comm.rank == 0:
         plotter = Plotter(fem["mesh_serial"])
@@ -48,6 +107,41 @@ def topopt(fem, opt):
     if not opt["use_oc"]:
         rho_old1, rho_old2 = np.zeros(num_elems), np.zeros(num_elems)
         low, upp = None, None
+
+    # --- NEW: hard dof mask for cells tagged "solid" (bolt/mount bosses),
+    # mirroring the reference script's V_ρ_f_bolt_dofs. This is independent
+    # of opt["solid_zone"]'s geometric predicate -- it comes directly from
+    # the mesh's cell_tags, so it stays correct even if solid_zone (built in
+    # mapper.py) is wrong or missing. If fem["mesh"] doesn't carry a "solid"
+    # tag (e.g. still using an older TaggedMesh without cell_tags wired
+    # through), this degrades to an empty mask with a loud warning rather
+    # than silently doing nothing.
+    solid_cell_mask = np.zeros(num_elems, dtype=bool)
+    cell_tags = fem.get("cell_tags")
+    solid_tag = fem.get("solid_tag")  # int tag id for the "solid" physical group
+    if cell_tags is not None and solid_tag is not None:
+        solid_cells = cell_tags.find(solid_tag)
+        # rho_phys_field lives in DG0 (one dof per cell); cell index == dof index
+        solid_cell_mask[solid_cells] = True
+        n_solid = comm.allreduce(int(solid_cell_mask.sum()), op=MPI.SUM)
+        if comm.rank == 0:
+            logger.info("Hard-pinning %d cells (global) to rho_phys=1.0 every iteration "
+                        "(solid/bolt regions).", n_solid)
+    else:
+        if comm.rank == 0:
+            logger.warning(
+                "No 'solid' cell_tags/solid_tag found in fem dict -- bolt/mount "
+                "regions will NOT be hard-pinned to solid density. This mirrors "
+                "the exact bug that caused bolt bosses to be optimized away; "
+                "check fenitop_adapter.py wires cell_tags + solid_tag through."
+            )
+
+    def _pin_solid(field) -> None:
+        """Hard-set solid-tagged cells to density 1, exactly like the
+        reference script's `ρ_f.x.array[V_ρ_f_bolt_dofs] = 1.0` re-pin
+        after every filter application."""
+        if solid_cell_mask.any():
+            field.x.petsc_vec.array[solid_cell_mask] = 1.0
 
     # Apply passive zones
     centers = rho_field.function_space.tabulate_dof_coordinates()[:num_elems].T
@@ -66,25 +160,59 @@ def topopt(fem, opt):
 
         # Density filter and Heaviside projection
         density_filter.forward()
+        _pin_solid(rho_phys_field)
         if opt_iter % opt["beta_interval"] == 0 and beta < opt["beta_max"]:
             beta *= 2
             change = opt["opt_tol"] * 2
         heaviside.forward(beta)
+        _pin_solid(rho_phys_field)
 
-        # Solve FEM
-        linear_problem.solve_fem()
+        # Solve FEM: each load case is its own independent equilibrium
+        # problem sharing rho_phys_field. Compliances and sensitivities
+        # are summed AFTER independently solving each case -- this is the
+        # actual multi-load-case fix; combining all tractions into one RHS
+        # before solving (the old single-case behavior) understates
+        # torsional/off-axis load cases whenever they'd partially cancel
+        # in a single combined equilibrium state.
+        C_total = 0.0
+        U_total = 0.0
+        dCdrho_total = None
+        dUdrho_total = None
+        V_value, dVdrho = None, None  # volume is case-independent; take from case 0
+        max_disp_over_cases = 0.0
+        for i, lcp in enumerate(problems):
+            lcp.linear_problem.solve_fem()
+            (C_i, V_i, U_i), (dCdrho_i, dVdrho_i, dUdrho_i) = lcp.sens_problem.evaluate()
+            C_total += C_i
+            U_total += U_i
+            dCdrho_total = dCdrho_i.copy() if dCdrho_total is None else (dCdrho_total + dCdrho_i)
+            if dUdrho_i is not None:
+                dUdrho_total = dUdrho_i.copy() if dUdrho_total is None else (dUdrho_total + dUdrho_i)
+            if i == 0:
+                V_value, dVdrho = V_i, dVdrho_i
 
-        u_array = u_field.x.petsc_vec.array  # local dofs, interleaved [ux,uy,uz,...]
-        u_reshaped = u_array.reshape(-1, 3)  # 3D problem
-        disp_mag = np.linalg.norm(u_reshaped, axis=1)
-        local_max_disp = disp_mag.max() if disp_mag.size > 0 else 0.0
-        global_max_disp = comm.allreduce(local_max_disp, op=MPI.MAX)
+            # Displacement diagnostic, per case (u_field differs per case
+            # under multi-load-case solving -- there is no single shared
+            # u_field to report anymore).
+            u_array = lcp.u_field.x.petsc_vec.array  # local dofs, interleaved [ux,uy,uz,...]
+            u_reshaped = u_array.reshape(-1, 3)  # 3D problem
+            disp_mag = np.linalg.norm(u_reshaped, axis=1)
+            local_max_disp = disp_mag.max() if disp_mag.size > 0 else 0.0
+            max_disp_over_cases = max(max_disp_over_cases, local_max_disp)
+
+        C_value, U_value = C_total, U_total
+        global_max_disp = comm.allreduce(max_disp_over_cases, op=MPI.MAX)
         if comm.rank == 0 and opt_iter % 10 == 0:  # print every 10 iters to avoid spam
-            print(f"  [diag] opt_iter {opt_iter}: max |u| = {global_max_disp:.6e} m "
-                f"({global_max_disp*1000:.6f} mm)", flush=True)
-                
-        # Compute function values and sensitivities
-        [C_value, V_value, U_value], sensitivities = sens_problem.evaluate()
+            print(f"  [diag] opt_iter {opt_iter}: max |u| over all load cases = "
+                f"{global_max_disp:.6e} m ({global_max_disp*1000:.6f} mm)", flush=True)
+
+        # Filter/project the SUMMED sensitivities exactly once (not once
+        # per case): heaviside.backward and density_filter.backward are
+        # linear/elementwise operators driven only by the shared
+        # rho_phys_field, not by load-case-specific state, so summing
+        # first and filtering once is both correct and avoids the
+        # (expensive) filter adjoint solve once per case per iteration.
+        sensitivities = [dCdrho_total, dVdrho, dUdrho_total]
         heaviside.backward(sensitivities)
         [dCdrho, dVdrho, dUdrho] = density_filter.backward(sensitivities)
         if opt["opt_compliance"]:

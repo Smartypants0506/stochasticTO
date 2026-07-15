@@ -69,22 +69,32 @@ def main(config_path: str = "src/config/config.yaml") -> None:
     assert "fixed" in tagged_mesh.name_to_tag, "No 'fixed' faces tagged — check STEP coloring"
     assert "load_1" in tagged_mesh.name_to_tag, "No 'load_1' faces tagged — check STEP coloring"
 
-    load_vectors = {lc.group_name: lc.vector for lc in cfg.load_cases}
+    # cfg.load_cases is dict[case_name, list[LoadCase]] (see schema.py) --
+    # convert each LoadCase to a plain (group_name, vector) tuple, which is
+    # what mapper.build_boundary_conditions expects.
+    load_cases_input = {
+        case_name: [(lc.group_name, lc.vector) for lc in entries]
+        for case_name, entries in cfg.load_cases.items()
+    }
     bc = build_boundary_conditions(
-    tagged_mesh, load_vectors,
+    tagged_mesh, load_cases_input,
     snap_tol=cfg.snap_tol,
-    protected_face_groups=["fixed", "load_1"],  # red bolt faces + blue pin face
+    protected_face_groups=["fixed", "load_1", "load_2"],  # red bolt faces + blue pin face
     protected_buffer_radius=4e-3,  # 5mm buffer; tune to your mesh_size_max (2mm)
     comm=comm,
 )
     if comm.rank == 0:
-        for name, vector in load_vectors.items():
-            vec_mag = np.linalg.norm(vector)
-            logger.info("RAW load_vector[%s] = %s, magnitude = %.6g", name, vector, vec_mag)
+        for case_name, entries in cfg.load_cases.items():
+            for lc in entries:
+                vec_mag = np.linalg.norm(lc.vector)
+                logger.info("RAW load_vector[case=%s, group=%s] = %s, magnitude = %.6g",
+                            case_name, lc.group_name, lc.vector, vec_mag)
 
-        for load_vec, membership_fn in bc.traction_bcs:
-            vec_mag = np.linalg.norm(load_vec)
-            logger.info("traction_bcs entry: vector=%s, |vector|=%.6g", load_vec, vec_mag)
+        for case_name, case_bcs in bc.traction_bcs.items():
+            for load_vec, membership_fn in case_bcs:
+                vec_mag = np.linalg.norm(load_vec)
+                logger.info("traction_bcs[case=%s] entry: vector=%s, |vector|=%.6g",
+                            case_name, load_vec, vec_mag)
 
     if "load_1" in tagged_mesh.name_to_tag:
         load1_tag = tagged_mesh.name_to_tag["load_1"]
@@ -95,14 +105,15 @@ def main(config_path: str = "src/config/config.yaml") -> None:
         if comm.rank == 0:
             logger.info("Measured load_1 face area = %.6g m^2", global_area)
 
-    fem, opt_nominal = build_fenitop_dicts(tagged_mesh, bc, cfg)
+    fem, opt_nominal, load_cases = build_fenitop_dicts(tagged_mesh, bc, cfg)
 
     with XDMFFile(comm, "meshes/mesh_checkpoint.xdmf", "w") as xdmf:
         xdmf.write_mesh(tagged_mesh.mesh)
 
     if comm.rank == 0:
-        logger.info("Stage 2: running nominal SIMP topopt for warm-start")
-    topopt(fem, opt_nominal)
+        logger.info("Stage 2: running nominal SIMP topopt for warm-start "
+                     "(%d load case(s): %s)", len(load_cases), list(load_cases.keys()))
+    topopt(fem, opt_nominal, load_cases)
 
     # rho_converged.npy is now a GLOBAL array (see topopt.py fix); load it
     # identically on every rank via comm.bcast so all ranks agree on its

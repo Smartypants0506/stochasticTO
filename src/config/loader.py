@@ -47,7 +47,32 @@ def load_config(path: str | Path) -> ProjectConfig:
 
     material = MaterialConfig(**raw["material"])
     petsc = PetscConfig(**raw.get("petsc", {}))
-    load_cases = [LoadCase(**lc) for lc in raw["load_cases"]]
+
+    raw_load_cases = raw["load_cases"]
+    if not isinstance(raw_load_cases, dict):
+        raise TypeError(
+            "config.yaml's load_cases: must be a mapping of case_name -> "
+            "list of {group_name, vector} entries (multi-load-case schema), "
+            "not a flat list. Example:\n"
+            "  load_cases:\n"
+            "    vertical_up:\n"
+            "      - group_name: \"load_1\"\n"
+            "        vector: [0.0, 0.0, 9.34e7]\n"
+            "    torsion:\n"
+            "      - group_name: \"load_1\"\n"
+            "        vector: [0.0, -2.9e7, 0.0]\n"
+            f"Got: {type(raw_load_cases).__name__}"
+        )
+    load_cases = {
+        case_name: [LoadCase(**lc) for lc in entries]
+        for case_name, entries in raw_load_cases.items()
+    }
+    if not load_cases:
+        raise KeyError("config.yaml's load_cases: mapping is empty -- at least one named load case is required")
+    for case_name, entries in load_cases.items():
+        if not entries:
+            raise KeyError(f"Load case '{case_name}' has no group_name/vector entries")
+
     optimization = OptimizationConfig(**raw.get("optimization", {}))
     random_field = RandomFieldConfig(**raw["random_field"])
     surrogate = SurrogateConfig(**raw.get("surrogate", {}))
