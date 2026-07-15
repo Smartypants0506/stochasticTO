@@ -66,6 +66,8 @@ def build_fem_dict(tagged_mesh: TaggedMesh, bc: BoundaryConditions,
         "body_force": config.optimization.body_force,
         "quadrature_degree": config.optimization.quadrature_degree,
         "petsc_options": config.petsc.to_options_dict(),
+        "cell_tags": tagged_mesh.cell_tags,                          # <-- add
+        "solid_tag": tagged_mesh.name_to_tag.get("solid"),
     }
 
 

@@ -13,8 +13,9 @@ from pathlib import Path
 import yaml
 
 from src.config.schema import (
-LoadCase, MaterialConfig, MonteCarloValidationConfig, OptimizationConfig,
-PetscConfig, ProjectConfig, RandomFieldConfig, SurrogateConfig,
+    KeepAliveConfig, LoadCase, MaterialConfig, MonteCarloValidationConfig,
+    OptimizationConfig, PetscConfig, ProjectConfig, RandomFieldConfig,
+    SurrogateConfig,
 )
 
 REQUIRED_TOP_KEYS = {"step_file", "mesh_out_path", "mesh_size_max", "snap_tol",
@@ -77,6 +78,7 @@ def load_config(path: str | Path) -> ProjectConfig:
     random_field = RandomFieldConfig(**raw["random_field"])
     surrogate = SurrogateConfig(**raw.get("surrogate", {}))
     mc_validation = MonteCarloValidationConfig(**raw.get("mc_validation", {}))
+    keep_alive = KeepAliveConfig(**raw.get("keep_alive", {}))
 
     return ProjectConfig(
         step_file=raw["step_file"],
@@ -91,5 +93,6 @@ def load_config(path: str | Path) -> ProjectConfig:
         surrogate=surrogate,
         color_targets=raw.get("color_targets", {}),
         mc_validation=mc_validation,
+        keep_alive=keep_alive,
         solid_volume_color=tuple(raw.get("solid_volume_color", (255, 255, 0, 255))),
     )

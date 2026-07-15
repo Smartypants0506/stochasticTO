@@ -30,6 +30,8 @@ from src.fenitop.optimize import optimality_criteria, mma_optimizer
 from src.fenitop.utility import Communicator, Plotter, save_xdmf
 from dataclasses import dataclass
 
+from dolfinx.fem import locate_dofs_topological
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -108,25 +110,45 @@ def topopt(fem, opt, load_cases: dict[str, list]):
         rho_old1, rho_old2 = np.zeros(num_elems), np.zeros(num_elems)
         low, upp = None, None
 
-    # --- NEW: hard dof mask for cells tagged "solid" (bolt/mount bosses),
-    # mirroring the reference script's V_ρ_f_bolt_dofs. This is independent
-    # of opt["solid_zone"]'s geometric predicate -- it comes directly from
-    # the mesh's cell_tags, so it stays correct even if solid_zone (built in
-    # mapper.py) is wrong or missing. If fem["mesh"] doesn't carry a "solid"
-    # tag (e.g. still using an older TaggedMesh without cell_tags wired
-    # through), this degrades to an empty mask with a loud warning rather
-    # than silently doing nothing.
-    solid_cell_mask = np.zeros(num_elems, dtype=bool)
+    # --- Solid mask for rho_phys_field (CG1 / nodal) --------------------------
+    # rho_phys_field lives in a Lagrange-1 (nodal) space, NOT DG0 -- see fem.py:
+    #   S = functionspace(mesh, ("Lagrange", 1)).  Its dofs are VERTICES, not
+    #   cells, so a cell-index mask (correct for rho_field/DG0) cannot index it.
+    # We pin the VERTEX dofs of every solid-tagged cell. This protects a
+    # one-element-thick nodal halo of the solid region, which is the correct
+    # analogue of the reference script's post-filter re-pin for a nodal density.
+    solid_cell_mask = np.zeros(rho_phys_field.x.petsc_vec.array.size, dtype=bool)
     cell_tags = fem.get("cell_tags")
-    solid_tag = fem.get("solid_tag")  # int tag id for the "solid" physical group
+    solid_tag = fem.get("solid_tag")
     if cell_tags is not None and solid_tag is not None:
+        Vp = rho_phys_field.function_space
+        mesh_p = Vp.mesh
+        tdim = mesh_p.topology.dim
+        n_local_cells = mesh_p.topology.index_map(tdim).size_local
+
+        # Restrict to owned solid cells (cell_tags is in this mesh's cell space;
+        # solid_cells.max() was 132391 < n_local_cells, so this is the right space).
         solid_cells = cell_tags.find(solid_tag)
-        # rho_phys_field lives in DG0 (one dof per cell); cell index == dof index
-        solid_cell_mask[solid_cells] = True
+        solid_cells = solid_cells[solid_cells < n_local_cells].astype(np.int32)
+
+        # Map solid CELLS -> their VERTICES -> CG1 dofs.
+        mesh_p.topology.create_connectivity(tdim, 0)
+        c_to_v = mesh_p.topology.connectivity(tdim, 0)
+        if len(solid_cells) > 0:
+            solid_vertices = np.unique(
+                np.concatenate([c_to_v.links(c) for c in solid_cells])
+            ).astype(np.int32)
+            # CG1: one dof per vertex; locate_dofs_topological gives local dof ids.
+            solid_dofs = locate_dofs_topological(Vp, 0, solid_vertices)
+            solid_dofs = solid_dofs[solid_dofs < solid_cell_mask.size]
+            solid_cell_mask[solid_dofs] = True
+
         n_solid = comm.allreduce(int(solid_cell_mask.sum()), op=MPI.SUM)
         if comm.rank == 0:
-            logger.info("Hard-pinning %d cells (global) to rho_phys=1.0 every iteration "
-                        "(solid/bolt regions).", n_solid)
+            logger.info(
+                "Hard-pinning %d nodal dofs (global) to rho_phys=1.0 every "
+                "iteration (solid/bolt regions, CG1 vertex dofs).", n_solid,
+            )
     else:
         if comm.rank == 0:
             logger.warning(
@@ -151,6 +173,21 @@ def topopt(fem, opt, load_cases: dict[str, list]):
     rho_field.x.petsc_vec.array[:] = rho_ini
     rho_min, rho_max = np.zeros(num_elems), np.ones(num_elems)
     rho_min[solid], rho_max[void] = 0.99, 0.01
+
+    if cell_tags is not None and solid_tag is not None:
+        solid_cells = cell_tags.find(solid_tag)
+        if comm.rank == 0 or True:  # per-rank
+            print(f"[rank {comm.rank}] num_elems={num_elems}, "
+                f"mask.size={solid_cell_mask.size}, "
+                f"rho_field.array.size={rho_field.x.petsc_vec.array.size}, "
+                f"rho_phys.array.size={rho_phys_field.x.petsc_vec.array.size}, "
+                f"cell_tags n_indices={solid_cells.size}, "
+                f"solid_cells.max={solid_cells.max() if solid_cells.size else -1}, "
+                f"mesh local cells="
+                f"{fem['mesh'].topology.index_map(fem['mesh'].topology.dim).size_local}, "
+                f"+ghosts="
+                f"{fem['mesh'].topology.index_map(fem['mesh'].topology.dim).num_ghosts}",
+                flush=True)
 
     # Start topology optimization
     opt_iter, beta, change = 0, 1, 2*opt["opt_tol"]

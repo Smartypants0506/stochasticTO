@@ -205,8 +205,8 @@ class Plotter():
         if self.dim == 2:
             grid = self.grid
         else:
-            grid = self.grid.threshold(threshold).extract_surface()
-        empty_mesh = (self.dim == 3 and grid.n_faces_strict == 0)
+            grid = self.grid.threshold(threshold).extract_surface(algorithm='dataset_surface')
+        empty_mesh = (self.dim == 3 and grid.n_faces == 0)
 
         if not empty_mesh:
             if self.dim == 3:

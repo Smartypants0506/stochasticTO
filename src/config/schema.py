@@ -140,6 +140,41 @@ class RandomFieldConfig:
     n_kl_hint: int = 20
     seed: int | None = None
 
+@dataclass
+class KeepAliveConfig:
+    """Non-designable "keep-alive" backbone connecting all attachment
+    instances into one connected component, independent of the optimizer's
+    stress-based judgment (masterContext Section 3.2 assembly constraint).
+
+    A minimum spanning tree is built over the attachment-instance anchor
+    points, with edge weights equal to the *in-mesh geodesic* distance
+    (Dijkstra over mesh edges), NOT straight-line distance -- a straight
+    segment between two anchors on a bent/non-convex bracket can pass
+    through void space. Each MST edge is then realized as a piecewise chain
+    of cylindrical corridors following the geodesic path's waypoints, and
+    OR-ed into solid_zone so those cells are hard-fixed to density 1.
+
+    Attributes:
+        enabled: Master on/off switch. When False, build_boundary_conditions
+            leaves solid_zone untouched.
+        groups: Facet-group names whose instances must all be connected
+            (e.g. ["fixed", "load_1"]). Every instance across every listed
+            group participates in a single shared MST, so bolts from
+            different groups still end up in one connected component.
+        corridor_radius: Cylinder radius (m) of each keep-alive segment.
+            Should be >= a couple of element sizes so the corridor is
+            actually meshed as solid. Defaults to a small multiple of
+            mesh_size_max at the call site if left None.
+        cluster_eps: Radius (m) for single-linkage clustering of a group's
+            facet points into distinct physical instances (separate holes).
+            Points within cluster_eps of each other are one instance.
+            Defaults to ~2x mesh_size_max at the call site if left None.
+    """
+    enabled: bool = False
+    groups: list[str] = field(default_factory=list)
+    corridor_radius: float | None = None
+    cluster_eps: float | None = None
+
 
 @dataclass
 class SurrogateConfig:
@@ -202,3 +237,4 @@ class ProjectConfig:
     color_targets: dict = field(default_factory=dict)
     solid_volume_color: tuple[int, int, int, int] = (255, 255, 0, 255)
     mc_validation: MonteCarloValidationConfig = field(default_factory=MonteCarloValidationConfig)
+    keep_alive: KeepAliveConfig = field(default_factory=KeepAliveConfig)

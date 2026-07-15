@@ -76,13 +76,47 @@ def main(config_path: str = "src/config/config.yaml") -> None:
         case_name: [(lc.group_name, lc.vector) for lc in entries]
         for case_name, entries in cfg.load_cases.items()
     }
+    # --- keep-alive backbone resolution -------------------------------------
+    # Resolve the non-designable "keep-alive" corridor parameters here (the
+    # call site), not inside mapper.py, so the mesh-size-derived default length
+    # scale stays traceable to cfg. mapper.build_boundary_conditions raises if
+    # groups are given without concrete radius/eps, so we always pass both when
+    # enabled. When disabled, all three are None and solid_zone is unchanged.
+    ka = cfg.keep_alive
+    if ka.enabled:
+        keep_alive_groups = ka.groups
+        keep_alive_radius = (
+            ka.corridor_radius if ka.corridor_radius is not None
+            else 2.0 * cfg.mesh_size_max
+        )
+        keep_alive_cluster_eps = (
+            ka.cluster_eps if ka.cluster_eps is not None
+            else 2.0 * cfg.mesh_size_max
+        )
+        if comm.rank == 0:
+            logger.info(
+                "keep_alive enabled: groups=%s, corridor_radius=%.6g m, "
+                "cluster_eps=%.6g m", keep_alive_groups,
+                keep_alive_radius, keep_alive_cluster_eps,
+            )
+    else:
+        keep_alive_groups = None
+        keep_alive_radius = None
+        keep_alive_cluster_eps = None
+        if comm.rank == 0:
+            logger.info("keep_alive disabled; solid_zone uses volumes + "
+                        "protected faces only.")
+
     bc = build_boundary_conditions(
-    tagged_mesh, load_cases_input,
-    snap_tol=cfg.snap_tol,
-    protected_face_groups=["fixed", "load_1", "load_2"],  # red bolt faces + blue pin face
-    protected_buffer_radius=4e-3,  # 5mm buffer; tune to your mesh_size_max (2mm)
-    comm=comm,
-)
+        tagged_mesh, load_cases_input,
+        snap_tol=cfg.snap_tol,
+        protected_face_groups=["fixed", "load_1", "load_2"],  # red bolt faces + blue pin face
+        protected_buffer_radius=4e-3,  # 4mm buffer; tune to your mesh_size_max (2mm)
+        keep_alive_groups=keep_alive_groups,
+        keep_alive_radius=keep_alive_radius,
+        keep_alive_cluster_eps=keep_alive_cluster_eps,
+        comm=comm,
+    )
     if comm.rank == 0:
         for case_name, entries in cfg.load_cases.items():
             for lc in entries:
@@ -111,6 +145,7 @@ def main(config_path: str = "src/config/config.yaml") -> None:
         xdmf.write_mesh(tagged_mesh.mesh)
 
     if comm.rank == 0:
+        logger.info("Physical groups: %s", tagged_mesh.name_to_tag)
         logger.info("Stage 2: running nominal SIMP topopt for warm-start "
                      "(%d load case(s): %s)", len(load_cases), list(load_cases.keys()))
     topopt(fem, opt_nominal, load_cases)

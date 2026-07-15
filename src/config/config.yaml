@@ -92,3 +92,9 @@ mc_validation:
   percentile_low: 5.0
   percentile_high: 95.0
   output_dir: "output/mc_validation"
+
+keep_alive:
+  enabled: true
+  groups: ["fixed", "load_1", "load_2"]
+  corridor_radius: 4.0e-3     # ~2x mesh_size_max; null -> auto
+  cluster_eps: 4.0e-3         # null -> auto (~2x mesh_size_max)
