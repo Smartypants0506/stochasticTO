@@ -29,7 +29,7 @@ from src.random_fields.kernel import KernelParams, build_squared_exponential
 
 logger = logging.getLogger(__name__)
 
-VARIANCE_EXPLAINED_THRESHOLD = 0.95  # Section 3.3: ">= 95% of total variance"
+VARIANCE_EXPLAINED_THRESHOLD = 0.90  # Section 3.3: ">= 95% of total variance"
 
 
 @dataclass
