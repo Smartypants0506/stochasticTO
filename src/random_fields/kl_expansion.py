@@ -27,9 +27,66 @@ from mpi4py import MPI
 
 from src.random_fields.kernel import KernelParams, build_squared_exponential
 
+import hashlib
+from pathlib import Path
+
 logger = logging.getLogger(__name__)
 
 VARIANCE_EXPLAINED_THRESHOLD = 0.90  # Section 3.3: ">= 95% of total variance"
+
+_KL_CACHE_DIR = Path("output/cache/kl_expansion")
+
+
+def _kl_cache_key(
+    node_coordinates: np.ndarray,
+    simplices: np.ndarray,
+    kernel_params: KernelParams,
+    variance_threshold: float,
+    max_modes: int,
+) -> str:
+    """Deterministic cache key covering every input that affects the KL solve."""
+    hasher = hashlib.sha256()
+    hasher.update(node_coordinates.tobytes())
+    hasher.update(simplices.tobytes())
+    hasher.update(
+        f"{kernel_params.sigma:.17g}|{kernel_params.length_scale:.17g}|"
+        f"{kernel_params.spatial_dim}|{variance_threshold:.17g}|{max_modes}".encode()
+    )
+    return hasher.hexdigest()[:24]
+
+
+def _kl_cache_path(cache_key: str) -> Path:
+    return _KL_CACHE_DIR / f"kl_{cache_key}.npz"
+
+
+def _load_kl_cache(cache_key: str) -> tuple | None:
+    path = _kl_cache_path(cache_key)
+    if not path.exists():
+        return None
+    logger.info("KL expansion cache hit: loading %s", path)
+    data = np.load(path)
+    return (
+        data["eigenvalues"],
+        data["modes"],
+        data["mean_field"],
+        float(data["variance_explained"]),
+        int(data["n_kl"]),
+    )
+
+
+def _save_kl_cache(cache_key: str, eigenvalues, modes, mean_field, variance_explained, n_kl) -> None:
+    _KL_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    path = _kl_cache_path(cache_key)
+    np.savez(
+        path,
+        eigenvalues=eigenvalues,
+        modes=modes,
+        mean_field=mean_field,
+        variance_explained=variance_explained,
+        n_kl=n_kl,
+    )
+    logger.info("KL expansion cached to %s", path)
+
 
 
 @dataclass
@@ -204,12 +261,28 @@ def compute_kl_expansion(
             )
         else:
             try:
-                eigenvalues, modes, mean_field, variance_explained, n_kl = (
-                    _compute_kl_expansion_local(
-                        node_coordinates, simplices, kernel_params,
-                        variance_threshold, max_modes,
-                    )
+                cache_key = _kl_cache_key(
+                    node_coordinates, simplices, kernel_params,
+                    variance_threshold, max_modes,
                 )
+                cached = _load_kl_cache(cache_key)
+                if cached is not None:
+                    eigenvalues, modes, mean_field, variance_explained, n_kl = cached
+                    logger.info(
+                        "KL expansion loaded from cache: N_kl=%d modes "
+                        "(%.2f%% variance explained, threshold=%.0f%%)",
+                        n_kl, variance_explained * 100, variance_threshold * 100,
+                    )
+                else:
+                    eigenvalues, modes, mean_field, variance_explained, n_kl = (
+                        _compute_kl_expansion_local(
+                            node_coordinates, simplices, kernel_params,
+                            variance_threshold, max_modes,
+                        )
+                    )
+                    _save_kl_cache(
+                        cache_key, eigenvalues, modes, mean_field, variance_explained, n_kl,
+                    )
                 payload = (
                     eigenvalues, modes, mean_field, variance_explained, n_kl,
                     node_coordinates,

@@ -150,7 +150,6 @@ def build_pce_surrogate(
     best_result = None
     for degree in range(1, max_degree_attempts + 1):
         chaos_result = _fit_chaos_at_degree(xi_train, c_train, n_kl, degree, hyperbolic_q)
-        print(c_train, c_test)
         q2, rmse = _compute_q2(chaos_result, xi_test, c_test)
         logger.info("PCE degree=%d: Q^2=%.5f, RMSE=%.5g", degree, q2, rmse)
 

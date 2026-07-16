@@ -104,6 +104,7 @@ class RobustLoopState:
         refresh_policy: Governs when compliance_pce/volume_pce are rebuilt.
     """
     outer_iteration: int = 0
+    true_outer_iteration: int = 0   # ADD THIS — increments once per real MMA step, via tao.setMonitor
     beta: float = 1.0
     compliance_pce: object = None
     volume_pce: object = None
@@ -354,36 +355,16 @@ def run_robust_topopt(
         """TAO objective+gradient callback for the robust scalarized objective J."""
         rho_current = x.getArray(readonly=True).copy()
 
-
-        if (state.outer_iteration % opt["beta_interval"] == 0
-                and state.beta < opt["beta_max"] and state.outer_iteration > 0):
-            state.beta = min(state.beta * 2, opt["beta_max"])
-            logger.info("Beta continuation: increased to %.3g at outer_iteration=%d",
-                         state.beta, state.outer_iteration)
-
-
         density_filter.forward()  # rho -> rho_tilde (deterministic Helmholtz filter)
-        # NOTE: rho_phys itself is set INSIDE run_fea_at_samples/robust evaluation
-        # via rf_heaviside per-sample; the design variable driving the filter here
-        # is rho_current, consistent with the trained PCE's rho_nominal only if
-        # a refresh has just occurred -- enforced below.
-
-
-        if state.refresh_policy.needs_refresh(state.outer_iteration):
-            state.compliance_pce, state.volume_pce = _retrain_pce_pair(
-    fem, opt, rho_current, density_filter, rf_heaviside, sens_problem, state.beta, kl_result,
-    linear_problem, rho_field)
-            state.refresh_policy.last_refresh_iteration = state.outer_iteration
-
 
         result = evaluate_from_pce(state.compliance_pce, state.volume_pce, n_elems_local)
         J_value = result.mu_C + lambda_tradeoff * result.sigma_C
         dJ_drho = get_pce_robust_gradient(state.compliance_pce, robust_config)
         g.setArray(dJ_drho)
 
-
         iteration_log.append({
             "outer_iteration": state.outer_iteration,
+            "true_outer_iteration": state.true_outer_iteration,
             "beta": state.beta,
             "J": J_value,
             "mu_C": result.mu_C,
@@ -428,6 +409,31 @@ def run_robust_topopt(
 
 
     tao = PETSc.TAO().create(comm)
+
+    def mma_iteration_monitor(tao: PETSc.TAO) -> None:
+        """Fires exactly once per real MMA outer iteration (mma.py calls tao.monitor()
+        once per outer loop pass), unlike objective_gradient_callback which TAO/MMA
+        invokes multiple times per outer iteration (once to build p/q, once for
+        post-step convergence logging). Beta continuation and PCE refresh cadence
+        must be driven from here, not from the objective/gradient callback's call
+        count, or both escalate roughly 2x faster than opt["beta_interval"] /
+        opt["pce_refresh_interval"] intend.
+        """
+        state.true_outer_iteration += 1
+
+        if (state.true_outer_iteration % opt["beta_interval"] == 0
+                and state.beta < opt["beta_max"]):
+            state.beta = min(state.beta * 2, opt["beta_max"])
+            logger.info("Beta continuation: increased to %.3g at true_outer_iteration=%d",
+                        state.beta, state.true_outer_iteration)
+
+        if state.refresh_policy.needs_refresh(state.true_outer_iteration):
+            rho_current = tao.getSolution().getArray(readonly=True).copy()
+            state.compliance_pce, state.volume_pce = _retrain_pce_pair(
+                fem, opt, rho_current, density_filter, rf_heaviside, sens_problem,
+                state.beta, kl_result, linear_problem, rho_field)
+            state.refresh_policy.last_refresh_iteration = state.true_outer_iteration
+            
     tao.setType(PETSc.TAO.Type.PYTHON)
     tao.setPythonContext(MMA())
 
@@ -489,6 +495,8 @@ def run_robust_topopt(
 
 
     tao.setFromOptions()
+
+    tao.setMonitor(mma_iteration_monitor)
 
 
     state.compliance_pce, state.volume_pce = _retrain_pce_pair(
