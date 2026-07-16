@@ -234,6 +234,8 @@ def run_robust_topopt(
     rho_warm_start: np.ndarray,
     lambda_tradeoff: float,
     kl_result: "KLExpansionResult",
+    load_cases=None, 
+    case_name=None
 ) -> dict:
     """Run the dolfiny-MMA-driven robust topology optimization loop for one lambda.
 
@@ -264,8 +266,45 @@ def run_robust_topopt(
     Raises:
         RuntimeError: If TAO reports a non-converged reason at the end of
             the solve, or if any PCE retrain fails its Q^2 gate.
+
+    load_cases: Optional dict[str, list] of named load cases (FEniTop
+        multi-case format, e.g. from build_fenitop_dicts/build_box_fenitop_dicts).
+        If provided, case_name must also be given -- this function is
+        SINGLE-LOAD-CASE ONLY (unlike FEniTop's form_fem_multi_case, it does
+        not sum compliance/gradients across multiple cases). The selected
+        case's traction_bcs list is merged into a local copy of `fem` before
+        calling form_fem(). If load_cases is None, `fem` must already contain
+        a "traction_bcs" key (caller has done the merge itself).
+    case_name: Name of the single load case to solve, required if load_cases
+        is given.
     """
     comm = MPI.COMM_WORLD
+
+    if load_cases is not None:
+        if case_name is None:
+            raise ValueError(
+                "case_name is required when load_cases is provided -- "
+                "run_robust_topopt only solves ONE load case per call, "
+                "it does not loop over load_cases internally."
+            )
+        if case_name not in load_cases:
+            raise KeyError(
+                f"case_name={case_name!r} not found in load_cases "
+                f"(available: {list(load_cases)!r})."
+            )
+        fem = dict(fem)
+        fem["traction_bcs"] = load_cases[case_name]
+    elif "traction_bcs" not in fem:
+        raise KeyError(
+            "fem['traction_bcs'] is missing and no load_cases/case_name "
+            "was provided. run_robust_topopt requires EITHER (1) fem "
+            "already containing 'traction_bcs' for one case (caller has "
+            "done fem = dict(fem); fem['traction_bcs'] = load_cases[name] "
+            "itself), OR (2) load_cases + case_name passed to this "
+            "function. See this function's docstring -- it is single-"
+            "load-case only, unlike FEniTop's form_fem_multi_case."
+        )
+    
     linear_problem, u_field, lambda_field, rho_field, rho_phys_field = form_fem(fem, opt)
     density_filter = DensityFilter(
         comm, rho_field, rho_phys_field, opt["filter_radius"], fem["petsc_options"]
@@ -273,7 +312,7 @@ def run_robust_topopt(
     random_heaviside_config = RandomHeavisideConfig(
         kernel_params=opt["kernel_params"],
         transform_params=opt["transform_params"],
-        variance_threshold=opt.get("kl_variance_threshold", 0.95),
+        variance_threshold=opt.get("kl_variance_threshold", 0.90),
         seed=opt.get("random_field_seed"),
     )
     rf_heaviside = build_random_heaviside_from_function_space(
@@ -443,6 +482,10 @@ def run_robust_topopt(
     
     opts[f"{prefix}tao_mma_subsolver_tao_type"] = "bqnls"          # keep as-is, or "bnls"
     opts[f"{prefix}tao_mma_subsolver_tao_ls_type"] = "armijo"      # replace fragile morethuente
+    opts[f"{prefix}tao_mma_subsolver_tao_max_it"] = 500            # PETSc default is far too low for this problem's p/q asymmetry
+    opts[f"{prefix}tao_mma_subsolver_tao_gatol"] = 1e-8
+    opts[f"{prefix}tao_mma_subsolver_tao_grtol"] = 1e-8
+    opts[f"{prefix}tao_mma_subsolver_tao_gttol"] = 1e-8
 
 
     tao.setFromOptions()

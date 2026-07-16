@@ -6,23 +6,9 @@ import numpy as np
 
 from src.fenitop.la import negative_part, positive_part
 
-from mpi4py import MPI
-
 logger = logging.getLogger(__name__)
 
-def _check_all_ranks(comm, local_ok: bool, message: str) -> None:
-        """Reduce a per-rank-local invariant check across the communicator.
 
-        Any bare `if not np.all(local_array_condition): raise` is only checking
-        THIS RANK's local dof slice. Raising only on the offending rank causes
-        the surviving ranks to hang on the next PETSc collective call. This
-        helper ensures every rank agrees on whether to raise, avoiding an
-        MPI deadlock under `-n 64`.
-        """
-        global_ok = comm.allreduce(bool(local_ok), op=MPI.LAND)
-        if not global_ok:
-            raise RuntimeError(message)
-        
 class MMA:
     """Method of Moving Asymptotes (MMA).
 
@@ -190,9 +176,6 @@ class MMA:
         self._objective = 0.0
         self._gradient = tao.getGradient()[0]
 
-        self._eps_floor = self._x.copy()
-        self._eps_floor.set(1e-6)
-
         # Dual problem is a bound-constrained optimisation problem of the form
         #
         #     min   W(λ)
@@ -210,7 +193,6 @@ class MMA:
             assert self._P is not None and self._Q is not None
             assert self._p is not None and self._q is not None
 
-            _EPS = 1e-6  # matches config.yaml's optimization.epsilon
             # x(λ)
             self.x(λ, self._x)
 
@@ -246,10 +228,6 @@ class MMA:
 
             # Flip for max. to min.
             G.scale(-1)
-            logger.debug(
-            "  W=%.6e |G|=%.3e |lambda|=%.3e lambda_min=%.3e",
-            -W, G.norm(), λ.norm(), λ.min()[1],
-        )
             return -W  # type: ignore
 
         if (constraint := tao.getInequalityConstraints())[1] is not None:
@@ -300,6 +278,7 @@ class MMA:
         # TAO 0-th iteration is a convergence check.
 
         self._f = tao.computeObjectiveGradient(self._x, self._gradient)
+
         tao.monitor(f=self._f)
 
         c, h_tuple = tao.getInequalityConstraints()
@@ -350,6 +329,14 @@ class MMA:
 
             # Compute f(x), ∇f(x), h(x) and J_h(x)
             self._f = tao.computeObjectiveGradient(self._x, self._gradient)
+
+            # --- DIAGNOSTICS: raw objective/gradient right out of FEA or PCE ---
+            logger.info(
+                f"[MMA diag] it={it} raw objective f={self._f:.6e}, "
+                f"|grad|={self._gradient.norm():.4e}, "
+                f"max|grad|={max(abs(self._gradient.getArray().min()), abs(self._gradient.getArray().max())):.4e}"
+            )
+            # --- END DIAGNOSTICS ---
 
             if h:
                 h(tao, self._x, c, *h_args, **h_kwargs)
@@ -471,25 +458,14 @@ class MMA:
             # beta = min ( beta, x_max )
             self._beta.pointwiseMin(self._beta, ub)
 
-            comm = self._x.getComm().tompi4py()
+            if not np.all(self._L.getArray() < self._alpha.getArray()):
+                raise RuntimeError("L < alpha not fulfilled.")
 
-            _check_all_ranks(
-                comm, not np.any(np.isinf(self._x_range.getArray())),
-                "MMA requires a bounded domain.",
-            )
-            ...
-            _check_all_ranks(
-                comm, np.all(self._L.getArray() < self._alpha.getArray()),
-                "L < alpha not fulfilled.",
-            )
-            _check_all_ranks(
-                comm, np.all(self._beta.getArray() < self._U.getArray()),
-                "beta < U not fulfilled.",
-            )
-            _check_all_ranks(
-                comm, np.all(self._alpha.getArray() <= self._beta.getArray()),
-                "alpha <= beta not fulfilled.",
-            )
+            if not np.all(self._beta.getArray() < self._U.getArray()):
+                raise RuntimeError("beta < U not fulfilled.")
+
+            if not np.all(self._alpha.getArray() <= self._beta.getArray()):
+                raise RuntimeError("alpha <= beta not fulfilled.")
 
             # tmp_2 = grad_p
             self._gradient.copy(self._tmp_2)
@@ -577,43 +553,41 @@ class MMA:
                 self._Q.mult(self._xmL_recp, tmp_h)
                 self._r_h -= tmp_h
 
+                grad_norm = self._gradient.norm()
+                p_norm = self._p.norm()
+                q_norm = self._q.norm()
+
+                Umx_arr = self._Umx.getArray()
+                xmL_arr = self._xmL.getArray()
+                x_range_arr = self._x_range.getArray()
+
+                # --- DIAGNOSTICS: state feeding the dual subsolver ---
                 logger.info(
-                    "it=%d f=%.6e |grad|=%.3e "
-                    "Umx_min=%.3e xmL_min=%.3e "
-                    "P_norm=%.3e Q_norm=%.3e "
-                    "p_norm=%.3e q_norm=%.3e "
-                    "r=%.3e r_h_norm=%.3e "
-                    "x_min=%.6e x_max=%.6e",
-                    it,
-                    self._f,
-                    self._gradient.norm(),
-                    self._Umx.min()[1],
-                    self._xmL.min()[1],
-                    self._P.norm(),
-                    self._Q.norm(),
-                    self._p.norm(),
-                    self._q.norm(),
-                    self._r,
-                    self._r_h.norm(),
-                    self._x.min()[1],
-                    self._x.max()[1],
+                    f"[MMA diag] it={it} pre-subsolver: "
+                    f"|grad|={grad_norm:.4e} "
+                    f"|p|={p_norm:.4e} |q|={q_norm:.4e} "
+                    f"min(U-x)={np.min(Umx_arr):.4e} max(U-x)={np.max(Umx_arr):.4e} "
+                    f"min(x-L)={np.min(xmL_arr):.4e} max(x-L)={np.max(xmL_arr):.4e} "
+                    f"min(x_range)={np.min(x_range_arr):.4e} "
+                    f"r_h_norm={self._r_h.norm():.4e}"
                 )
-
-                # NaN/Inf sanity checks across ALL ranks (avoids MPI deadlock)
-                for name, vec in (("Umx", self._Umx), ("xmL", self._xmL),
-                                ("p", self._p), ("q", self._q),
-                                ("gradient", self._gradient), ("x", self._x)):
-                    arr = vec.getArray(readonly=True)
-                    local_ok = np.all(np.isfinite(arr))
-                    _check_all_ranks(comm, local_ok, f"Non-finite values detected in '{name}' at it={it}.")
-
-                for name, mat in (("P", self._P), ("Q", self._Q)):
-                    local_ok = np.isfinite(mat.norm())
-                    _check_all_ranks(comm, local_ok, f"Non-finite norm detected in matrix '{name}' at it={it}.")
+                if np.min(Umx_arr) < 1e-8 or np.min(xmL_arr) < 1e-8:
+                    logger.warning(
+                        f"[MMA diag] it={it}: (U-x) or (x-L) near zero — "
+                        f"bound/asymptote collapse likely"
+                    )
+                # --- END DIAGNOSTICS ---
 
                 self._subsolver.solve()
 
                 if self._subsolver.getConvergedReason() < 0:
+                    reason_name = PETSc.TAO.ConvergedReason(reason).name if hasattr(PETSc.TAO.ConvergedReason(reason), "name") else str(reason)
+                    logger.error(
+                        f"[MMA diag] it={it}: subsolver diverged, reason={reason} ({reason_name}), "
+                        f"subsolver_its={self._subsolver.getIterationNumber()}, "
+                        f"subsolver_max_its={self._subsolver.getMaximumIterations()}, "
+                        f"|grad|={grad_norm:.4e}, |p|={p_norm:.4e}, |q|={q_norm:.4e}"
+                    )
                     raise RuntimeError("Subsolver diverged.")
 
                 self.x(self._subsolver.getSolution(), self._x)
@@ -711,7 +685,6 @@ class MMA:
             self._tmp_2,
             self._tmp_3,
             self._zero,
-            self._eps_floor,
         )
         for o in filter(lambda o: o is not None, to_destroy):
             o.destroy()

@@ -105,7 +105,8 @@ def _void_zone(x):
 
 def build_box_mesh(comm: MPI.Comm, cell_type: str):
     """Recreate beam_3d.py's `mesh` + `mesh_serial` exactly (module-level
-    call in beam_3d.py; wrapped in a function here so main.py controls
+    call in beam_3d_DOMAIN = [[0, 0, 0], [10, 30, 10]]
+_ELEMENTS = [25, 75, 25].py; wrapped in a function here so main.py controls
     when/whether it runs)."""
     if cell_type not in _CELL_TYPES:
         raise ValueError(

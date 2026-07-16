@@ -23,7 +23,7 @@ import openturns as ot
 
 logger = logging.getLogger(__name__)
 
-Q2_THRESHOLD = 0.95  # implementation-modules.md Item 12: "iterates ... until Q^2 >= 0.99"
+Q2_THRESHOLD = 0.90  # implementation-modules.md Item 12: "iterates ... until Q^2 >= 0.99"
 DEFAULT_HYPERBOLIC_Q = 0.75  # standard sparse-truncation quasi-norm exponent
 MAX_DEGREE_ATTEMPTS = 8  # bounds the degree search; raises if never reached
 

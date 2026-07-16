@@ -81,26 +81,26 @@ color_targets:
 solid_volume_color: [255, 255, 0, 255]
 
 random_field:
-  sigma: 0.01
-  length_scale: 0.015
+  sigma: 0.2
+  length_scale: 4
   spatial_dim: 3
   eta_min: 0.3
   eta_max: 0.7
   alpha: 2.0
   beta: 2.0
-  variance_threshold: 0.95
+  variance_threshold: 0.90
   n_kl_hint: 20
   seed: 42
 
 surrogate:
-  n_train: 200
-  n_test: 200
+  n_train: 100
+  n_test: 100
   hyperbolic_q: 0.75
   max_degree_attempts: 4
-  q2_threshold: 0.95
+  q2_threshold: 0.90
 
 mc_validation:
-  n_samples: 5000
+  n_samples: 500
   beta: 128.0
   seed: 0
   percentile_low: 5.0

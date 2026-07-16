@@ -57,7 +57,7 @@ def build_squared_exponential(params: KernelParams) -> ot.CovarianceModel:
     # ot.SquaredExponential takes scale = [l]*dim and amplitude = [sigma]
     model = ot.SquaredExponential([params.length_scale] * params.spatial_dim, [params.sigma])
     logger.info(
-        "Built squared-exponential kernel: sigma=%.4g, l=%.4g m, dim=%d",
+        "Built squared-exponential kernel: sigma=%.4g, l=%.4g mm, dim=%d",
         params.sigma, params.length_scale, params.spatial_dim,
     )
     return model

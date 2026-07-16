@@ -220,11 +220,20 @@ def main(config_path: str = "src/config/config.yaml") -> None:
 
     if comm.rank == 0:
         logger.info("Stage 5: Pareto sweep over lambda_tradeoff=%s", cfg.optimization.lambda_sweep)
+        if len(load_cases) > 1:
+            logger.warning(
+                "Stage 5's run_robust_topopt is single-load-case only; "
+                "%d load cases found (%s) but only %r will be used for the "
+                "robust optimization. Multi-case robust support is a known gap.",
+                len(load_cases), list(load_cases.keys()), next(iter(load_cases)),
+            )
     pareto_results = []
+    robust_case_name = next(iter(load_cases))
     for lam in cfg.optimization.lambda_sweep:
         opt_robust = dict(opt_nominal)
         result = run_robust_topopt(
             fem, opt_robust, rho_warmstart_global, lambda_tradeoff=lam, kl_result=kl_result,
+            load_cases=load_cases, case_name=robust_case_name,
         )
         pareto_results.append({"lambda": lam, "rho_robust": result["rho_robust"],
                             **{k: result[k] for k in ("mu_C", "sigma_C", "mean_volume", "kkt_residual")}})
@@ -246,7 +255,7 @@ def main(config_path: str = "src/config/config.yaml") -> None:
         transform_params=MarginalTransformParams(
             eta_min=0.3, eta_max=0.7, alpha=2.0, beta=2.0
         ),
-        variance_threshold=0.95,
+        variance_threshold=0.90,
         seed=cfg.mc_validation.seed,
     )
 
