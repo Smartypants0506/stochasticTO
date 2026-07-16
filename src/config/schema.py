@@ -208,6 +208,30 @@ class MonteCarloValidationConfig:
     percentile_high: float = 95.0
     output_dir: str = "output/mc_validation"
 
+@dataclass
+class BoxMeshConfig:
+    """Synthetic box-mesh source (bypasses STEP import), used to validate
+    this project's multi-load-case topopt() pipeline against FEniTop's own
+    scripts/beam_3d.py reference case. Only cell_type is exposed as a
+    knob -- domain extents / element counts / BC placement are
+    intentionally hardcoded in src/meshing/box_source.py to match
+    beam_3d.py bit-for-bit; making those config-driven would defeat the
+    point of a fixed known-good reference case.
+ 
+    Attributes:
+        cell_type: "tetrahedron" (default) or "hexahedron".
+            beam_3d.py itself uses hexahedron elements, but its topopt()
+            call is single-case Stage-2-only (no random-field stage).
+            This project's Stage 3+ (compute_kl_expansion /
+            extract_simplices) builds an OpenTURNS FEM mesh that requires
+            SIMPLICES, so "hexahedron" is only valid if you stop after
+            Stage 2 -- main.py raises if mesh_source="box",
+            cell_type="hexahedron", and the pipeline proceeds past the
+            nominal topopt warm-start.
+    """
+    cell_type: str = "tetrahedron"
+
+
 
 @dataclass
 class ProjectConfig:
@@ -238,3 +262,5 @@ class ProjectConfig:
     solid_volume_color: tuple[int, int, int, int] = (255, 255, 0, 255)
     mc_validation: MonteCarloValidationConfig = field(default_factory=MonteCarloValidationConfig)
     keep_alive: KeepAliveConfig = field(default_factory=KeepAliveConfig)
+    mesh_source: str = "step"
+    box_mesh: BoxMeshConfig = field(default_factory=BoxMeshConfig)

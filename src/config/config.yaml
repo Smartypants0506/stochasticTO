@@ -1,3 +1,17 @@
+# mesh_source: "step" (CAD pipeline, default) or "box" (synthetic mesh
+# ported from FEniTop's scripts/beam_3d.py, for validating topopt()
+# against that reference case -- see src/meshing/box_source.py).
+# step_file/mesh_out_path/snap_tol/color_targets/solid_volume_color/
+# keep_alive below are ignored when mesh_source: "box".
+mesh_source: "box"
+ 
+box_mesh:
+  # "tetrahedron" (default) required for the full Stage 2-6 pipeline
+  # (Stage 3's KL expansion needs a simplicial mesh_serial). beam_3d.py
+  # itself uses "hexahedron", but that's Stage-2-only -- main.py raises
+  # if you set this to "hexahedron" and let the pipeline run past Stage 2.
+  cell_type: "tetrahedron"
+
 step_file: "data/cad/ge_bracket_rotated_nonds.step"
 mesh_out_path: "output/meshes/ge_bracket_rotated_nonds.xdmf"
 mesh_size_max: 2.0e-3

@@ -13,7 +13,7 @@ from pathlib import Path
 import yaml
 
 from src.config.schema import (
-    KeepAliveConfig, LoadCase, MaterialConfig, MonteCarloValidationConfig,
+    BoxMeshConfig, KeepAliveConfig, LoadCase, MaterialConfig, MonteCarloValidationConfig,
     OptimizationConfig, PetscConfig, ProjectConfig, RandomFieldConfig,
     SurrogateConfig,
 )
@@ -79,6 +79,13 @@ def load_config(path: str | Path) -> ProjectConfig:
     surrogate = SurrogateConfig(**raw.get("surrogate", {}))
     mc_validation = MonteCarloValidationConfig(**raw.get("mc_validation", {}))
     keep_alive = KeepAliveConfig(**raw.get("keep_alive", {}))
+    box_mesh = BoxMeshConfig(**raw.get("box_mesh", {}))
+
+    mesh_source = raw.get("mesh_source", "step")
+    if mesh_source not in ("step", "box"):
+        raise ValueError(
+            f"config.yaml's mesh_source must be 'step' or 'box', got {mesh_source!r}"
+        )
 
     return ProjectConfig(
         step_file=raw["step_file"],
@@ -95,4 +102,6 @@ def load_config(path: str | Path) -> ProjectConfig:
         mc_validation=mc_validation,
         keep_alive=keep_alive,
         solid_volume_color=tuple(raw.get("solid_volume_color", (255, 255, 0, 255))),
+        mesh_source=mesh_source,
+        box_mesh=box_mesh,
     )

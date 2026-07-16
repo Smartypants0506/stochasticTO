@@ -23,6 +23,7 @@ from src.validation.monte_carlo import (
 from src.meshing.importer import import_and_heal, finalize
 from src.meshing.mesher import extract_simplices, MeshingConfig, tag_physical_groups, generate_mesh, import_to_dolfinx
 from src.meshing.mapper import build_boundary_conditions
+from src.meshing.box_source import build_box_fenitop_dicts
 from src.fea.fenitop_adapter import build_fenitop_dicts
 
 from src.topology.heaviside_projection_glue import RandomHeavisideConfig
@@ -57,89 +58,125 @@ def main(config_path: str = "src/config/config.yaml") -> None:
         logger.info("material.poissons_ratio (raw config value) = %.6g", cfg.material.poissons_ratio)
     
 
-    if comm.rank == 0:
-        entities = import_and_heal(cfg.step_file)
-        mesh_cfg = MeshingConfig(mesh_size_max=cfg.mesh_size_max,
-                                color_targets=cfg.color_targets,
-                                solid_volume_color=cfg.solid_volume_color)
-        tag_physical_groups(entities, mesh_cfg)
-        generate_mesh(mesh_cfg, comm)
+    if cfg.mesh_source == "step":
+        # ---------------------------------------------------------------
+        # STEP/CAD mesh pipeline (unchanged).
+        # ---------------------------------------------------------------
+        if comm.rank == 0:
+            entities = import_and_heal(cfg.step_file)
+            mesh_cfg = MeshingConfig(mesh_size_max=cfg.mesh_size_max,
+                                    color_targets=cfg.color_targets,
+                                    solid_volume_color=cfg.solid_volume_color)
+            tag_physical_groups(entities, mesh_cfg)
+            generate_mesh(mesh_cfg, comm)
 
-    tagged_mesh = import_to_dolfinx(comm)  # already collective — reads/partitions on all ranks
-    assert "fixed" in tagged_mesh.name_to_tag, "No 'fixed' faces tagged — check STEP coloring"
-    assert "load_1" in tagged_mesh.name_to_tag, "No 'load_1' faces tagged — check STEP coloring"
+        tagged_mesh = import_to_dolfinx(comm)  # already collective — reads/partitions on all ranks
+        assert "fixed" in tagged_mesh.name_to_tag, "No 'fixed' faces tagged — check STEP coloring"
+        assert "load_1" in tagged_mesh.name_to_tag, "No 'load_1' faces tagged — check STEP coloring"
 
-    # cfg.load_cases is dict[case_name, list[LoadCase]] (see schema.py) --
-    # convert each LoadCase to a plain (group_name, vector) tuple, which is
-    # what mapper.build_boundary_conditions expects.
-    load_cases_input = {
-        case_name: [(lc.group_name, lc.vector) for lc in entries]
-        for case_name, entries in cfg.load_cases.items()
-    }
-    # --- keep-alive backbone resolution -------------------------------------
-    # Resolve the non-designable "keep-alive" corridor parameters here (the
-    # call site), not inside mapper.py, so the mesh-size-derived default length
-    # scale stays traceable to cfg. mapper.build_boundary_conditions raises if
-    # groups are given without concrete radius/eps, so we always pass both when
-    # enabled. When disabled, all three are None and solid_zone is unchanged.
-    ka = cfg.keep_alive
-    if ka.enabled:
-        keep_alive_groups = ka.groups
-        keep_alive_radius = (
-            ka.corridor_radius if ka.corridor_radius is not None
-            else 2.0 * cfg.mesh_size_max
+        # cfg.load_cases is dict[case_name, list[LoadCase]] (see schema.py) --
+        # convert each LoadCase to a plain (group_name, vector) tuple, which is
+        # what mapper.build_boundary_conditions expects.
+        load_cases_input = {
+            case_name: [(lc.group_name, lc.vector) for lc in entries]
+            for case_name, entries in cfg.load_cases.items()
+        }
+        # --- keep-alive backbone resolution -------------------------------------
+        # Resolve the non-designable "keep-alive" corridor parameters here (the
+        # call site), not inside mapper.py, so the mesh-size-derived default length
+        # scale stays traceable to cfg. mapper.build_boundary_conditions raises if
+        # groups are given without concrete radius/eps, so we always pass both when
+        # enabled. When disabled, all three are None and solid_zone is unchanged.
+        ka = cfg.keep_alive
+        if ka.enabled:
+            keep_alive_groups = ka.groups
+            keep_alive_radius = (
+                ka.corridor_radius if ka.corridor_radius is not None
+                else 2.0 * cfg.mesh_size_max
+            )
+            keep_alive_cluster_eps = (
+                ka.cluster_eps if ka.cluster_eps is not None
+                else 2.0 * cfg.mesh_size_max
+            )
+            if comm.rank == 0:
+                logger.info(
+                    "keep_alive enabled: groups=%s, corridor_radius=%.6g m, "
+                    "cluster_eps=%.6g m", keep_alive_groups,
+                    keep_alive_radius, keep_alive_cluster_eps,
+                )
+        else:
+            keep_alive_groups = None
+            keep_alive_radius = None
+            keep_alive_cluster_eps = None
+            if comm.rank == 0:
+                logger.info("keep_alive disabled; solid_zone uses volumes + "
+                            "protected faces only.")
+
+        bc = build_boundary_conditions(
+            tagged_mesh, load_cases_input,
+            snap_tol=cfg.snap_tol,
+            protected_face_groups=["fixed", "load_1", "load_2"],  # red bolt faces + blue pin face
+            protected_buffer_radius=4e-3,  # 4mm buffer; tune to your mesh_size_max (2mm)
+            keep_alive_groups=keep_alive_groups,
+            keep_alive_radius=keep_alive_radius,
+            keep_alive_cluster_eps=keep_alive_cluster_eps,
+            comm=comm,
         )
-        keep_alive_cluster_eps = (
-            ka.cluster_eps if ka.cluster_eps is not None
-            else 2.0 * cfg.mesh_size_max
-        )
+        if comm.rank == 0:
+            for case_name, entries in cfg.load_cases.items():
+                for lc in entries:
+                    vec_mag = np.linalg.norm(lc.vector)
+                    logger.info("RAW load_vector[case=%s, group=%s] = %s, magnitude = %.6g",
+                                case_name, lc.group_name, lc.vector, vec_mag)
+
+            for case_name, case_bcs in bc.traction_bcs.items():
+                for load_vec, membership_fn in case_bcs:
+                    vec_mag = np.linalg.norm(load_vec)
+                    logger.info("traction_bcs[case=%s] entry: vector=%s, |vector|=%.6g",
+                                case_name, load_vec, vec_mag)
+
+        if "load_1" in tagged_mesh.name_to_tag:
+            load1_tag = tagged_mesh.name_to_tag["load_1"]
+            ds = ufl.Measure("ds", domain=tagged_mesh.mesh, subdomain_data=tagged_mesh.facet_tags)
+            area_form = dolfinx.fem.form(1.0 * ds(load1_tag))
+            local_area = dolfinx.fem.assemble_scalar(area_form)
+            global_area = comm.allreduce(local_area, op=MPI.SUM)
+            if comm.rank == 0:
+                logger.info("Measured load_1 face area = %.6g m^2", global_area)
+
+        fem, opt_nominal, load_cases = build_fenitop_dicts(tagged_mesh, bc, cfg)
+
+    elif cfg.mesh_source == "box":
+        # ---------------------------------------------------------------
+        # Synthetic box mesh, ported from FEniTop's scripts/beam_3d.py,
+        # for validating topopt() results against that reference case.
+        # See src/meshing/box_source.py for what's hardcoded vs. cfg-driven.
+        # ---------------------------------------------------------------
+        if cfg.box_mesh.cell_type == "hexahedron":
+            raise NotImplementedError(
+                "mesh_source='box' with box_mesh.cell_type='hexahedron' "
+                "matches beam_3d.py exactly but is only valid through "
+                "Stage 2 (nominal topopt) -- Stage 3's compute_kl_expansion "
+                "requires a simplicial (tetrahedral) mesh_serial. This "
+                "main.py always runs the full Stage 2-6 pipeline, so "
+                "hexahedra would silently produce a wrong/garbage KL basis "
+                "in Stage 3 rather than fail loudly there. Set "
+                "box_mesh.cell_type='tetrahedron' for the full pipeline, "
+                "or run a separate Stage-2-only script if you specifically "
+                "want the hex-vs-hex comparison."
+            )
         if comm.rank == 0:
             logger.info(
-                "keep_alive enabled: groups=%s, corridor_radius=%.6g m, "
-                "cluster_eps=%.6g m", keep_alive_groups,
-                keep_alive_radius, keep_alive_cluster_eps,
+                "mesh_source='box': bypassing STEP/CAD pipeline, building "
+                "beam_3d.py-equivalent mesh (cell_type=%s)",
+                cfg.box_mesh.cell_type,
             )
+        tagged_mesh, fem, opt_nominal, load_cases = build_box_fenitop_dicts(cfg, comm)
+
     else:
-        keep_alive_groups = None
-        keep_alive_radius = None
-        keep_alive_cluster_eps = None
-        if comm.rank == 0:
-            logger.info("keep_alive disabled; solid_zone uses volumes + "
-                        "protected faces only.")
-
-    bc = build_boundary_conditions(
-        tagged_mesh, load_cases_input,
-        snap_tol=cfg.snap_tol,
-        protected_face_groups=["fixed", "load_1", "load_2"],  # red bolt faces + blue pin face
-        protected_buffer_radius=4e-3,  # 4mm buffer; tune to your mesh_size_max (2mm)
-        keep_alive_groups=keep_alive_groups,
-        keep_alive_radius=keep_alive_radius,
-        keep_alive_cluster_eps=keep_alive_cluster_eps,
-        comm=comm,
-    )
-    if comm.rank == 0:
-        for case_name, entries in cfg.load_cases.items():
-            for lc in entries:
-                vec_mag = np.linalg.norm(lc.vector)
-                logger.info("RAW load_vector[case=%s, group=%s] = %s, magnitude = %.6g",
-                            case_name, lc.group_name, lc.vector, vec_mag)
-
-        for case_name, case_bcs in bc.traction_bcs.items():
-            for load_vec, membership_fn in case_bcs:
-                vec_mag = np.linalg.norm(load_vec)
-                logger.info("traction_bcs[case=%s] entry: vector=%s, |vector|=%.6g",
-                            case_name, load_vec, vec_mag)
-
-    if "load_1" in tagged_mesh.name_to_tag:
-        load1_tag = tagged_mesh.name_to_tag["load_1"]
-        ds = ufl.Measure("ds", domain=tagged_mesh.mesh, subdomain_data=tagged_mesh.facet_tags)
-        area_form = dolfinx.fem.form(1.0 * ds(load1_tag))
-        local_area = dolfinx.fem.assemble_scalar(area_form)
-        global_area = comm.allreduce(local_area, op=MPI.SUM)
-        if comm.rank == 0:
-            logger.info("Measured load_1 face area = %.6g m^2", global_area)
-
-    fem, opt_nominal, load_cases = build_fenitop_dicts(tagged_mesh, bc, cfg)
+        raise ValueError(
+            f"Unknown mesh_source={cfg.mesh_source!r}; expected 'step' or 'box'"
+        )
 
     with XDMFFile(comm, "meshes/mesh_checkpoint.xdmf", "w") as xdmf:
         xdmf.write_mesh(tagged_mesh.mesh)
