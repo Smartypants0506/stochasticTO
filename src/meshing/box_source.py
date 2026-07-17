@@ -71,7 +71,13 @@ _MAX_ITER = 400
 _OPT_TOL = 1e-5
 _QUADRATURE_DEGREE = 2
 _BODY_FORCE = (0, 0, 0)
-_PETSC_OPTIONS = {"ksp_type": "cg", "pc_type": "gamg"}
+_PETSC_OPTIONS = {
+    "ksp_type": "cg",
+    "pc_type": "gamg",
+    "ksp_max_it": 2000,
+    "ksp_converged_reason": None,     # PETSc bool-flag options: value is ignored, just needs the key present
+    "ksp_error_if_not_converged": None,
+}
 
 _CELL_TYPES = {
     "tetrahedron": CellType.tetrahedron,

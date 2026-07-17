@@ -26,8 +26,37 @@ from dolfinx.fem import form, Function
 import dolfinx.la.petsc as la_petsc
 from dolfinx.fem.petsc import (create_vector, create_matrix,
                                assemble_vector, assemble_matrix, set_bc)
+from dolfinx import la
+
 import pyvista
 
+def build_nullspace(V):
+    """Build PETSc near-nullspace for 3D elasticity (rigid body modes).
+    Pattern verified against dolfinx's demo_elasticity.py, stable 0.9-0.12.dev0.
+    """
+    dtype = PETSc.ScalarType
+    bs = V.dofmap.index_map_bs
+    length0 = V.dofmap.index_map.size_local
+    basis = [la.vector(V.dofmap.index_map, bs=bs, dtype=dtype) for _ in range(6)]
+    b = [bi.array for bi in basis]
+
+    dofs = [V.sub(i).dofmap.list.flatten() for i in range(3)]
+    for i in range(3):
+        b[i][dofs[i]] = 1.0
+
+    x = V.tabulate_dof_coordinates()
+    dofs_block = V.dofmap.list.flatten()
+    x0, x1, x2 = x[dofs_block, 0], x[dofs_block, 1], x[dofs_block, 2]
+    b[3][dofs[0]] = -x1; b[3][dofs[1]] = x0
+    b[4][dofs[0]] = x2;  b[4][dofs[2]] = -x0
+    b[5][dofs[2]] = x1;  b[5][dofs[1]] = -x2
+
+    la.orthonormalize(basis)
+    basis_petsc = [
+        PETSc.Vec().createWithArray(xi[: bs * length0], bsize=3, comm=V.mesh.comm)
+        for xi in b
+    ]
+    return PETSc.NullSpace().create(vectors=basis_petsc)
 
 def create_mechanism_vectors(func_space, in_spring, out_spring):
     """Create vectors for compliant mechanism design."""
@@ -62,6 +91,14 @@ class LinearProblem:
         self.lam_wrap = la_petsc.create_vector_wrap(self.lam.x)
         self.lhs_form, self.rhs_form = form(lhs), form(rhs)
         self.lhs_mat = create_matrix(self.lhs_form)
+
+        # Rigid-body near-nullspace: without this, GAMG coarsens poorly as
+        # SIMP density contrast grows (eps=1e-6), and CG can stall/hang on
+        # near-disconnected material rather than fail. 3D vector elasticity
+        # only (gdim==3) -- this project's box/STEP meshes are both 3D.
+        if self.u.function_space.mesh.geometry.dim == 3:
+            self.lhs_mat.setNearNullSpace(build_nullspace(self.u.function_space))
+            
         self.rhs_vec = create_vector(self.rhs_form.function_spaces[0])
         self.bcs, self.l_vec, self.spring_vec = bcs, l_vec, spring_vec
 

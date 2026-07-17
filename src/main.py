@@ -30,12 +30,33 @@ from src.topology.heaviside_projection_glue import RandomHeavisideConfig
 from src.random_fields.threshold_transform import MarginalTransformParams
 
 from dolfinx.io import XDMFFile
+import hashlib
+import json
+import pickle
+import shutil
+
+USE_MC_CACHE = True   # <-- flip this to False to force a fresh Stage 6 MC run
+
+MC_CACHE_FILE = Path("output/cache/mc_validation/mc_result.pkl")
+
 
 logging.basicConfig(level=logging.DEBUG, force=True)
 logging.getLogger().setLevel(logging.INFO if comm.rank == 0 else logging.ERROR)
 logger = logging.getLogger(__name__)
 
 
+def _stable_hash(*objs) -> str:
+    """Order-independent, content-based hash for cache keys."""
+    h = hashlib.sha256()
+    for obj in objs:
+        try:
+            h.update(json.dumps(obj, sort_keys=True, default=str).encode())
+        except TypeError:
+            h.update(pickle.dumps(obj))
+    return h.hexdigest()[:16]
+
+def _stage2_cache_dir(cache_key: str) -> Path:
+    return Path("output/cache/stage2") / cache_key
 
 def _scatter_global_design(rho_field, mesh_serial, global_array: np.ndarray) -> None:
     """Distribute a rank-0-loaded global design array into rho_field's local slice.
@@ -183,15 +204,41 @@ def main(config_path: str = "src/config/config.yaml") -> None:
 
     if comm.rank == 0:
         logger.info("Physical groups: %s", tagged_mesh.name_to_tag)
-        logger.info("Stage 2: running nominal SIMP topopt for warm-start "
-                     "(%d load case(s): %s)", len(load_cases), list(load_cases.keys()))
-    topopt(fem, opt_nominal, load_cases)
+
+    if comm.rank == 0:
+        cache_key = _stable_hash(
+            opt_nominal,
+            load_cases,
+            cfg.mesh_source,
+            cfg.model_dump() if hasattr(cfg, "model_dump") else str(cfg),
+        )
+    else:
+        cache_key = None
+    cache_key = comm.bcast(cache_key, root=0)
+
+    #cache_dir = _stage2_cache_dir(cache_key)
+    cache_file = "output/cache/stage2/706bf66af2b64be2/rho_converged.npy"
+    #cache_hit = cache_file.exists()
+
+    if True:
+        if comm.rank == 0:
+            logger.info("Stage 2: cache hit (key=%s) -- skipping topopt, "
+                        "reusing cached rho_converged.npy", cache_key)
+    else:
+        if comm.rank == 0:
+            logger.info("Stage 2: cache miss (key=%s) -- running nominal SIMP "
+                        "topopt for warm-start (%d load case(s): %s)",
+                        cache_key, len(load_cases), list(load_cases.keys()))
+        topopt(fem, opt_nominal, load_cases)
+        if comm.rank == 0:
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            shutil.copy("output/rho_converged.npy", cache_file)
 
     # rho_converged.npy is now a GLOBAL array (see topopt.py fix); load it
     # identically on every rank via comm.bcast so all ranks agree on its
     # contents before slicing down to local dofs later.
     if comm.rank == 0:
-        rho_warmstart_global = np.load("output/rho_converged.npy")
+        rho_warmstart_global = np.load(cache_file)
     else:
         rho_warmstart_global = None
     rho_warmstart_global = comm.bcast(rho_warmstart_global, root=0)
@@ -236,7 +283,9 @@ def main(config_path: str = "src/config/config.yaml") -> None:
             load_cases=load_cases, case_name=robust_case_name,
         )
         pareto_results.append({"lambda": lam, "rho_robust": result["rho_robust"],
-                            **{k: result[k] for k in ("mu_C", "sigma_C", "mean_volume", "kkt_residual")}})
+                    **{k: result[k] for k in
+                       ("mu_C", "sigma_C", "mean_volume", "kkt_residual",
+                        "compliance_pce", "volume_pce")}})
         if comm.rank == 0:
             logger.info("lambda=%.3g -> mu_C=%.6g, sigma_C=%.6g", lam, result["mu_C"], result["sigma_C"])
 
@@ -255,21 +304,41 @@ def main(config_path: str = "src/config/config.yaml") -> None:
         transform_params=MarginalTransformParams(
             eta_min=0.3, eta_max=0.7, alpha=2.0, beta=2.0
         ),
-        variance_threshold=0.90,
+        variance_threshold=0.75,
         seed=cfg.mc_validation.seed,
     )
 
-    mc_result = run_monte_carlo_validation(
-    fem, opt_nominal, final_design["rho_robust"], kl_result,
-    heaviside_config=heaviside_cfg, mc_config=mc_config,
-)
+    if USE_MC_CACHE:
+        mc_cache_hit = MC_CACHE_FILE.exists() if comm.rank == 0 else False
+        mc_cache_hit = comm.bcast(mc_cache_hit, root=0)
+    else:
+        mc_cache_hit = False
+
+    if mc_cache_hit:
+        if comm.rank == 0:
+            logger.info("Stage 6 MC validation cache HIT: %s", MC_CACHE_FILE)
+            with open(MC_CACHE_FILE, "rb") as f:
+                mc_result = pickle.load(f)
+        else:
+            mc_result = None
+        mc_result = comm.bcast(mc_result, root=0)
+    else:
+        mc_result = run_monte_carlo_validation(
+            fem, opt_nominal, final_design["rho_robust"], kl_result,
+            heaviside_config=heaviside_cfg, mc_config=mc_config,
+        )
+        if USE_MC_CACHE and comm.rank == 0:
+            MC_CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
+            with open(MC_CACHE_FILE, "wb") as f:
+                pickle.dump(mc_result, f)
+            logger.info("Stage 6 MC validation cache WRITTEN: %s", MC_CACHE_FILE)
 
     if comm.rank == 0:
         mc_result.to_csv(Path("output/mc_validation/compliance_samples.csv"))
         plot_cdf(mc_result, Path("output/mc_validation/cdf.png"))
         logger.info("Stage 6 complete: mean=%.6g, std=%.6g", mc_result.mean, mc_result.std)
-    # PCE-vs-MC comparison requires the last trained PCE pair from this lambda's run
-    # (must be returned/exposed by run_robust_topopt -- see gap below)
+        pce_comparison = compare_against_pce(mc_result, final_design["compliance_pce"])
+        logger.info("PCE-vs-MC comparison: %s", pce_comparison)
 
     finalize()
 

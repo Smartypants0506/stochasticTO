@@ -50,6 +50,11 @@ class PCEGradientModel:
     sigma_C: float
     dc_drho: np.ndarray
     n_kl: int
+    active_kl_indices: np.ndarray | None = None
+    chaos_result: ot.FunctionalChaosResult | None = None  # NEW: needed to
+    # evaluate this PCE's metamodel outside this module (e.g. Stage 6's
+    # compare_against_pce). Sourced from the PCEBuildResult this model
+    # was built from.
 
     def dmu_drho(self) -> np.ndarray:
         """d(mu_C)/drho = dc_alpha=0/drho -- the constant-term coefficient's gradient.
@@ -116,6 +121,7 @@ def build_pce_gradient_model(
     pce_result: PCEBuildResult,
     xi_train: np.ndarray,
     dC_drho_train: np.ndarray,
+    active_kl_indices: np.ndarray | None = None,
 ) -> PCEGradientModel:
     """Build the analytic mean/variance/gradient model from a fitted PCE.
 
@@ -195,4 +201,6 @@ def build_pce_gradient_model(
         sigma_C=sigma_C,
         dc_drho=dc_drho,
         n_kl=pce_result.n_kl,
+        active_kl_indices=active_kl_indices,
+        chaos_result=chaos_result,
     )

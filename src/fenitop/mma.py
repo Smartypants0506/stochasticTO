@@ -119,7 +119,7 @@ class MMA:
         self._asymptote_min = opts.getReal(f"{prefix}tao_mma_asymptote_min", 0.01)
         self._asymptote_max = opts.getReal(f"{prefix}tao_mma_asymptote_max", 10.0)
         self._raai = opts.getReal(f"{prefix}tao_mma_raai", 0.0)  # 1e-5
-        self._theta = opts.getReal(f"{prefix}tao_mma_theta", 0.001)
+        self._theta = opts.getReal(f"{prefix}tao_mma_theta", 0.1)
 
         if not np.isclose(self._raai, 0.0):
             raise RuntimeError("raai 0 only supported.")
@@ -578,17 +578,33 @@ class MMA:
                     )
                 # --- END DIAGNOSTICS ---
 
+                def _sub_monitor(subtao):
+                    logger.info(f"[subsolver] it={subtao.getIterationNumber()} "
+                                f"obj={subtao.getObjectiveValue():.6e} "
+                                f"|grad|={subtao.getGradient()[0].norm():.4e}")
+                                
+                self._subsolver.setMonitor(_sub_monitor)
+
                 self._subsolver.solve()
 
                 if self._subsolver.getConvergedReason() < 0:
-                    reason_name = PETSc.TAO.ConvergedReason(reason).name if hasattr(PETSc.TAO.ConvergedReason(reason), "name") else str(reason)
-                    logger.error(
-                        f"[MMA diag] it={it}: subsolver diverged, reason={reason} ({reason_name}), "
-                        f"subsolver_its={self._subsolver.getIterationNumber()}, "
-                        f"subsolver_max_its={self._subsolver.getMaximumIterations()}, "
-                        f"|grad|={grad_norm:.4e}, |p|={p_norm:.4e}, |q|={q_norm:.4e}"
-                    )
-                    raise RuntimeError("Subsolver diverged.")
+                    _TAO_REASONS = {
+                        2: "CONVERGED_GATOL", 3: "CONVERGED_GRTOL", 4: "CONVERGED_GTTOL",
+                        5: "CONVERGED_STEPTOL", 6: "CONVERGED_MINF", 7: "CONVERGED_USER",
+                        -2: "DIVERGED_MAXITS", -4: "DIVERGED_NAN", -5: "DIVERGED_MAXFCN",
+                        -6: "DIVERGED_LS_FAILURE", -7: "DIVERGED_TR_REDUCTION",
+                        -8: "DIVERGED_USER",
+                    }
+
+                    reason = self._subsolver.getConvergedReason()
+                    if reason < 0:
+                        logger.error(
+                            f"[MMA diag] subsolver diverged: reason={reason} "
+                            f"({_TAO_REASONS.get(reason, 'UNKNOWN')}), "
+                            f"its={self._subsolver.getIterationNumber()}, "
+                            f"final_obj={self._subsolver.getObjectiveValue()}"
+                            )
+                    raise RuntimeError(f"Subsolver diverged (reason={reason}).")
 
                 self.x(self._subsolver.getSolution(), self._x)
             else:

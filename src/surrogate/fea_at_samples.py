@@ -43,6 +43,8 @@ import numpy as np
 
 from src.topology.heaviside_projection_glue import RandomFieldHeaviside
 
+import time
+
 
 logger = logging.getLogger(__name__)
 
@@ -145,7 +147,7 @@ def run_fea_at_samples(
     dC_drho_samples = np.empty((n_train, n_elems_local))
     dV_drho_samples = np.empty((n_train, n_elems_local))
 
-
+    t0 = time.time()
     for j in range(n_train):
         rho_field.x.petsc_vec.array[:] = rho_nominal
         density_filter.forward()  # deterministic Helmholtz filter: rho -> rho_tilde
@@ -183,7 +185,9 @@ def run_fea_at_samples(
 
 
         if is_root and ((j + 1) % 50 == 0 or j == n_train - 1):
-            logger.info("FEA-at-samples: completed %d/%d solves", j + 1, n_train)
+            logger.info("FEA-at-samples: completed %d/%d solves (%.2fs for last batch)",
+                        j + 1, n_train, time.time() - t0)
+            t0 = time.time()
 
 
     return SurrogateTrainingData(

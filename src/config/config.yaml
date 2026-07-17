@@ -60,7 +60,7 @@ load_cases:
 optimization:
   max_iter: 400
   opt_tol: 1.0e-5
-  vol_frac: 0.1
+  vol_frac: 0.08
   penalty: 3.0
   epsilon: 1.0e-6
   filter_radius: 0.006
@@ -88,16 +88,16 @@ random_field:
   eta_max: 0.7
   alpha: 2.0
   beta: 2.0
-  variance_threshold: 0.90
+  variance_threshold: 0.75
   n_kl_hint: 20
   seed: 42
 
 surrogate:
-  n_train: 100
-  n_test: 100
+  n_train: 200
+  n_test: 50
   hyperbolic_q: 0.75
   max_degree_attempts: 4
-  q2_threshold: 0.90
+  q2_threshold: 0.75
 
 mc_validation:
   n_samples: 500

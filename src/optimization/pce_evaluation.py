@@ -50,12 +50,16 @@ class PCERefreshPolicy:
             not this module, since only the driver knows the true MMA
             iteration counter.
     """
-    refresh_interval: int = 5
+    refresh_interval: int = 20
     last_refresh_iteration: int = 0
+    max_delta_rho_inf: float = 0.3   # new: force refresh if design moved this much (in [0,1] density units)
 
-    def needs_refresh(self, current_iteration: int) -> bool:
-        """True if the PCE pair is stale and must be rebuilt before this iteration's evaluate call."""
-        return (current_iteration - self.last_refresh_iteration) >= self.refresh_interval
+    def needs_refresh(self, current_iteration: int, delta_rho_inf: float | None = None) -> bool:
+        if (current_iteration - self.last_refresh_iteration) >= self.refresh_interval:
+            return True
+        if delta_rho_inf is not None and delta_rho_inf >= self.max_delta_rho_inf:
+            return True
+        return False
 
 
 def evaluate_from_pce(

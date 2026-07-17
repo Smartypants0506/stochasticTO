@@ -33,31 +33,39 @@ MPI design (replaces the old serial-only limitation):
     and matches them against kl_result's global nodes via the same
     coordinate-matching pattern used throughout this codebase. Every rank
     must call this function together with an identical rho_converged
-    (local slice) and mc_config.seed; xi is drawn identically on every
-    rank per sample since np.random.default_rng(seed + i) is deterministic,
-    so no further communication is needed at sample time. Compliance is
-    already a true global scalar via comm.allreduce on assemble_scalar,
-    unchanged from the original.
+    (a full GLOBAL array -- see run_monte_carlo_validation's docstring;
+    this function scatters it internally) and mc_config.seed; xi is drawn
+    identically on every rank per sample since np.random.default_rng(seed
+    + i) is deterministic, so no further communication is needed at sample
+    time beyond the per-sample rho_phys_field gather used for ensemble
+    export. Compliance is already a true global scalar via comm.allreduce
+    on assemble_scalar, unchanged from the original.
 """
 from __future__ import annotations
 
 
 import logging
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
 
 import numpy as np
+import pyvista
+import dolfinx.plot
 from mpi4py import MPI
 from dolfinx.fem import form, assemble_scalar
 
 
 from src.fenitop.fem import form_fem
 from src.fenitop.parameterize import DensityFilter
+from src.fenitop.utility import Communicator
 
 
 from src.topology.heaviside_projection_glue import RandomFieldHeaviside, RandomHeavisideConfig
 from src.random_fields.kl_expansion import KLExpansionResult
+
+import openturns as ot
 
 
 logger = logging.getLogger(__name__)
@@ -83,12 +91,40 @@ class MCConfig:
         seed: Base RNG seed; sample i uses seed + i for reproducibility.
             Must be identical on every rank (this is a collective loop).
         output_dir: Directory to write results CSV/plot to.
+        write_ensemble: If True, gather and write a FULL-RESOLUTION per-sample
+            .vtu (nodal rho_phys density field) for every one of n_samples
+            draws, plus an ensemble.pvd ParaView collection and a
+            reliability_map.vtu (per-node mean/std/exceedance-probability
+            across the ensemble). This is the "probability cloud of
+            perturbed geometries" artifact -- exact, not a cheap replay --
+            per explicit request. Cost scales as n_samples x (one
+            world-collective gather + one VTU write on rank 0), on top of
+            the FEA solve already paid per sample; at n_samples=5000 this
+            is the dominant wall-clock cost, matching fileDescription.md's
+            own "~3-5 hours on DGX" estimate for full-scale MC.
+        ensemble_dir: Directory for per-sample .vtu files. Defaults to
+            output_dir / "ensemble" if left None (resolved in __post_init__).
+        reliability_threshold: Density value below which a node is counted
+            as "locally void/unreliable" for the per-node exceedance-
+            probability field in reliability_map.vtu (default 0.5, the
+            conventional solid/void SIMP threshold).
+        store_eta_samples: If True, retain the full [n_samples x n_dofs_local]
+            eta(x) realization array in the returned MCResult (as before).
+            Default False: at n_samples=5000 across e.g. 64 ranks this is
+            the single largest per-rank buffer in the whole loop and is not
+            needed for compliance stats, the CDF, or PCE-vs-MC comparison
+            (which only needs xi_samples, always retained). Opt in only if
+            you specifically need the raw per-sample nodal eta(x) fields.
     """
     n_samples: int = 2500
     beta: float = 8.0
     percentiles: tuple[float, float] = (5.0, 95.0)
     seed: int = 0
     output_dir: Path = field(default_factory=lambda: Path("output/mc_validation"))
+    write_ensemble: bool = True
+    ensemble_dir: Path | None = None
+    reliability_threshold: float = 0.5
+    store_eta_samples: bool = False
 
 
     def __post_init__(self) -> None:
@@ -102,6 +138,15 @@ class MCConfig:
                 "scale up n_samples before treating results as production-grade.",
                 self.n_samples, FULL_SPEC_N_MC,
             )
+        # Defensive coercion: schema.py's MonteCarloValidationConfig.output_dir
+        # is typed as a plain str (config.yaml value), so a caller wiring that
+        # straight into MCConfig(output_dir=...) would otherwise pass a str
+        # here, and self.output_dir / "ensemble" below would raise TypeError.
+        self.output_dir = Path(self.output_dir)
+        if self.ensemble_dir is None:
+            self.ensemble_dir = self.output_dir / "ensemble"
+        else:
+            self.ensemble_dir = Path(self.ensemble_dir)
 
 
 
@@ -123,9 +168,33 @@ class MCResult:
             used, restricted to THIS RANK's local dofs (retained for
             reproducibility / later PCE-vs-MC comparison; NOT gathered to
             a global array here to avoid an unnecessary MPI collective for
-            an MVP diagnostic field).
+            an MVP diagnostic field). None unless mc_config.store_eta_samples
+            was True (see MCConfig docstring -- this is the largest
+            per-rank buffer in the loop and is opt-in).
         n_kl: Number of KL modes used to generate eta(x), for provenance.
         variance_explained: KL truncation variance fraction, for provenance.
+        reliability_mean: [N_nodes_GLOBAL] per-node mean physical density
+            rho_phys across the full ensemble. Populated on rank 0 only
+            (None on every other rank), since it is a gathered/aggregated
+            spatial field, not a world-identical scalar. None entirely if
+            mc_config.write_ensemble was False.
+        reliability_std: [N_nodes_GLOBAL] per-node std of rho_phys across
+            the ensemble. Same rank-0-only convention as reliability_mean.
+        reliability_prob_void: [N_nodes_GLOBAL] per-node fraction of
+            ensemble samples with rho_phys below mc_config.reliability_threshold
+            -- the manufacturing-sensitive-region reliability map. Same
+            rank-0-only convention.
+        probability_weights: [n_samples] Gaussian-density opacity weight
+            per sample, exp(-0.5*||xi_i||^2) normalized to max=1, i.e. how
+            "typical" each drawn realization is under the underlying
+            N(0, I) KL coefficient law -- intended for ParaView opacity
+            transfer functions on the ensemble (extreme/rare geometries
+            render more transparent). World-identical (xi is drawn
+            identically on every rank), always populated when
+            write_ensemble is True.
+        ensemble_pvd_path: Path to the written ensemble.pvd ParaView
+            collection file, or None if write_ensemble was False. Only
+            meaningful on rank 0 (the only rank that writes files).
     """
     compliance_samples: np.ndarray
     mean: float
@@ -133,10 +202,15 @@ class MCResult:
     std: float
     percentile_low: float
     percentile_high: float
-    eta_samples: np.ndarray
+    eta_samples: np.ndarray | None
     n_kl: int
     variance_explained: float
     xi_samples: np.ndarray
+    reliability_mean: np.ndarray | None = None
+    reliability_std: np.ndarray | None = None
+    reliability_prob_void: np.ndarray | None = None
+    probability_weights: np.ndarray | None = None
+    ensemble_pvd_path: Path | None = None
 
 
     def cdf(self) -> tuple[np.ndarray, np.ndarray]:
@@ -161,6 +235,31 @@ class MCResult:
         np.savetxt(path, rows, delimiter=",", header=header, comments="", fmt=["%d", "%.10e"])
         logger.info("Wrote MC compliance samples to %s", path)
 
+
+
+def _write_pvd_collection(pvd_path: Path, entries: list[tuple[int, str]]) -> None:
+    """Write a minimal ParaView .pvd XML collection referencing each
+    per-sample .vtu file, keyed by sample index as the "timestep" attribute
+    so ParaView's animation/time controls can scrub through the ensemble.
+
+    entries: list of (sample_index, relative_path_to_vtu) tuples, where the
+    relative path is resolved relative to pvd_path's own directory (i.e.
+    "ensemble/sample_00000.vtu" when pvd_path lives in the parent of
+    ensemble_dir) -- this matches how most ParaView-facing tools expect a
+    .pvd file to sit alongside (not inside) the directory it indexes.
+    """
+    lines = [
+        '<?xml version="1.0"?>',
+        '<VTKFile type="Collection" version="0.1" byte_order="LittleEndian">',
+        "  <Collection>",
+    ]
+    for idx, relpath in entries:
+        lines.append(f'    <DataSet timestep="{idx}" group="" part="0" file="{relpath}"/>')
+    lines.append("  </Collection>")
+    lines.append("</VTKFile>")
+    pvd_path.parent.mkdir(parents=True, exist_ok=True)
+    pvd_path.write_text("\n".join(lines))
+    logger.info("Wrote ParaView collection %s (%d entries)", pvd_path, len(entries))
 
 
 def run_monte_carlo_validation(
@@ -196,28 +295,42 @@ def run_monte_carlo_validation(
         opt_config: The `opt` dict as consumed by form_fem / DensityFilter
             (penalty, epsilon, filter_radius, opt_compliance=True required
             for this MVP since only the compliance QoI path is exercised).
-        rho_converged: [n_elems_local] converged density field from a prior
-            deterministic or robust TO run. Must be THIS RANK's local slice,
-            matching rho_field's local dof array exactly under the SAME
-            comm.size that produced it.
+        rho_converged: [n_elems_GLOBAL] converged density field from a
+            prior deterministic or robust TO run (e.g. topopt.py's
+            rho_converged.npy, or run_robust_topopt's now-gathered
+            "rho_robust" -- see dolfiny_mma_driver.py). Must be a full
+            GLOBAL array, IDENTICAL on every rank (loaded once on rank 0
+            and comm.bcast'd by the caller, per this codebase's existing
+            convention). This function scatters it internally to each
+            rank's local dof slice via Communicator.bcast(), exactly
+            mirroring run_robust_topopt's own rho_warm_start handling --
+            it is NOT a per-rank local slice, unlike the previous version
+            of this function.
         kl_result: A KLExpansionResult already computed (and, under MPI,
             already broadcast identically to every rank) via
             src/random_fields/kl_expansion.py's compute_kl_expansion(). This
             is NOT recomputed here.
         heaviside_config: RandomHeavisideConfig (kernel + marginal params).
-        mc_config: MCConfig controlling n_samples, beta, seed, percentiles.
-            seed must be identical on every rank.
+        mc_config: MCConfig controlling n_samples, beta, seed, percentiles,
+            and (new) write_ensemble/ensemble_dir/reliability_threshold/
+            store_eta_samples -- see MCConfig docstring.
 
 
     Returns:
         An MCResult with the empirical compliance distribution (global,
-        identical on every rank) and per-rank-local eta(x)/xi provenance
-        arrays.
+        identical on every rank), xi_samples (world-identical), optionally
+        eta_samples (per-rank-local, only if mc_config.store_eta_samples),
+        and -- when mc_config.write_ensemble is True -- a full-resolution
+        per-sample VTU ensemble + ParaView .pvd collection on disk, plus
+        rank-0-only reliability_mean/reliability_std/reliability_prob_void
+        per-node arrays and per-sample probability_weights for opacity
+        mapping.
 
 
     Raises:
-        ValueError: If rho_converged's shape does not match rho_field's
-            local dof shape, or if opt_config["opt_compliance"] is not True.
+        ValueError: If rho_converged's size does not match the design
+            space's GLOBAL dof count, or if opt_config["opt_compliance"]
+            is not True.
     """
     comm = MPI.COMM_WORLD
 
@@ -244,13 +357,24 @@ def run_monte_carlo_validation(
     )
 
 
-    expected_shape = rho_field.x.petsc_vec.array.shape
-    if rho_converged.shape != expected_shape:
+    # BUGFIX (multi-rank correctness): the old version asserted rho_converged
+    # against rho_field's LOCAL dof shape and used it directly -- correct by
+    # accident only at comm.size == 1. rho_converged is now a GLOBAL array
+    # (see docstring); validate against the GLOBAL dof count and scatter it
+    # into rho_field's local slice via Communicator.bcast(), the exact same
+    # pattern run_robust_topopt uses for its own rho_warm_start argument.
+    design_index_map = rho_field.function_space.dofmap.index_map
+    n_elems_global = design_index_map.size_global
+    if rho_converged.size != n_elems_global:
         raise ValueError(
-            f"rho_converged shape {rho_converged.shape} does not match "
-            f"rho_field local dof shape {expected_shape}. Under MPI, "
-            "rho_converged must be THIS RANK's local slice, not a global array."
+            f"rho_converged has {rho_converged.size} entries but the design "
+            f"space has {n_elems_global} GLOBAL dofs. rho_converged must be "
+            "a full global array (identical on every rank), not a local "
+            "slice -- see this function's docstring."
         )
+    design_comm = Communicator(rho_field.function_space, fem_config["mesh_serial"])
+    design_comm.bcast(rho_field, rho_converged)
+    rho_converged_local = rho_field.x.petsc_vec.array.copy()
 
 
     local_node_coordinates = rho_phys_field.function_space.tabulate_dof_coordinates()
@@ -266,15 +390,54 @@ def run_monte_carlo_validation(
         )
 
 
+    # --- Full-resolution ensemble export setup (only if requested) --------
+    # phys_comm gathers THIS SAMPLE's rho_phys_field to a true global array
+    # on rank 0, using the same Communicator machinery (coordinate-matched
+    # local<->global dof map, built ONCE here and reused for every sample --
+    # the expensive cKDTree match happens only once, not per sample).
+    write_ensemble = mc_config.write_ensemble
+    if write_ensemble:
+        phys_comm = Communicator(rho_phys_field.function_space, fem_config["mesh_serial"])
+        if comm.rank == 0:
+            mesh_serial = fem_config["mesh_serial"]
+            tdim = mesh_serial.topology.dim
+            vtk_cells, vtk_cell_types, vtk_points = dolfinx.plot.vtk_mesh(mesh_serial, tdim)
+            ensemble_grid = pyvista.UnstructuredGrid(vtk_cells, vtk_cell_types, vtk_points)
+            n_nodes_global = vtk_points.shape[0]
+
+            mc_config.output_dir.mkdir(parents=True, exist_ok=True)
+            mc_config.ensemble_dir.mkdir(parents=True, exist_ok=True)
+            sum_rho = np.zeros(n_nodes_global)
+            sumsq_rho = np.zeros(n_nodes_global)
+            count_void = np.zeros(n_nodes_global)
+            pvd_entries: list[tuple[int, str]] = []
+            weights = np.zeros(mc_config.n_samples)
+            # Resolved once, up front, so per-sample relative paths below are
+            # correct even if ensemble_dir was overridden away from the
+            # output_dir/"ensemble" default.
+            ensemble_pvd_dir = mc_config.output_dir
+
+            logger.warning(
+                "write_ensemble=True: gathering + writing a full-resolution "
+                ".vtu for all %d samples (N_nodes_global=%d). This is the "
+                "dominant wall-clock cost of Stage 6 at scale -- expect "
+                "hours, not minutes, for n_samples>=5000 (matches "
+                "fileDescription.md's own ~3-5 hour DGX estimate).",
+                mc_config.n_samples, n_nodes_global,
+            )
+
+
     compliance_form = form(opt_config["compliance"])
     compliance_samples = np.zeros(mc_config.n_samples)
     n_dofs_local = local_node_coordinates.shape[0]
-    eta_samples_all = np.zeros((mc_config.n_samples, n_dofs_local))
+    eta_samples_all = (
+        np.zeros((mc_config.n_samples, n_dofs_local)) if mc_config.store_eta_samples else None
+    )
     xi_samples_all = np.zeros((mc_config.n_samples, rf_heaviside.kl_result.n_kl))
 
 
     for i in range(mc_config.n_samples):
-        rho_field.x.petsc_vec.array[:] = rho_converged
+        rho_field.x.petsc_vec.array[:] = rho_converged_local
         density_filter.forward()
 
 
@@ -282,13 +445,35 @@ def run_monte_carlo_validation(
         xi_sample = rng.standard_normal(size=rf_heaviside.kl_result.n_kl)
         eta_sample = rf_heaviside.set_eta_from_xi(xi_sample)
         xi_samples_all[i, :] = xi_sample
-        eta_samples_all[i, :] = eta_sample
+        if mc_config.store_eta_samples:
+            eta_samples_all[i, :] = eta_sample
         rf_heaviside.forward(mc_config.beta)
 
 
         linear_problem.solve_fem()
         C_value = comm.allreduce(assemble_scalar(compliance_form), op=MPI.SUM)
         compliance_samples[i] = C_value
+
+
+        if write_ensemble:
+            # Collective on every rank -- gathers this sample's rho_phys_field
+            # to a true global nodal array on rank 0 (None on other ranks).
+            global_rho_phys = phys_comm.gather(rho_phys_field)
+            if comm.rank == 0:
+                ensemble_grid.point_data["density"] = global_rho_phys
+                sample_path = mc_config.ensemble_dir / f"sample_{i:05d}.vtu"
+                ensemble_grid.save(str(sample_path))
+                sample_relpath = os.path.relpath(sample_path, start=ensemble_pvd_dir)
+                pvd_entries.append((i, sample_relpath))
+
+                sum_rho += global_rho_phys
+                sumsq_rho += global_rho_phys ** 2
+                count_void += (global_rho_phys < mc_config.reliability_threshold)
+                # Gaussian-density opacity weight: xi ~ iid N(0, I), so this
+                # is proportional to the true likelihood of this realization
+                # -- extreme (rare) samples get a lower weight, i.e. render
+                # more transparent in a ParaView opacity transfer function.
+                weights[i] = np.exp(-0.5 * float(np.sum(xi_sample ** 2)))
 
 
         if comm.rank == 0 and (i + 1) % max(1, mc_config.n_samples // 10) == 0:
@@ -320,6 +505,46 @@ def run_monte_carlo_validation(
         )
 
 
+    reliability_mean = reliability_std = reliability_prob_void = None
+    probability_weights = None
+    ensemble_pvd_path = None
+
+
+    if write_ensemble and comm.rank == 0:
+        n = mc_config.n_samples
+        reliability_mean = sum_rho / n
+        reliability_var = np.clip(sumsq_rho / n - reliability_mean ** 2, 0.0, None)
+        reliability_std = np.sqrt(reliability_var)
+        reliability_prob_void = count_void / n
+
+        # Normalize opacity weights to max=1 -- a direct [0,1] range is what
+        # a ParaView opacity transfer function expects; the relative
+        # likelihood ordering between samples is unaffected by this scaling.
+        probability_weights = weights / weights.max() if weights.max() > 0 else weights
+        np.savetxt(
+            mc_config.output_dir / "probability_weights.csv",
+            np.column_stack([np.arange(n), probability_weights]),
+            delimiter=",", header="sample_index,opacity_weight", comments="", fmt=["%d", "%.10e"],
+        )
+
+        reliability_grid = ensemble_grid.copy()
+        reliability_grid.point_data.clear()
+        reliability_grid.point_data["mean_density"] = reliability_mean
+        reliability_grid.point_data["std_density"] = reliability_std
+        reliability_grid.point_data["prob_void"] = reliability_prob_void
+        reliability_path = mc_config.output_dir / "reliability_map.vtu"
+        reliability_grid.save(str(reliability_path))
+
+        ensemble_pvd_path = ensemble_pvd_dir / "ensemble.pvd"
+        _write_pvd_collection(ensemble_pvd_path, pvd_entries)
+
+        logger.info(
+            "Ensemble export complete: %d sample VTUs in %s, reliability map "
+            "at %s, ParaView collection at %s",
+            n, mc_config.ensemble_dir, reliability_path, ensemble_pvd_path,
+        )
+
+
     return MCResult(
         compliance_samples=compliance_samples,
         mean=mean,
@@ -331,40 +556,32 @@ def run_monte_carlo_validation(
         xi_samples=xi_samples_all,
         n_kl=rf_heaviside.kl_result.n_kl,
         variance_explained=rf_heaviside.kl_result.variance_explained,
+        reliability_mean=reliability_mean,
+        reliability_std=reliability_std,
+        reliability_prob_void=reliability_prob_void,
+        probability_weights=probability_weights,
+        ensemble_pvd_path=ensemble_pvd_path,
     )
 
 
 
-def compare_against_pce(mc_result: MCResult, pce_result) -> dict:
-    """Validate a PCE surrogate against brute-force MC ground truth.
-
-
-    Implements Section 3.6: RMSE, relative error on mean/variance, Q^2 on
-    the full MC sample set, and tail-quantile underprediction flags.
-
-
-    Note: mc_result.xi_samples is a WORLD-COLLECTIVE, rank-agnostic
-    quantity (xi is drawn identically per rank per sample), so this
-    comparison is valid to run identically on every rank without gathering.
-
-
+def compare_against_pce(mc_result: MCResult, pce_model) -> dict:
+    """...
     Args:
-        mc_result: Output of run_monte_carlo_validation (must have
-            xi_samples populated).
-        pce_result: A fitted PCEBuildResult (pce_builder.build_pce_surrogate's
-            output), whose chaos_result.getMetaModel() is evaluated at
-            mc_result.xi_samples for a like-for-like comparison.
-
-
-    Returns:
-        Dict with keys: rmse, relative_error_mean, relative_error_variance,
-        q2_vs_mc, tail_low_underprediction, tail_high_underprediction.
+        mc_result: Output of run_monte_carlo_validation (xi_samples at
+            FULL n_kl dimension).
+        pce_model: A PCEGradientModel (src.surrogate.pce_model). Its
+            active_kl_indices (if set) is used to slice mc_result.xi_samples
+            down to the dimension pce_model.chaos_result was actually fit
+            on, before evaluating the metamodel.
     """
-    import openturns as ot
 
+    xi_eval = mc_result.xi_samples
+    if pce_model.active_kl_indices is not None:
+        xi_eval = xi_eval[:, pce_model.active_kl_indices]
 
-    metamodel = pce_result.chaos_result.getMetaModel()
-    xi_ot = ot.Sample(mc_result.xi_samples)
+    metamodel = pce_model.chaos_result.getMetaModel()
+    xi_ot = ot.Sample(xi_eval)
     pce_predictions = np.array(metamodel(xi_ot)).ravel()
 
 
