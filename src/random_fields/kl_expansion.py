@@ -32,7 +32,7 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-VARIANCE_EXPLAINED_THRESHOLD = 0.90  # Section 3.3: ">= 95% of total variance"
+VARIANCE_EXPLAINED_THRESHOLD = 0.95  # Section 3.3: ">= 95% of total variance"
 
 _KL_CACHE_DIR = Path("output/cache/kl_expansion")
 
@@ -56,7 +56,7 @@ def _kl_cache_key(
 
 
 def _kl_cache_path(cache_key: str) -> Path:
-    return _KL_CACHE_DIR / f"kl_{cache_key}.npz"
+    return _KL_CACHE_DIR / "kl_51d4ea81965bedd740bafe3f.npz"
 
 
 def _load_kl_cache(cache_key: str) -> tuple | None:
@@ -86,8 +86,6 @@ def _save_kl_cache(cache_key: str, eigenvalues, modes, mean_field, variance_expl
         n_kl=n_kl,
     )
     logger.info("KL expansion cached to %s", path)
-
-
 
 @dataclass
 class KLExpansionResult:
@@ -266,7 +264,7 @@ def compute_kl_expansion(
                     variance_threshold, max_modes,
                 )
                 cached = _load_kl_cache(cache_key)
-                if cached is not None:
+                if False: # cached is not None
                     eigenvalues, modes, mean_field, variance_explained, n_kl = cached
                     logger.info(
                         "KL expansion loaded from cache: N_kl=%d modes "
@@ -280,9 +278,9 @@ def compute_kl_expansion(
                             variance_threshold, max_modes,
                         )
                     )
-                    _save_kl_cache(
-                        cache_key, eigenvalues, modes, mean_field, variance_explained, n_kl,
-                    )
+                    #_save_kl_cache(
+                    #   cache_key, eigenvalues, modes, mean_field, variance_explained, n_kl,
+                    #)
                 payload = (
                     eigenvalues, modes, mean_field, variance_explained, n_kl,
                     node_coordinates,

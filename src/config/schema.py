@@ -99,7 +99,7 @@ class OptimizationConfig:
     opt_compliance: bool = True
     quadrature_degree: int = 2
     body_force: tuple[float, float, float] = (0.0, 0.0, 0.0)
-    pce_refresh_interval: int = 20
+    pce_refresh_interval: int = 100
     lambda_sweep: list[float] = field(default_factory=lambda: [0.0, 0.5, 1.0, 2.0])
 
 

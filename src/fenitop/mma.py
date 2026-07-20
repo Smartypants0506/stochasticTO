@@ -562,7 +562,7 @@ class MMA:
                 x_range_arr = self._x_range.getArray()
 
                 # --- DIAGNOSTICS: state feeding the dual subsolver ---
-                logger.info(
+                """logger.info(
                     f"[MMA diag] it={it} pre-subsolver: "
                     f"|grad|={grad_norm:.4e} "
                     f"|p|={p_norm:.4e} |q|={q_norm:.4e} "
@@ -570,7 +570,7 @@ class MMA:
                     f"min(x-L)={np.min(xmL_arr):.4e} max(x-L)={np.max(xmL_arr):.4e} "
                     f"min(x_range)={np.min(x_range_arr):.4e} "
                     f"r_h_norm={self._r_h.norm():.4e}"
-                )
+                )"""
                 if np.min(Umx_arr) < 1e-8 or np.min(xmL_arr) < 1e-8:
                     logger.warning(
                         f"[MMA diag] it={it}: (U-x) or (x-L) near zero — "
@@ -582,7 +582,7 @@ class MMA:
                     logger.info(f"[subsolver] it={subtao.getIterationNumber()} "
                                 f"obj={subtao.getObjectiveValue():.6e} "
                                 f"|grad|={subtao.getGradient()[0].norm():.4e}")
-                                
+
                 self._subsolver.setMonitor(_sub_monitor)
 
                 self._subsolver.solve()

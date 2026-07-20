@@ -23,7 +23,7 @@ import openturns as ot
 
 logger = logging.getLogger(__name__)
 
-Q2_THRESHOLD = 0.75  # implementation-modules.md Item 12: "iterates ... until Q^2 >= 0.99"
+Q2_THRESHOLD = 0.99  # implementation-modules.md Item 12: "iterates ... until Q^2 >= 0.99"
 DEFAULT_HYPERBOLIC_Q = 0.75  # standard sparse-truncation quasi-norm exponent
 MAX_DEGREE_ATTEMPTS = 8  # bounds the degree search; raises if never reached
 
@@ -153,22 +153,27 @@ def build_pce_surrogate(
         q2, rmse = _compute_q2(chaos_result, xi_test, c_test)
         logger.info("PCE degree=%d: Q^2=%.5f, RMSE=%.5g", degree, q2, rmse)
 
-        best_result = PCEBuildResult(
-            chaos_result=chaos_result, q2=q2, degree=degree, n_kl=n_kl, rmse_test=rmse,
-        )
-        if q2 >= Q2_THRESHOLD:
-            logger.info(
-                "PCE reached Q^2=%.5f >= %.2f threshold at degree=%d",
-                q2, Q2_THRESHOLD, degree,
-            )
+        current = PCEBuildResult(chaos_result=chaos_result, q2=q2, degree=degree, n_kl=n_kl, rmse_test=rmse)
+        if best_result is None or q2 > best_result.q2:
+            best_result = current
+
+        if q2 >= q2_threshold:
+            logger.info("PCE reached Q^2=%.5f >= %.2f threshold at degree=%d", q2, q2_threshold, degree)
             return best_result
 
+        # early stop: once Q^2 has degraded for 2 straight degrees past the running
+        # best, higher degree is overfitting, not helping -- stop wasting refits
+        if degree >= best_result.degree + 2:
+            logger.warning(
+                "Q^2 degrading for 2+ degrees past best (degree=%d, Q^2=%.5f); "
+                "stopping degree search early -- overfitting, not underfitting.",
+                best_result.degree, best_result.q2,
+            )
+            break
+
     raise RuntimeError(
-        f"PCE failed to reach Q^2 >= {Q2_THRESHOLD} within "
-        f"max_degree_attempts={max_degree_attempts} (best Q^2={best_result.q2:.5f} "
-        f"at degree={best_result.degree}). Increase n_train, raise "
-        f"max_degree_attempts, or revisit hyperbolic_q -- do not silently "
-        f"accept a surrogate below the accuracy gate."
+        f"PCE failed to reach Q^2 >= {q2_threshold} (best Q^2={best_result.q2:.5f} "
+        f"at degree={best_result.degree})."
     )
 
 

@@ -28,6 +28,11 @@ from src.fea.fenitop_adapter import build_fenitop_dicts
 
 from src.topology.heaviside_projection_glue import RandomHeavisideConfig
 from src.random_fields.threshold_transform import MarginalTransformParams
+from src.viz.probability_cloud import build_probability_cloud, ProbabilityCloudConfig
+
+from src.optimization.dolfiny_mma_driver import (
+    setup_robust_problem, train_pce_pair, run_mma_with_pce,
+)
 
 from dolfinx.io import XDMFFile
 import hashlib
@@ -35,7 +40,7 @@ import json
 import pickle
 import shutil
 
-USE_MC_CACHE = True   # <-- flip this to False to force a fresh Stage 6 MC run
+USE_MC_CACHE = False   # <-- flip this to False to force a fresh Stage 6 MC run
 
 MC_CACHE_FILE = Path("output/cache/mc_validation/mc_result.pkl")
 
@@ -73,10 +78,6 @@ def _scatter_global_design(rho_field, mesh_serial, global_array: np.ndarray) -> 
 
 def main(config_path: str = "src/config/config.yaml") -> None:
     cfg = load_config(config_path)
-
-    if comm.rank == 0:
-        logger.info("material.youngs_modulus (raw config value) = %.6g", cfg.material.youngs_modulus)
-        logger.info("material.poissons_ratio (raw config value) = %.6g", cfg.material.poissons_ratio)
     
 
     if cfg.mesh_source == "step":
@@ -220,7 +221,7 @@ def main(config_path: str = "src/config/config.yaml") -> None:
     cache_file = "output/cache/stage2/706bf66af2b64be2/rho_converged.npy"
     #cache_hit = cache_file.exists()
 
-    if True:
+    if False:
         if comm.rank == 0:
             logger.info("Stage 2: cache hit (key=%s) -- skipping topopt, "
                         "reusing cached rho_converged.npy", cache_key)
@@ -231,7 +232,7 @@ def main(config_path: str = "src/config/config.yaml") -> None:
                         cache_key, len(load_cases), list(load_cases.keys()))
         topopt(fem, opt_nominal, load_cases)
         if comm.rank == 0:
-            cache_dir.mkdir(parents=True, exist_ok=True)
+            #cache_dir.mkdir(parents=True, exist_ok=True)
             shutil.copy("output/rho_converged.npy", cache_file)
 
     # rho_converged.npy is now a GLOBAL array (see topopt.py fix); load it
@@ -267,27 +268,71 @@ def main(config_path: str = "src/config/config.yaml") -> None:
 
     if comm.rank == 0:
         logger.info("Stage 5: Pareto sweep over lambda_tradeoff=%s", cfg.optimization.lambda_sweep)
-        if len(load_cases) > 1:
-            logger.warning(
-                "Stage 5's run_robust_topopt is single-load-case only; "
-                "%d load cases found (%s) but only %r will be used for the "
-                "robust optimization. Multi-case robust support is a known gap.",
-                len(load_cases), list(load_cases.keys()), next(iter(load_cases)),
-            )
-    pareto_results = []
+    if len(load_cases) > 1:
+        logger.warning(
+            "Stage 5's run_robust_topopt is single-load-case only; "
+            "%d load cases found (%s) but only %r will be used for the "
+            "robust optimization. Multi-case robust support is a known gap.",
+            len(load_cases), list(load_cases.keys()), next(iter(load_cases)),
+        )
     robust_case_name = next(iter(load_cases))
-    for lam in cfg.optimization.lambda_sweep:
-        opt_robust = dict(opt_nominal)
-        result = run_robust_topopt(
-            fem, opt_robust, rho_warmstart_global, lambda_tradeoff=lam, kl_result=kl_result,
+    STAGE5_NPY_CACHE = False  # <-- skip Stage 5 sweep, load rho_robust_lambda*.npy directly
+
+    if STAGE5_NPY_CACHE:
+        lambda_npy_map = {
+            0: "rho_robust_lambda0.npy",
+            1: "rho_robust_lambda1.npy",
+            5: "rho_robust_lambda5.npy",
+        }
+        pareto_results = []
+        for lam, npy_path in lambda_npy_map.items():
+            if comm.rank == 0:
+                rho_robust_global = np.load("output/" + npy_path)
+            else:
+                rho_robust_global = None
+            rho_robust_global = comm.bcast(rho_robust_global, root=0)
+            pareto_results.append({
+                "lambda": lam,
+                "rho_robust": rho_robust_global,
+                "mu_C": None, "sigma_C": None,
+                "mean_volume": None, "kkt_residual": None,
+                "compliance_pce": None, "volume_pce": None,
+            })
+        if comm.rank == 0:
+            logger.info("Stage 5 bypassed: loaded rho_robust for lambdas %s from disk",
+                        list(lambda_npy_map.keys()))
+    else:
+
+        pareto_results = []
+
+        ctx = setup_robust_problem(
+            fem, opt_nominal, rho_warmstart_global, kl_result,
             load_cases=load_cases, case_name=robust_case_name,
         )
-        pareto_results.append({"lambda": lam, "rho_robust": result["rho_robust"],
-                    **{k: result[k] for k in
-                       ("mu_C", "sigma_C", "mean_volume", "kkt_residual",
-                        "compliance_pce", "volume_pce")}})
-        if comm.rank == 0:
-            logger.info("lambda=%.3g -> mu_C=%.6g, sigma_C=%.6g", lam, result["mu_C"], result["sigma_C"])
+
+        compliance_pce, volume_pce, rho_trained_local = train_pce_pair(ctx, opt_nominal, kl_result)
+
+        midpoint = len(cfg.optimization.lambda_sweep) // 2  # set to -1 to disable the mid-sweep refresh entirely
+
+        for i, lam in enumerate(cfg.optimization.lambda_sweep):
+            if i == midpoint and i != 0:
+                if comm.rank == 0:
+                    logger.info("Mid-sweep PCE refresh at lambda index %d (lambda=%.3g)", i, lam)
+                compliance_pce, volume_pce, rho_trained_local = train_pce_pair(
+                    ctx, opt_nominal, kl_result, rho_current_local=rho_trained_local
+                )
+
+            opt_robust = dict(opt_nominal)
+            result = run_mma_with_pce(
+                ctx, opt_robust, lam, compliance_pce, volume_pce, rho_trained_local,
+                kl_result, allow_refresh=False,
+            )
+            pareto_results.append({"lambda": lam, "rho_robust": result["rho_robust"],
+                **{k: result[k] for k in
+                ("mu_C", "sigma_C", "mean_volume", "kkt_residual",
+                    "compliance_pce", "volume_pce")}})
+            if comm.rank == 0:
+                logger.info("lambda=%.3g -> mu_C=%.6g, sigma_C=%.6g", lam, result["mu_C"], result["sigma_C"])
 
     if comm.rank == 0:
         logger.info("Stage 6: full-scale MC validation on final robust design")
@@ -295,16 +340,16 @@ def main(config_path: str = "src/config/config.yaml") -> None:
 
     mc_config = MCConfig(
         n_samples=cfg.mc_validation.n_samples,
-        beta=cfg.optimization.beta_max,
+        beta=cfg.optimization.beta_max / 2,
         seed=cfg.mc_validation.seed,
     )
 
     heaviside_cfg = RandomHeavisideConfig(
         kernel_params=kernel_params,
         transform_params=MarginalTransformParams(
-            eta_min=0.3, eta_max=0.7, alpha=2.0, beta=2.0
+            eta_min=0.3, eta_max=0.7, alpha=2.0, beta=32.0
         ),
-        variance_threshold=0.75,
+        variance_threshold=0.5,
         seed=cfg.mc_validation.seed,
     )
 
@@ -323,6 +368,7 @@ def main(config_path: str = "src/config/config.yaml") -> None:
             mc_result = None
         mc_result = comm.bcast(mc_result, root=0)
     else:
+        fem["traction_bcs"] = load_cases[robust_case_name]
         mc_result = run_monte_carlo_validation(
             fem, opt_nominal, final_design["rho_robust"], kl_result,
             heaviside_config=heaviside_cfg, mc_config=mc_config,
@@ -339,6 +385,14 @@ def main(config_path: str = "src/config/config.yaml") -> None:
         logger.info("Stage 6 complete: mean=%.6g, std=%.6g", mc_result.mean, mc_result.std)
         pce_comparison = compare_against_pce(mc_result, final_design["compliance_pce"])
         logger.info("PCE-vs-MC comparison: %s", pce_comparison)
+
+        viz_config = ProbabilityCloudConfig(
+            n_vis=min(cfg.mc_validation.n_samples, 100),
+            output_dir=Path("output/viz/probability_cloud"),
+            seed=cfg.mc_validation.seed,
+        )
+        build_probability_cloud(tagged_mesh, mc_result, viz_config)
+
 
     finalize()
 

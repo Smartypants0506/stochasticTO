@@ -59,7 +59,7 @@ load_cases:
 
 optimization:
   max_iter: 400
-  opt_tol: 1.0e-5
+  opt_tol: 1.0e-3
   vol_frac: 0.08
   penalty: 3.0
   epsilon: 1.0e-6
@@ -71,7 +71,7 @@ optimization:
   opt_compliance: true
   quadrature_degree: 2
   body_force: [0.0, 0.0, 0.0]
-  lambda_sweep: [0.0, 0.5, 1.0, 2.0, 5.0]
+  lambda_sweep: [0.0, 1.0, 2.0, 5.0]
 
 color_targets:
   fixed: [255, 0, 0, 255]
@@ -96,19 +96,19 @@ surrogate:
   n_train: 200
   n_test: 50
   hyperbolic_q: 0.75
-  max_degree_attempts: 4
-  q2_threshold: 0.75
+  max_degree_attempts: 8
+  q2_threshold: 0.99
 
 mc_validation:
-  n_samples: 500
-  beta: 128.0
-  seed: 0
+  n_samples: 100
+  beta: 64
+  seed: 42
   percentile_low: 5.0
   percentile_high: 95.0
   output_dir: "output/mc_validation"
 
 keep_alive:
-  enabled: true
+  enabled: false
   groups: ["fixed", "load_1", "load_2"]
   corridor_radius: 4.0e-3     # ~2x mesh_size_max; null -> auto
   cluster_eps: 4.0e-3         # null -> auto (~2x mesh_size_max)

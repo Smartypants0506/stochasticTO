@@ -75,7 +75,6 @@ _PETSC_OPTIONS = {
     "ksp_type": "cg",
     "pc_type": "gamg",
     "ksp_max_it": 2000,
-    "ksp_converged_reason": None,     # PETSc bool-flag options: value is ignored, just needs the key present
     "ksp_error_if_not_converged": None,
 }
 

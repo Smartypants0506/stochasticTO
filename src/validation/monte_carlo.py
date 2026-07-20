@@ -64,6 +64,7 @@ from src.fenitop.utility import Communicator
 
 from src.topology.heaviside_projection_glue import RandomFieldHeaviside, RandomHeavisideConfig
 from src.random_fields.kl_expansion import KLExpansionResult
+from src.topology.heaviside_projection_glue import build_random_heaviside_from_function_space
 
 import openturns as ot
 
@@ -380,8 +381,8 @@ def run_monte_carlo_validation(
     local_node_coordinates = rho_phys_field.function_space.tabulate_dof_coordinates()
     spatial_dim = heaviside_config.kernel_params.spatial_dim
     local_node_coordinates = local_node_coordinates[:, :spatial_dim]
-    rf_heaviside = RandomFieldHeaviside(
-        rho_phys_field, local_node_coordinates, kl_result, heaviside_config
+    rf_heaviside = build_random_heaviside_from_function_space(
+    rho_phys_field, kl_result, heaviside_config
     )
     if comm.rank == 0:
         logger.info(
@@ -450,8 +451,22 @@ def run_monte_carlo_validation(
         rf_heaviside.forward(mc_config.beta)
 
 
-        linear_problem.solve_fem()
-        C_value = comm.allreduce(assemble_scalar(compliance_form), op=MPI.SUM)
+        try:
+            linear_problem.solve_fem()
+            C_value = comm.allreduce(assemble_scalar(compliance_form), op=MPI.SUM)
+        except PETSc.Error as exc:
+            n_failed_samples += 1
+            if comm.rank == 0:
+                logger.warning(
+                    "MC sample %d/%d: FEA solve failed (PETSc error code %s: %s). "
+                    "seed=%d, xi_sample=%s. Recording compliance as NaN and "
+                    "continuing.",
+                    i + 1, mc_config.n_samples, getattr(exc, "ierr", "unknown"),
+                    exc, mc_config.seed + i, xi_sample.tolist(),
+                )
+            compliance_samples[i] = np.nan
+            continue
+        
         compliance_samples[i] = C_value
 
 
