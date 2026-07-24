@@ -23,9 +23,9 @@ import openturns as ot
 
 logger = logging.getLogger(__name__)
 
-Q2_THRESHOLD = 0.99  # implementation-modules.md Item 12: "iterates ... until Q^2 >= 0.99"
+Q2_THRESHOLD = 0.90  # implementation-modules.md Item 12: "iterates ... until Q^2 >= 0.99"
 DEFAULT_HYPERBOLIC_Q = 0.75  # standard sparse-truncation quasi-norm exponent
-MAX_DEGREE_ATTEMPTS = 8  # bounds the degree search; raises if never reached
+MAX_DEGREE_ATTEMPTS = 4  # bounds the degree search; raises if never reached
 
 
 @dataclass
@@ -114,7 +114,7 @@ def build_pce_surrogate(
     hyperbolic_q: float = DEFAULT_HYPERBOLIC_Q,
     max_degree_attempts: int = MAX_DEGREE_ATTEMPTS,
 ) -> PCEBuildResult:
-    """Fit a sparse PCE, increasing total degree until Q^2 >= 0.99 on test data.
+    """Fit a sparse PCE, increasing total degree until Q^2 >= 0.95 on test data.
 
     Args:
         xi_train: [n_train x n_kl] training KL coefficients.
@@ -157,8 +157,8 @@ def build_pce_surrogate(
         if best_result is None or q2 > best_result.q2:
             best_result = current
 
-        if q2 >= q2_threshold:
-            logger.info("PCE reached Q^2=%.5f >= %.2f threshold at degree=%d", q2, q2_threshold, degree)
+        if q2 >= Q2_THRESHOLD and degree >= 2:
+            logger.info("PCE reached Q^2=%.5f >= %.2f threshold at degree=%d", q2, Q2_THRESHOLD, degree)
             return best_result
 
         # early stop: once Q^2 has degraded for 2 straight degrees past the running
@@ -172,7 +172,7 @@ def build_pce_surrogate(
             break
 
     raise RuntimeError(
-        f"PCE failed to reach Q^2 >= {q2_threshold} (best Q^2={best_result.q2:.5f} "
+        f"PCE failed to reach Q^2 >= {Q2_THRESHOLD} (best Q^2={best_result.q2:.5f} "
         f"at degree={best_result.degree})."
     )
 

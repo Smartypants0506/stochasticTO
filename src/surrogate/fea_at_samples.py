@@ -48,6 +48,20 @@ import time
 
 logger = logging.getLogger(__name__)
 
+# Rebuild the (frozen) GAMG preconditioner every this many samples within a
+# batch, if PC reuse is engaged at all. Set to 1 (rebuild every sample --
+# effectively OFF): for this project's SIMP contrast (epsilon=1e-6) combined
+# with a sharp Heaviside projection (beta=8), even a small eta(x) shift between
+# samples can flip which near-threshold elements are solid vs. void, changing
+# the connectivity/contrast pattern the GAMG hierarchy depends on -- the
+# "mildly-varying matrix" assumption reuse relies on does not hold here.
+# Empirically this made reuse fail (DIVERGED_INDEFINITE_PC) on nearly every
+# solve, paying for a failed CG attempt AND a fresh rebuild -- strictly worse
+# than always rebuilding. LinearProblem.solve_fem()'s retry-on-failure fallback
+# still protects correctness if this is ever raised again for a problem where
+# reuse genuinely helps; it just won't fire while this stays at 1.
+PC_REBUILD_INTERVAL = 1
+
 
 
 @dataclass
@@ -84,6 +98,7 @@ def run_fea_at_samples(
     beta: float,
     linear_problem,
     rho_field,
+    raise_on_nonfinite: bool = True,
 ) -> SurrogateTrainingData:
     """Evaluate compliance and volume at each training sample's perturbed density field.
 
@@ -147,48 +162,90 @@ def run_fea_at_samples(
     dC_drho_samples = np.empty((n_train, n_elems_local))
     dV_drho_samples = np.empty((n_train, n_elems_local))
 
-    t0 = time.time()
+    # rho_nominal is fixed across all samples -- only eta(x) varies -- so the
+    # density write + Helmholtz filter solve only needs to happen ONCE, not
+    # once per sample. Also fixes the missing ghost sync: writing directly
+    # to .petsc_vec.array only touches OWNED dofs, so scatter_forward() is
+    # required before density_filter.forward() reads ghost values during
+    # its PDE assembly (matters for -n ranks > 1).
+    rho_field.x.petsc_vec.array[:] = rho_nominal
+    rho_field.x.scatter_forward()
+    density_filter.forward()  # deterministic Helmholtz filter: rho -> rho_tilde
+    rho_tilde_cached = heaviside.rho_phys.x.petsc_vec.array.copy()
+
+    # --- solver warm-start + GAMG hierarchy reuse across this batch ----------
+    # rho_nominal is fixed and only eta(x) varies mildly between samples, so the
+    # stiffness matrices are close: (1) warm-start CG from the previous sample's
+    # solution, and (2) build the GAMG hierarchy once and reuse it, rebuilding
+    # only every PC_REBUILD_INTERVAL samples to bound CG-iteration growth as
+    # eta walks away. Both are math-exact -- solve_fem() still assembles the true
+    # matrix and CG converges to the same tolerance; only setup cost/iteration
+    # count change. See LinearProblem.enable_warm_start / set_reuse_preconditioner.
+    linear_problem.enable_warm_start(True)
+
+    batch_t0 = time.time()
     for j in range(n_train):
-        rho_field.x.petsc_vec.array[:] = rho_nominal
-        density_filter.forward()  # deterministic Helmholtz filter: rho -> rho_tilde
-
-
+        _s0 = time.time()
+        heaviside.rho_phys.x.petsc_vec.array[:] = rho_tilde_cached
         heaviside.set_eta_from_xi(xi_train[j])
+        _s1 = time.time()
+
         heaviside.forward(beta)  # perturbs rho_phys via eta(x), not the mesh
+        _s2 = time.time()
 
-
+        # reuse the frozen PC except on periodic rebuild steps (j==0 always
+        # rebuilds, so the hierarchy is set up once before any reuse).
+        rebuild_pc = (j % PC_REBUILD_INTERVAL == 0)
+        linear_problem.set_reuse_preconditioner(not rebuild_pc)
         linear_problem.solve_fem()
-
+        _s3 = time.time()
 
         func_values, sensitivities = sens_problem.evaluate()
+        _s4 = time.time()
+
         C_value, V_value, _ = func_values
-        dCdrho_vec, dVdrho_vec, _ = sensitivities
 
-
-        if not np.isfinite(C_value) or not np.isfinite(V_value):
-            raise RuntimeError(
-                f"Non-finite compliance/volume at training sample {j} "
-                f"(C={C_value}, V={V_value}). Likely a near-disconnected "
-                "structure under this eta(x) draw -- investigate before "
-                "trusting the PCE surrogate."
+        if is_root and j < 3:
+            logger.info(
+                "eta=%.3f proj=%.3f solve=%.3f sens=%.3f",
+                _s1 - _s0, _s2 - _s1, _s3 - _s2, _s4 - _s3,
             )
 
+        if not np.isfinite(C_value) or not np.isfinite(V_value):
+            if raise_on_nonfinite:
+                raise RuntimeError(
+                    f"Non-finite compliance/volume at training sample {j} "
+                    f"(C={C_value}, V={V_value}). Likely a near-disconnected "
+                    "structure under this eta(x) draw -- investigate before "
+                    "trusting the PCE surrogate."
+                )
+            # Deferred mode (used by the sub-communicator grouped runner): record
+            # the non-finite value and continue, so a single bad sample in one
+            # group cannot raise mid-loop while other groups sit in a collective
+            # (that would deadlock COMM_WORLD). The grouped runner performs a
+            # single collective finiteness check after reassembling all samples.
+            logger.warning(
+                "Non-finite compliance/volume at sample %d (C=%s, V=%s); "
+                "recording and continuing (deferred check).", j, C_value, V_value,
+            )
 
         heaviside.backward(sensitivities)  # chain rule through Heaviside, in-place
         dCdrho, dVdrho, _ = density_filter.backward(sensitivities)
-
 
         compliance_samples[j] = C_value
         volume_samples[j] = V_value
         dC_drho_samples[j, :] = dCdrho
         dV_drho_samples[j, :] = dVdrho
 
-
         if is_root and ((j + 1) % 50 == 0 or j == n_train - 1):
             logger.info("FEA-at-samples: completed %d/%d solves (%.2fs for last batch)",
-                        j + 1, n_train, time.time() - t0)
-            t0 = time.time()
+                        j + 1, n_train, time.time() - batch_t0)
+            batch_t0 = time.time()
 
+    # Unfreeze the PC so the frozen hierarchy from THIS batch's design cannot be
+    # silently reused by a later solve at a different design (e.g. the next
+    # refresh, or the MMA world solve sharing this LinearProblem).
+    linear_problem.set_reuse_preconditioner(False)
 
     return SurrogateTrainingData(
         compliance_samples=compliance_samples,

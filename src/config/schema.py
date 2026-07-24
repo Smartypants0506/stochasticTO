@@ -39,10 +39,21 @@ class PetscConfig:
     """
     ksp_type: str = "cg"
     pc_type: str = "gamg"
+    # Guardrails matching box_source.py's _PETSC_OPTIONS so the STEP path gets
+    # the same iterative-solver safety net (previously these were silently
+    # dropped by to_options_dict, leaving the STEP path with unbounded KSP
+    # iterations and no hard failure on non-convergence).
+    ksp_max_it: int = 2000
+    ksp_error_if_not_converged: bool = True
 
     def to_options_dict(self) -> dict:
         """Convert to the PETSc options dict form form_fem() expects."""
-        return {"ksp_type": self.ksp_type, "pc_type": self.pc_type}
+        opts = {"ksp_type": self.ksp_type, "pc_type": self.pc_type}
+        if self.ksp_max_it is not None:
+            opts["ksp_max_it"] = self.ksp_max_it
+        # PETSc expects the key present (value None) to enable the flag.
+        opts["ksp_error_if_not_converged"] = None if self.ksp_error_if_not_converged else False
+        return opts
 
 
 @dataclass
@@ -99,8 +110,43 @@ class OptimizationConfig:
     opt_compliance: bool = True
     quadrature_degree: int = 2
     body_force: tuple[float, float, float] = (0.0, 0.0, 0.0)
-    pce_refresh_interval: int = 100
+    pce_refresh_interval: int = 5
     lambda_sweep: list[float] = field(default_factory=lambda: [0.0, 0.5, 1.0, 2.0])
+    pce_n_train_refresh: int = 60
+    pce_n_test_refresh: int = 20
+    # Sample-parallelism: ranks per sub-communicator group for the FEA-at-samples
+    # / MC loops. COMM_WORLD is split into world_size // this many groups, each
+    # solving a disjoint subset of samples concurrently on its own mesh. Must
+    # divide world_size; set equal to world_size (or >= it) to disable grouping
+    # and run the original single-group path. ~8 keeps each ~150k-DOF CG+GAMG
+    # solve in its efficient regime while maximizing sample concurrency.
+    sample_parallel_ranks_per_group: int = 8
+    # PCE-refresh robustness: when a surrogate refit falls below the Q^2 gate,
+    # add up to this many extra sample batches (accumulating) and refit before
+    # giving up, capped at pce_n_train_escalation_cap total training samples.
+    # If it still fails, a mid-solve refresh keeps the last valid surrogate and
+    # stops refreshing (never crashes). Set pce_max_escalations=0 to restore the
+    # old single-attempt behavior.
+    pce_max_escalations: int = 3
+    pce_n_train_escalation_cap: int = 800
+    # Divergence guard: if the TRUE robust objective (from each refreshed
+    # surrogate) rises for this many consecutive refreshes, the robust solve is
+    # declared diverged -- refreshes freeze and the best feasible design seen so
+    # far is returned instead of the runaway final iterate.
+    pce_divergence_patience: int = 3
+    # --- Surrogate-free Sample Average Approximation (SAA) robust-TO path ---
+    # When robust_method="saa", Stage 4/5 skips the PCE entirely and, at every
+    # MMA iteration, evaluates the EXACT sample-average robust objective/gradient
+    # via saa_n_samples full FEA solves at the current design over one FIXED
+    # sample set (common random numbers -> deterministic objective -> clean KKT
+    # convergence). Higher saa_n_samples = higher Monte-Carlo fidelity, more
+    # compute. saa_seed must be DISJOINT from mc_validation.seed so Stage-6 MC
+    # gives an unbiased assessment (never validate on the optimization samples).
+    robust_method: str = "saa"          # "saa" (surrogate-free) or "pce"
+    saa_n_samples: int = 512            # fixed SAA sample-set size (fidelity knob)
+    saa_sampling_strategy: str = "lhs"  # "lhs" (space-filling) or "monte_carlo"
+    saa_seed: int = 7                   # keep != mc_validation.seed
+    saa_beta: float = 8.0               # Heaviside sharpness for the SAA solves
 
 
 @dataclass

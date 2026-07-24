@@ -1,27 +1,52 @@
-step_file: "data/cad/ge_bracket_rotated_nonds.step"
-mesh_out_path: "output/meshes/ge_bracket_rotated_nonds.xdmf"
-mesh_size_max: 3.0e-3
+# =============================================================================
+# SMOKE-TEST CONFIG -- fast end-to-end validation of the SAA (surrogate-free)
+# robust-TO pipeline before committing to a full overnight run.
+#
+# Uses the synthetic BOX mesh (beam_3d reference) so there is NO CAD/STEP
+# dependency, and drives every stage with tiny budgets so the whole 6-stage run
+# finishes in a few minutes. The numbers here are NOT accurate -- they only
+# prove the pipeline runs end-to-end without crashing and produces sane
+# artifacts. Bump saa_n_samples / max_iter / mc_validation.n_samples for the
+# real run (or just use config.yaml).
+#
+# Run:
+#   mpirun -n 8 python src/mainClean.py src/config/configSmoke.yaml
+# (mainClean now takes the config path as its first CLI arg.)
+# =============================================================================
+
+mesh_source: "box"            # synthetic beam_3d mesh -- no STEP file needed
+
+box_mesh:
+  cell_type: "tetrahedron"    # required for the Stage-3 KL expansion
+
+# --- Ignored on the box path, but the loader requires these top-level keys ---
+step_file: "data/cad/unused_for_box.step"
+mesh_out_path: "output/meshes/unused_for_box.xdmf"
+mesh_size_max: 2.0e-3
 snap_tol: 1.0e-4
 
-material:
+material:                     # box path uses hardcoded beam_3d E/nu; kept for schema
   youngs_modulus: 68900000000
   poissons_ratio: 0.33
 
 petsc:
-  ksp_type: "cg"
+  ksp_type: "fgmres"   # robust to indefinite GAMG PC (cg bails with -8 on hard eta draws)
   pc_type: "gamg"
 
-load_cases:
-  - group_name: "load_1"
-    vector: [0.0, -1000000.0, 0.0]
+load_cases:                   # ignored on box path (single hardcoded beam_3d case),
+  smoke:                      # but MUST be the mapping form or the loader rejects it
+    - group_name: "load_1"
+      vector: [0.0, 0.0, -1.0]
 
 optimization:
-  max_iter: 20
+  max_iter: 15                # SHORT: caps BOTH the Stage-2 warm-start and the
+                              # Stage-5 SAA loop (now config-driven on the box path)
   opt_tol: 1.0e-5
-  vol_frac: 0.1
+  vol_frac: 0.08
   penalty: 3.0
-  epsilon: 1.0e-6
-  filter_radius: 1.2
+  epsilon: 1.0e-4             # void/solid stiffness ratio -- 1e-4 keeps GAMG well-conditioned
+                             # (the box path now honors this; 1e-6 caused indefinite-PC solve failures)
+  filter_radius: 0.6
   beta_interval: 50
   beta_max: 128
   use_oc: true
@@ -29,37 +54,43 @@ optimization:
   opt_compliance: true
   quadrature_degree: 2
   body_force: [0.0, 0.0, 0.0]
-  lambda_sweep: [0.0, 0.5, 1.0]
+  lambda_sweep: [0.0, 1.0]    # 2 points -> exercises the sweep + lambda-continuation
+  # --- SAA (surrogate-free) robust TO ---
+  robust_method: "saa"
+  saa_n_samples: 8            # TINY sample set for speed -- smoke only, NOT accurate
+  saa_sampling_strategy: "lhs"
+  saa_seed: 7                 # must differ from mc_validation.seed below
+  saa_beta: 8.0
+  sample_parallel_ranks_per_group: 4   # with `mpirun -n 8` this makes 2 groups,
+                                       # so the smoke run EXERCISES the grouped
+                                       # sample-parallel MPI path (the riskiest code)
 
-color_targets:
-  fixed: [0, 255, 0, 255]
-  load_1: [255, 0, 0, 255]
-
-solid_volume_color: [255, 255, 0, 255]
-
-random_field:
-  sigma: 0.01
-  length_scale: 0.025
+random_field:                 # drives the KL expansion + the eta-field model
+  # sigma is INERT for the eta spread now (field is standardized to unit
+  # variance before the marginal map -> exact Beta on [eta_min,eta_max],
+  # sigma cancels). Magnitude = the band + alpha/beta; length_scale = correlation.
+  sigma: 0.2
+  length_scale: 4
   spatial_dim: 3
-  eta_min: 0.3
-  eta_max: 0.7
+  eta_min: 0.45              # tight manufacturing envelope eta in [0.45,0.55]
+  eta_max: 0.55              # (~4x less boundary motion than the old [0.3,0.7])
   alpha: 2.0
-  beta: 2.0
+  beta: 2.0                   # Beta(2,2) marginal -- SAME model the MC validates against
   variance_threshold: 0.95
   n_kl_hint: 20
   seed: 42
 
-surrogate:
-  n_train: 31
-  n_test: 31
+surrogate:                    # unused when robust_method=saa, but a required key
+  n_train: 32
+  n_test: 16
   hyperbolic_q: 0.75
   max_degree_attempts: 4
-  q2_threshold: -1
+  q2_threshold: 0.90
 
 mc_validation:
-  n_samples: 50
-  beta: 128.0
-  seed: 0
+  n_samples: 8                # tiny INDEPENDENT validation ensemble
+  beta: 8.0                   # match saa_beta (same eta-field sharpness)
+  seed: 42                    # != saa_seed=7  ->  unbiased in-loop-vs-MC check
   percentile_low: 5.0
   percentile_high: 95.0
   output_dir: "output/mc_validation"

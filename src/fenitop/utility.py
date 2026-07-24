@@ -18,6 +18,8 @@ Reference:
   https://doi.org/10.1007/s00158-024-03818-7
 """
 
+import logging
+
 import numpy as np
 from scipy.spatial import cKDTree
 from petsc4py import PETSc
@@ -29,6 +31,8 @@ from dolfinx.fem.petsc import (create_vector, create_matrix,
 from dolfinx import la
 
 import pyvista
+
+logger = logging.getLogger(__name__)
 
 def build_nullspace(V):
     """Build PETSc near-nullspace for 3D elasticity (rigid body modes).
@@ -120,9 +124,70 @@ class LinearProblem:
                 var.setOptionsPrefix(prefix)
                 var.setFromOptions()
 
+        # Override whatever petsc_options set for ksp_error_if_not_converged:
+        # that option makes a non-converged KSPSolve raise via SETERRQ, which
+        # exits KSPSolve_Private before the normal PCPostSolve cleanup runs and
+        # leaves the PC's internal reentrancy-depth counter incremented.
+        # Calling KSPSolve again on the SAME KSP after that (as solve_fem's
+        # reuse-fallback retry does) then trips PETSc's "Cannot embed
+        # PCPreSolve() more than twice" guard. Enforcing convergence ourselves
+        # in Python (see solve_fem) preserves the exact same "never silently
+        # use a non-converged solve" guarantee via a normal-returning solve +
+        # explicit getConvergedReason() check, which is always safe to retry.
+        self.solver.setErrorIfNotConverged(False)
+
         assemble_vector(self.rhs_vec, self.rhs_form)
         self.rhs_vec.ghostUpdate(addv=PETSc.InsertMode.ADD, mode=PETSc.ScatterMode.REVERSE)
         set_bc(self.rhs_vec, self.bcs)
+
+        # Tracks whether the PC is currently frozen (see set_reuse_preconditioner),
+        # so solve_fem can tell a reuse-caused failure apart from a genuine one.
+        self._reuse_pc_active = False
+        self._warned_no_pc_reuse = False
+
+    def enable_warm_start(self, flag=True):
+        """Use the current contents of u (the previous solve's solution) as the
+        CG initial guess instead of zero. Math-exact: CG still converges to the
+        same solution at the same tolerance; only the iteration count changes.
+        The Dirichlet BC here is homogeneous (Constant 0), so the retained u
+        already satisfies u=0 at constrained dofs, keeping the guess admissible.
+        """
+        self.solver.setInitialGuessNonzero(flag)
+
+    def set_reuse_preconditioner(self, flag=True):
+        """Freeze (or unfreeze) the assembled preconditioner (e.g. the GAMG
+        multigrid hierarchy) across subsequent solves. When True, solve_fem()
+        still re-assembles the true matrix and CG iterates against it to the same
+        tolerance -- only the (expensive) PC *setup* is skipped. Used across a
+        batch of mildly-varying matrices (fixed nominal design, only eta(x)
+        varies) to turn ~N GAMG setups into 1. The first solve must run with
+        this False so the PC is built once.
+
+        The reuse flag really lives on the PC (PCSetReusePreconditioner). The
+        KSP-level convenience wrapper (KSP.setReusePreconditioner) only exists in
+        newer petsc4py, so prefer the PC method and fall back to the KSP method,
+        to work across versions.
+        """
+        pc = self.solver.getPC()
+        if hasattr(pc, "setReusePreconditioner"):
+            pc.setReusePreconditioner(flag)
+            self._reuse_pc_active = bool(flag)
+        elif hasattr(self.solver, "setReusePreconditioner"):
+            self.solver.setReusePreconditioner(flag)
+            self._reuse_pc_active = bool(flag)
+        else:
+            # Preconditioner reuse is a pure speed optimization. If this petsc4py
+            # exposes no toggle on either PC or KSP, skip it -- the PC just
+            # rebuilds every solve (the original, correct-but-slower behavior) --
+            # rather than crashing the whole run over an optional speedup.
+            if not self._warned_no_pc_reuse:
+                logger.warning(
+                    "petsc4py exposes no setReusePreconditioner on PC or KSP; "
+                    "preconditioner reuse disabled (solves remain correct, the "
+                    "PC is just rebuilt each solve)."
+                )
+                self._warned_no_pc_reuse = True
+            self._reuse_pc_active = False
 
     def solve_fem(self):
         """Solve K*x=F for FEM."""
@@ -131,7 +196,58 @@ class LinearProblem:
         self.lhs_mat.assemble()
         if self.spring_vec is not None:
             self.lhs_mat.setDiagonal(self.lhs_mat.getDiagonal()+self.spring_vec)
+
         self.solver.solve(self.rhs_vec, self.u_wrap)
+        reason = self.solver.getConvergedReason()
+
+        if reason < 0:
+            if not self._reuse_pc_active:
+                # No reuse in play -- this is a genuine solver/design failure
+                # (e.g. a near-singular K), not an artifact of the reuse
+                # optimization. Fail loudly, exactly as ksp_error_if_not_converged
+                # would have (enforced here in Python instead -- see __init__).
+                raise RuntimeError(f"KSP solve failed to converge (reason={reason}).")
+
+            # Preconditioner reuse (set_reuse_preconditioner) freezes the GAMG
+            # hierarchy across a batch of mildly-varying matrices (fixed
+            # nominal design, only eta(x) varies) to skip repeated AMG setup.
+            # Occasionally a sample's matrix has drifted enough from the one
+            # the frozen PC was built for that CG fails to converge (indefinite
+            # PC, or exceeds ksp_max_it). This is a statistical risk of the
+            # reuse heuristic, bounded but not eliminated by periodic rebuilds
+            # (PC_REBUILD_INTERVAL) -- so fall back deterministically: rebuild
+            # the PC fresh for THIS matrix and retry once. lhs_mat/rhs_vec are
+            # already assembled above and unchanged, so no reassembly is needed.
+            logger.warning(
+                "KSP solve failed to converge with a REUSED preconditioner "
+                "(converged reason=%d); rebuilding the preconditioner fresh "
+                "for this matrix and retrying once.", reason,
+            )
+            self.set_reuse_preconditioner(False)
+            # The failed solve may have left u_wrap holding a poor (though
+            # finite) unconverged iterate. Force a zero initial guess for just
+            # this retry so it cannot compound the failure -- this reproduces
+            # the exact original (pre-warm-start, pre-reuse) solve from
+            # scratch, the safest possible fallback. Restore whatever warm-
+            # start setting the caller had afterwards.
+            had_warm_start = self.solver.getInitialGuessNonzero()
+            if had_warm_start:
+                self.solver.setInitialGuessNonzero(False)
+            try:
+                self.solver.solve(self.rhs_vec, self.u_wrap)
+                retry_reason = self.solver.getConvergedReason()
+            finally:
+                if had_warm_start:
+                    self.solver.setInitialGuessNonzero(True)
+
+            if retry_reason < 0:
+                # Fresh PC still failed -- a genuine problem, not caused by
+                # reuse. Fail loudly, matching the no-reuse case above.
+                raise RuntimeError(
+                    "KSP solve failed to converge even after rebuilding the "
+                    f"preconditioner fresh (reason={retry_reason})."
+                )
+
         self.u.x.scatter_forward()
 
     def solve_adjoint(self):

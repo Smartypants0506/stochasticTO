@@ -56,7 +56,10 @@ def _kl_cache_key(
 
 
 def _kl_cache_path(cache_key: str) -> Path:
-    return _KL_CACHE_DIR / "kl_51d4ea81965bedd740bafe3f.npz"
+    # Key the filename by the cache_key so different meshes/kernels/thresholds
+    # get distinct cache files (the previous hardcoded name collided across all
+    # problems, which is why the cache had to stay disabled).
+    return _KL_CACHE_DIR / f"kl_{cache_key}.npz"
 
 
 def _load_kl_cache(cache_key: str) -> tuple | None:
@@ -259,12 +262,16 @@ def compute_kl_expansion(
             )
         else:
             try:
+                # Cache keyed by every input that affects the eigensolve, so a
+                # hit is only returned for an identical problem. The eigensolve
+                # is deterministic, so a cached result is bit-identical to a
+                # fresh one -- no accuracy change, only recompute avoided.
                 cache_key = _kl_cache_key(
                     node_coordinates, simplices, kernel_params,
                     variance_threshold, max_modes,
                 )
                 cached = _load_kl_cache(cache_key)
-                if False: # cached is not None
+                if cached is not None:
                     eigenvalues, modes, mean_field, variance_explained, n_kl = cached
                     logger.info(
                         "KL expansion loaded from cache: N_kl=%d modes "
@@ -278,9 +285,9 @@ def compute_kl_expansion(
                             variance_threshold, max_modes,
                         )
                     )
-                    #_save_kl_cache(
-                    #   cache_key, eigenvalues, modes, mean_field, variance_explained, n_kl,
-                    #)
+                    _save_kl_cache(
+                        cache_key, eigenvalues, modes, mean_field, variance_explained, n_kl
+                    )
                 payload = (
                     eigenvalues, modes, mean_field, variance_explained, n_kl,
                     node_coordinates,
@@ -334,6 +341,36 @@ def sample_kl_coefficients(kl_result: KLExpansionResult, n_samples: int, seed: i
     """Draw xi ~ iid N(0,1), the raw KL coefficients, without evaluating G(x)."""
     rng = np.random.default_rng(seed)
     return rng.standard_normal(size=(n_samples, kl_result.n_kl))
+
+def pointwise_std(kl_result: KLExpansionResult, eps: float = 1e-12) -> np.ndarray:
+    """Exact pointwise standard deviation of the TRUNCATED KL field at each node.
+
+    The truncated field is G(x) = mu(x) + sum_i sqrt(lambda_i) * phi_i(x) * xi_i
+    with xi_i ~ iid N(0,1), so its pointwise variance is exactly
+        v(x) = sum_i lambda_i * phi_i(x)^2.
+    For the FULL (untruncated) expansion this equals the stationary kernel
+    variance sigma^2; at variance_threshold < 1 it is smaller and spatially
+    varying (the truncation removes more variance in some regions than others).
+
+    Returning sqrt(v(x)) lets callers standardize G(x)/std(x) to an EXACT
+    unit-variance N(0,1) at every node, which is what makes the downstream
+    isoprobabilistic marginal transform reproduce its target Beta marginal
+    exactly regardless of sigma or truncation level (see
+    src/topology/heaviside_projection_glue.py). Vectorized (no node loops),
+    matching evaluate_field_from_xi's style.
+
+    Args:
+        kl_result: Output of compute_kl_expansion.
+        eps: Floor on the returned std to guard the rare near-zero-variance
+            node (e.g. a boundary node the truncated basis barely resolves)
+            against a divide-by-zero when standardizing.
+
+    Returns:
+        [N_nodes] array of pointwise standard deviations, floored at eps.
+    """
+    variance = (kl_result.modes ** 2) @ kl_result.eigenvalues  # [N_nodes]
+    return np.sqrt(np.maximum(variance, eps * eps))
+
 
 def evaluate_field_from_xi(kl_result: KLExpansionResult, xi: np.ndarray) -> np.ndarray:
     """Evaluate G(x) at an explicit, caller-supplied KL coefficient vector.

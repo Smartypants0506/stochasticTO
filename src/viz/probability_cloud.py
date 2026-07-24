@@ -69,49 +69,89 @@ def build_probability_cloud(tagged_mesh, mc_result, config: ProbabilityCloudConf
     `probability_cloud.vtp` for the single merged surface cloud.
     """
     config = config or ProbabilityCloudConfig()
-    samples = getattr(mc_result, "samples", None)
-    if not samples:
-        raise ValueError(
-            "mc_result.samples is empty/missing -- build_probability_cloud "
-            "requires per-sample xi/compliance/rho_hat/von_mises records "
-            "from run_monte_carlo_validation; see module docstring."
+
+    # run_monte_carlo_validation(write_ensemble=True) has ALREADY written one
+    # .vtu per sample (each carrying point_data["density"] = that sample's
+    # rho_phys), the ensemble.pvd collection, and the normalized opacity weights.
+    # We consume those on-disk artifacts to assemble the single merged,
+    # opacity-weighted probability_cloud.vtp (masterContext 4.1), rather than
+    # requiring MCResult to also hold the (large) per-sample nodal density
+    # fields in memory. (The legacy `.samples`-record schema this module's
+    # docstring describes was never implemented in MCResult.)
+    pvd_path = getattr(mc_result, "ensemble_pvd_path", None)
+    if pvd_path is None:
+        logger.warning(
+            "MCResult has no ensemble_pvd_path (run_monte_carlo_validation ran "
+            "with write_ensemble=False) -- no per-sample ensemble on disk to "
+            "assemble; skipping probability_cloud.vtp."
         )
+        return {"pvd": None, "vtp": None}
+    pvd_path = Path(pvd_path)
+    ensemble_dir = pvd_path.parent / "ensemble"
+    vtu_files = sorted(ensemble_dir.glob("sample_*.vtu"))
+    if not vtu_files:
+        logger.warning("No per-sample VTUs under %s; skipping probability_cloud.vtp.",
+                       ensemble_dir)
+        return {"pvd": pvd_path, "vtp": None}
+    n_total = len(vtu_files)
 
-    samples = _subsample(samples, config.n_vis, config.seed)
-    logger.info("Stage 6 viz: building probability cloud from %d/%d MC samples",
-                len(samples), len(mc_result.samples))
+    # Opacity weights: prefer the ones MC already computed & normalized; else
+    # derive them from the retained iid-N(0,1) KL coordinates.
+    weights = getattr(mc_result, "probability_weights", None)
+    if weights is None:
+        weights = _sample_probability_weights(np.asarray(mc_result.xi_samples, dtype=float))
+    weights = np.asarray(weights, dtype=float)
+    compliance = np.asarray(mc_result.compliance_samples, dtype=float)
 
-    xi = np.stack([np.asarray(s.xi, dtype=float) for s in samples])
-    weights = _sample_probability_weights(xi)
-    opacity = _map_to_opacity(weights, config.min_opacity, config.max_opacity)
+    # Defensive: n_total came from a glob of ensemble_dir on disk, which is
+    # only guaranteed to match THIS run's sample count if the directory was
+    # freshened before writing (see monte_carlo.py). Don't trust it blindly --
+    # clamp to the smallest of the three so a stale/pre-populated directory
+    # can't index past this run's actual weights/compliance arrays.
+    n_matched = min(n_total, weights.size, compliance.size)
+    if n_matched < n_total:
+        logger.warning(
+            "Ensemble dir %s has %d VTU file(s) but this run's MCResult only "
+            "has %d sample(s) (probability_weights/compliance_samples) -- "
+            "likely stale files left by a previous run. Using only the "
+            "first %d.", ensemble_dir, n_total, n_matched, n_matched,
+        )
+    n_total = n_matched
+    vtu_files = vtu_files[:n_total]
 
-    base_grid = _mesh_to_pyvista(tagged_mesh)
-    density_stack = np.stack(
-        [_match_length(np.asarray(s.rho_hat, dtype=float), base_grid.n_cells) for s in samples]
-    )
-    elem_cov = _coefficient_of_variation(density_stack)
+    # Deterministic subsample to n_vis.
+    idx = np.arange(n_total)
+    if config.n_vis < n_total:
+        rng = np.random.default_rng(config.seed)
+        idx = np.sort(rng.choice(n_total, size=config.n_vis, replace=False))
+
+    opacity = _map_to_opacity(weights[idx], config.min_opacity, config.max_opacity)
+
+    grids: list[pv.UnstructuredGrid] = []
+    for k, i in enumerate(idx):
+        grid = pv.read(str(vtu_files[i]))  # PyVista/VTK native reader (has "density")
+        n_pts = grid.n_points
+        grid.point_data["opacity"] = np.full(n_pts, float(opacity[k]))
+        grid.point_data["sample_probability"] = np.full(
+            n_pts, float(weights[i]) if i < weights.size else np.nan)
+        grid.point_data["compliance"] = np.full(
+            n_pts, float(compliance[i]) if i < compliance.size else np.nan)
+        grids.append(grid)
 
     output_dir = Path(config.output_dir)
-    samples_dir = output_dir / "samples"
-    samples_dir.mkdir(parents=True, exist_ok=True)
-
-    vtu_paths: list[Path] = []
-    merged: pv.UnstructuredGrid | None = None
-    for i, (sample, p, w) in enumerate(zip(samples, opacity, weights)):
-        grid = _build_sample_grid(base_grid, sample, elem_cov, opacity=p, probability=w)
-        vtu_path = samples_dir / f"sample_{i:05d}.vtu"
-        grid.save(str(vtu_path))            # PyVista/VTK native writer
-        vtu_paths.append(vtu_path)
-        merged = grid if merged is None else merged.merge(grid)  # PyVista native merge
-
-    pvd_path = output_dir / "ensemble.pvd"
-    _write_pvd_collection(pvd_path, vtu_paths)
-
+    output_dir.mkdir(parents=True, exist_ok=True)
     vtp_path = output_dir / "probability_cloud.vtp"
-    merged.extract_surface().save(str(vtp_path))  # PyVista native surface extraction/writer
 
-    logger.info("Stage 6 viz: wrote %s, %s (%d samples) -- open either directly in ParaView Desktop",
-                pvd_path, vtp_path, len(samples))
+    # Single batched merge (DataSet.merge accepts a list -> one pass), then a
+    # native surface extraction/writer.
+    merged = grids[0].merge(grids[1:]) if len(grids) > 1 else grids[0]
+    merged.extract_surface().save(str(vtp_path))
+
+    logger.info(
+        "Stage 6 viz: wrote %s from %d/%d MC ensemble samples (per-sample "
+        "collection already at %s) -- open either directly in ParaView Desktop.",
+        vtp_path, len(idx), n_total, pvd_path,
+    )
     return {"pvd": pvd_path, "vtp": vtp_path}
 
 

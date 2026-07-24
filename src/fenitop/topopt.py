@@ -105,6 +105,13 @@ def topopt(fem, opt, load_cases: dict[str, list]):
     problems, rho_field, rho_phys_field = form_fem_multi_case(fem, opt, load_cases)
     #_ck("after form_fem_multi_case")
 
+    # Warm-start each load case's CG from its previous iteration's solution.
+    # Consecutive design iterates are close, so this cuts CG iteration counts;
+    # it is math-exact (CG still converges to the same tolerance). Each load
+    # case keeps its own u_field, so warm starts stay per-case.
+    for lcp in problems:
+        lcp.linear_problem.enable_warm_start(True)
+
     num_consts = 1 if opt["opt_compliance"] else 2
     num_elems = rho_field.x.petsc_vec.array.size
 

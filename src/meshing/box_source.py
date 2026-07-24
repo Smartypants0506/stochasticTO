@@ -61,7 +61,11 @@ _POISSONS_RATIO = 0.25
 _VOL_FRAC = 0.08
 _PENALTY = 3.0
 _EPSILON = 1e-6
-_FILTER_RADIUS = 0.6
+_FILTER_RADIUS = 0.6   # Helmholtz length = 1.5*h (h=0.4) ~= 5-element classical
+                       # radius; interface is several elements wide (smooth, no
+                       # 1-element snapping). NOTE: config.optimization.filter_radius
+                       # is intentionally NOT honored on the box path (beam_3d
+                       # physics is frozen) -- tune it here, not in the YAML.
 _BETA_INTERVAL = 50
 _BETA_MAX = 128
 _USE_OC = True
@@ -71,8 +75,15 @@ _MAX_ITER = 400
 _OPT_TOL = 1e-5
 _QUADRATURE_DEGREE = 2
 _BODY_FORCE = (0, 0, 0)
+# fgmres, NOT cg: under high SIMP contrast (epsilon small) a random eta(x) draw
+# can make the structure near-disconnected, and GAMG then produces a slightly
+# non-SPD preconditioner application. CG detects that and bails immediately with
+# DIVERGED_INDEFINITE_PC (reason=-8), crashing the batch. FGMRES minimizes the
+# residual regardless of PC definiteness and converges on the same SPD system to
+# the same tolerance (math-exact -- same solution), just a bit more work/memory.
 _PETSC_OPTIONS = {
-    "ksp_type": "cg",
+    "ksp_type": "fgmres",
+    "ksp_gmres_restart": 100,
     "pc_type": "gamg",
     "ksp_max_it": 2000,
     "ksp_error_if_not_converged": None,
@@ -174,6 +185,12 @@ def build_box_fenitop_dicts(config: ProjectConfig, comm: MPI.Comm):
         # beam_3d.py's own solid_zone/void_zone lambdas (both all-False).
         "cell_tags": None,
         "solid_tag": None,
+        # Deterministic mesh rebuild on an arbitrary communicator, used by the
+        # sub-communicator sample-parallelism path to construct a per-group mesh.
+        # create_box(COMM_SELF, ...) makes mesh_serial byte-identical across the
+        # world and every group, so their serial cell/node ordering matches and
+        # gathered global arrays remain interchangeable (see build_group_fea_context).
+        "mesh_factory": (lambda c, ct=cell_type: build_box_mesh(c, ct)),
     }
 
     rf_cfg = config.random_field
@@ -184,13 +201,22 @@ def build_box_fenitop_dicts(config: ProjectConfig, comm: MPI.Comm):
     pce_refresh_interval = config.optimization.pce_refresh_interval
 
     opt = {
-        "max_iter": _MAX_ITER,
+        # max_iter is run-control (iteration budget), NOT beam_3d.py physics, so
+        # it is sourced from cfg -- this lets a smoke config shorten the run
+        # (Stage 2 warm-start + Stage 5 robust loop) without changing the
+        # problem. Defaults to 400 via config.yaml, preserving the reference run.
+        "max_iter": config.optimization.max_iter,
         "opt_tol": _OPT_TOL,
         "vol_frac": _VOL_FRAC,
         "solid_zone": _solid_zone,
         "void_zone": _void_zone,
         "penalty": _PENALTY,
-        "epsilon": _EPSILON,
+        # epsilon (void/solid stiffness ratio E_min/E_0) is sourced from cfg: it
+        # is the dominant FEA *conditioning* knob. The beam_3d default 1e-6 is a
+        # 1e6 contrast that makes GAMG fragile (indefinite-PC failures) on
+        # near-disconnected random-eta draws; config.yaml's 1e-4 is far more
+        # solvable with a negligible effect on the (essentially 0/1) design.
+        "epsilon": config.optimization.epsilon,
         "filter_radius": _FILTER_RADIUS,
         "beta_interval": _BETA_INTERVAL,
         "beta_max": _BETA_MAX,
@@ -221,6 +247,11 @@ def build_box_fenitop_dicts(config: ProjectConfig, comm: MPI.Comm):
         "pce_q2_threshold": surrogate_cfg.q2_threshold,
 
         "pce_refresh_interval": pce_refresh_interval,
+        "sample_parallel_ranks_per_group": config.optimization.sample_parallel_ranks_per_group,
+        "pce_max_escalations": config.optimization.pce_max_escalations,
+        "pce_n_train_escalation_cap": config.optimization.pce_n_train_escalation_cap,
+        "pce_divergence_patience": config.optimization.pce_divergence_patience,
+        "saa_beta": config.optimization.saa_beta,
     }
 
     # Vector kept as a plain tuple (not np.array) to match beam_3d.py's

@@ -42,23 +42,46 @@ class PCERefreshPolicy:
 
     Attributes:
         refresh_interval: Rebuild the PCE pair every this many MMA iterations.
-            A value of 1 degenerates to rebuilding every iteration (safest,
-            most expensive); values > 1 amortize the FEA-at-samples cost
-            across iterations, matching TOuU-style periodic refresh.
         last_refresh_iteration: Iteration index at which the current PCE
-            pair was last (re)built. Tracked by the caller (dolfiny_mma_driver.py),
-            not this module, since only the driver knows the true MMA
-            iteration counter.
+            pair was last (re)built. Tracked by the caller (dolfiny_mma_driver.py).
+        max_delta_rho_inf: Outlier safety-net trigger. A single element (or
+            a few) moving this much forces a refresh even if the rest of the
+            design is stable -- catches genuine localized events like a
+            member appearing/disappearing. Deliberately set several
+            multiples above `move` limit so density-flip boundary elements
+            oscillating at the move limit every iteration don't trip this
+            on their own.
+        mean_delta_rho_threshold: Bulk-drift trigger. Refreshes once the
+            GLOBAL mean absolute density change since the last training
+            point crosses this value -- reflects whether the *design as a
+            whole* has moved enough to invalidate the PCE, rather than
+            being dominated by a handful of boundary elements.
+        frac_moved_threshold: Refreshes once this fraction of all elements
+            have moved by more than a small epsilon (see needs_refresh) --
+            catches a "wide but shallow" drift pattern that a mean
+            threshold alone might miss.
     """
-    refresh_interval: int = 20
+    refresh_interval: int = 50
     last_refresh_iteration: int = 0
-    max_delta_rho_inf: float = 0.3   # new: force refresh if design moved this much (in [0,1] density units)
+    max_delta_rho_inf: float = 0.15
+    mean_delta_rho_threshold: float = 0.01
+    frac_moved_threshold: float = 0.10
 
-    def needs_refresh(self, current_iteration: int, delta_rho_inf: float | None = None) -> bool:
+    def needs_refresh(
+        self,
+        current_iteration: int,
+        delta_rho_inf: float | None = None,
+        delta_rho_mean: float | None = None,
+        delta_rho_frac_moved: float | None = None,
+    ) -> bool:
         if (current_iteration - self.last_refresh_iteration) >= self.refresh_interval:
             return True
         if delta_rho_inf is not None and delta_rho_inf >= self.max_delta_rho_inf:
-            return True
+            return True  # outlier safety net
+        if delta_rho_mean is not None and delta_rho_mean >= self.mean_delta_rho_threshold:
+            return True  # bulk drift
+        if delta_rho_frac_moved is not None and delta_rho_frac_moved >= self.frac_moved_threshold:
+            return True  # wide-but-shallow drift
         return False
 
 

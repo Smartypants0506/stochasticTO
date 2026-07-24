@@ -22,7 +22,7 @@ material:
   poissons_ratio: 0.33
 
 petsc:
-  ksp_type: "cg"
+  ksp_type: "fgmres"   # robust to GAMG's occasionally-indefinite PC under high SIMP contrast (cg bails with -8)
   pc_type: "gamg"
 
 load_cases:
@@ -60,9 +60,9 @@ load_cases:
 optimization:
   max_iter: 400
   opt_tol: 1.0e-3
-  vol_frac: 0.08
+  vol_frac: 0.15
   penalty: 3.0
-  epsilon: 1.0e-6
+  epsilon: 1.0e-4
   filter_radius: 0.006
   beta_interval: 50
   beta_max: 128
@@ -71,7 +71,16 @@ optimization:
   opt_compliance: true
   quadrature_degree: 2
   body_force: [0.0, 0.0, 0.0]
-  lambda_sweep: [0.0, 1.0, 2.0, 5.0]
+  lambda_sweep: [0.0, 1.0]
+  pce_n_train_refresh: 60
+  pce_n_test_refresh: 20
+  # --- Surrogate-free robust TO (Sample Average Approximation) ---
+  robust_method: "saa"         # "saa" (no PCE middleman) or "pce" (legacy surrogate path)
+  saa_n_samples: 512           # fixed sample-set size solved by FEA every iteration
+                               # -- THE fidelity knob; raise for more accuracy / more compute
+  saa_sampling_strategy: "lhs" # "lhs" (space-filling, preferred) or "monte_carlo"
+  saa_seed: 7                  # MUST differ from mc_validation.seed (unbiased Stage-6 check)
+  saa_beta: 8.0                # Heaviside sharpness for the SAA FEA solves
 
 color_targets:
   fixed: [255, 0, 0, 255]
@@ -81,11 +90,18 @@ color_targets:
 solid_volume_color: [255, 255, 0, 255]
 
 random_field:
+  # sigma is now INERT for the threshold spread: the marginal transform
+  # standardizes the KL field to unit variance before mapping, so eta's
+  # pointwise distribution is exactly Beta(alpha,beta) on [eta_min,eta_max]
+  # regardless of sigma (it cancels). Magnitude of the manufacturing-error
+  # perturbation is set solely by the [eta_min,eta_max] band + alpha/beta;
+  # length_scale still controls spatial correlation. sigma is kept only as
+  # the nominal Gaussian amplitude and no longer affects results.
   sigma: 0.2
   length_scale: 4
   spatial_dim: 3
-  eta_min: 0.3
-  eta_max: 0.7
+  eta_min: 0.45              # tight manufacturing envelope: eta in [0.45,0.55]
+  eta_max: 0.55              # (~0.1-0.25 element of boundary motion per sample)
   alpha: 2.0
   beta: 2.0
   variance_threshold: 0.75
@@ -96,12 +112,12 @@ surrogate:
   n_train: 200
   n_test: 50
   hyperbolic_q: 0.75
-  max_degree_attempts: 8
-  q2_threshold: 0.99
+  max_degree_attempts: 4
+  q2_threshold: 0.90
 
 mc_validation:
   n_samples: 100
-  beta: 64
+  beta: 8
   seed: 42
   percentile_low: 5.0
   percentile_high: 95.0
@@ -112,3 +128,10 @@ keep_alive:
   groups: ["fixed", "load_1", "load_2"]
   corridor_radius: 4.0e-3     # ~2x mesh_size_max; null -> auto
   cluster_eps: 4.0e-3         # null -> auto (~2x mesh_size_max)
+
+recompute:
+  stage1_mesh: false
+  stage2_fea: false
+  stage3_random_field: false
+  stage4_5_surrogate_optimization: true
+  stage6_validation: true

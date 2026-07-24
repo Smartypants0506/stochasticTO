@@ -50,7 +50,9 @@ from scipy.spatial import cKDTree
 
 
 from src.random_fields.kernel import KernelParams
-from src.random_fields.kl_expansion import KLExpansionResult, sample_gaussian_field, evaluate_field_from_xi
+from src.random_fields.kl_expansion import (
+    KLExpansionResult, sample_gaussian_field, evaluate_field_from_xi, pointwise_std,
+)
 from src.random_fields.threshold_transform import MarginalTransformParams, ThresholdMarginalTransform
 
 
@@ -168,6 +170,16 @@ class RandomFieldHeaviside:
             )
         self._local_to_global_idx = local_to_global_idx
 
+        # Exact pointwise std of the truncated KL field, cached once (global,
+        # every rank holds the full field). set_eta_from_xi/resample divide the
+        # Gaussian field by this BEFORE the marginal transform, standardizing it
+        # to unit-variance N(0,1) at every node. That is what makes the
+        # isoprobabilistic transform reproduce its target Beta marginal EXACTLY
+        # on [eta_min, eta_max], independent of sigma and of the KL truncation
+        # level -- so the manufacturing-error magnitude is set solely by the
+        # transform's [eta_min,eta_max] band + alpha/beta, not by sigma.
+        self._field_std = pointwise_std(self.kl_result)
+
         self.transform = ThresholdMarginalTransform(config.transform_params)
         logger.info(
             "RandomFieldHeaviside ready: N_kl=%d, variance_explained=%.4f, "
@@ -199,6 +211,9 @@ class RandomFieldHeaviside:
         """
         use_seed = seed if seed is not None else self.config.seed
         g_sample_global = sample_gaussian_field(self.kl_result, n_samples=1, seed=use_seed)[0]
+        # Standardize to unit-variance N(0,1) so the transform receives the
+        # standard-normal input it assumes -> exact Beta marginal on the band.
+        g_sample_global = g_sample_global / self._field_std
         eta_global = self.transform.transform(g_sample_global)
         eta_global = np.clip(eta_global, _ETA_CLIP_EPS, 1.0 - _ETA_CLIP_EPS)
         eta_local = eta_global[self._local_to_global_idx]
@@ -363,6 +378,9 @@ class RandomFieldHeaviside:
             shape [n_local_dofs].
         """
         g_sample_global = evaluate_field_from_xi(self.kl_result, xi)
+        # Standardize to unit-variance N(0,1) so the transform receives the
+        # standard-normal input it assumes -> exact Beta marginal on the band.
+        g_sample_global = g_sample_global / self._field_std
         eta_global = self.transform.transform(g_sample_global)
         eta_global = np.clip(eta_global, _ETA_CLIP_EPS, 1.0 - _ETA_CLIP_EPS)
         eta_local = eta_global[self._local_to_global_idx]

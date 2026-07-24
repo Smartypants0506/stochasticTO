@@ -46,6 +46,7 @@ from __future__ import annotations
 
 import logging
 import os
+import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -54,6 +55,7 @@ import numpy as np
 import pyvista
 import dolfinx.plot
 from mpi4py import MPI
+from petsc4py import PETSc
 from dolfinx.fem import form, assemble_scalar
 
 
@@ -407,6 +409,14 @@ def run_monte_carlo_validation(
             n_nodes_global = vtk_points.shape[0]
 
             mc_config.output_dir.mkdir(parents=True, exist_ok=True)
+            # Clear any stale per-sample VTUs left by a previous run at this
+            # same path (ensemble_dir is NOT covered by mainClean.py's
+            # per-stage _fresh_dir() sweep) -- otherwise a run with fewer
+            # samples than a prior run leaves higher-index files behind,
+            # which is exactly what made build_probability_cloud's glob-based
+            # sample count diverge from this run's actual n_samples.
+            if mc_config.ensemble_dir.exists():
+                shutil.rmtree(mc_config.ensemble_dir)
             mc_config.ensemble_dir.mkdir(parents=True, exist_ok=True)
             sum_rho = np.zeros(n_nodes_global)
             sumsq_rho = np.zeros(n_nodes_global)
@@ -430,17 +440,33 @@ def run_monte_carlo_validation(
 
     compliance_form = form(opt_config["compliance"])
     compliance_samples = np.zeros(mc_config.n_samples)
+    n_failed_samples = 0
     n_dofs_local = local_node_coordinates.shape[0]
     eta_samples_all = (
         np.zeros((mc_config.n_samples, n_dofs_local)) if mc_config.store_eta_samples else None
     )
     xi_samples_all = np.zeros((mc_config.n_samples, rf_heaviside.kl_result.n_kl))
 
+    # rho_converged is fixed across all samples -- only eta(x) varies -- so the
+    # density write + Helmholtz filter solve happens ONCE here, not once per
+    # sample (mirrors fea_at_samples.py). Cache the filtered rho_tilde and reset
+    # rho_phys to it at the top of each sample before the Heaviside projection
+    # overwrites it in place.
+    rho_field.x.petsc_vec.array[:] = rho_converged_local
+    rho_field.x.scatter_forward()
+    density_filter.forward()
+    rho_tilde_cached = rf_heaviside.rho_phys.x.petsc_vec.array.copy()
+
+    # Warm-start CG from the previous sample (math-exact, cuts iteration count).
+    # PC reuse is intentionally OFF (rebuild every sample, see
+    # fea_at_samples.PC_REBUILD_INTERVAL for why): this project's SIMP contrast
+    # (epsilon=1e-6) + sharp Heaviside (beta) means a frozen GAMG hierarchy goes
+    # stale almost immediately as eta(x) varies, making reuse net-negative here.
+    _PC_REBUILD_INTERVAL = 1
+    linear_problem.enable_warm_start(True)
 
     for i in range(mc_config.n_samples):
-        rho_field.x.petsc_vec.array[:] = rho_converged_local
-        density_filter.forward()
-
+        rf_heaviside.rho_phys.x.petsc_vec.array[:] = rho_tilde_cached
 
         rng = np.random.default_rng(mc_config.seed + i)
         xi_sample = rng.standard_normal(size=rf_heaviside.kl_result.n_kl)
@@ -450,18 +476,23 @@ def run_monte_carlo_validation(
             eta_samples_all[i, :] = eta_sample
         rf_heaviside.forward(mc_config.beta)
 
-
+        linear_problem.set_reuse_preconditioner(i % _PC_REBUILD_INTERVAL != 0)
         try:
             linear_problem.solve_fem()
             C_value = comm.allreduce(assemble_scalar(compliance_form), op=MPI.SUM)
-        except PETSc.Error as exc:
+        except (PETSc.Error, RuntimeError) as exc:
+            # solve_fem() raises RuntimeError on a non-converged KSP (it already
+            # retries once internally with a fresh preconditioner if reuse was
+            # active -- see LinearProblem.solve_fem -- so this is reached only
+            # after that retry also failed, or reuse wasn't in play). PETSc.Error
+            # is kept for any other, unrelated PETSc-level failure.
             n_failed_samples += 1
             if comm.rank == 0:
                 logger.warning(
-                    "MC sample %d/%d: FEA solve failed (PETSc error code %s: %s). "
+                    "MC sample %d/%d: FEA solve failed (%s: %s). "
                     "seed=%d, xi_sample=%s. Recording compliance as NaN and "
                     "continuing.",
-                    i + 1, mc_config.n_samples, getattr(exc, "ierr", "unknown"),
+                    i + 1, mc_config.n_samples, type(exc).__name__,
                     exc, mc_config.seed + i, xi_sample.tolist(),
                 )
             compliance_samples[i] = np.nan
