@@ -201,35 +201,35 @@ class LinearProblem:
         reason = self.solver.getConvergedReason()
 
         if reason < 0:
-            if not self._reuse_pc_active:
-                # No reuse in play -- this is a genuine solver/design failure
-                # (e.g. a near-singular K), not an artifact of the reuse
-                # optimization. Fail loudly, exactly as ksp_error_if_not_converged
-                # would have (enforced here in Python instead -- see __init__).
-                raise RuntimeError(f"KSP solve failed to converge (reason={reason}).")
-
-            # Preconditioner reuse (set_reuse_preconditioner) freezes the GAMG
-            # hierarchy across a batch of mildly-varying matrices (fixed
-            # nominal design, only eta(x) varies) to skip repeated AMG setup.
-            # Occasionally a sample's matrix has drifted enough from the one
-            # the frozen PC was built for that CG fails to converge (indefinite
-            # PC, or exceeds ksp_max_it). This is a statistical risk of the
-            # reuse heuristic, bounded but not eliminated by periodic rebuilds
-            # (PC_REBUILD_INTERVAL) -- so fall back deterministically: rebuild
-            # the PC fresh for THIS matrix and retry once. lhs_mat/rhs_vec are
-            # already assembled above and unchanged, so no reassembly is needed.
+            # ANY non-convergence falls back to the safest possible solve:
+            # fresh preconditioner AND zero initial guess. This is the original
+            # pre-warm-start, pre-reuse configuration, so if the problem is
+            # solvable at all this should solve it.
+            #
+            # The retry used to be gated on `self._reuse_pc_active`, on the
+            # reasoning that without PC reuse a failure must be a genuine
+            # near-singular design. That reasoning missed the WARM START, which
+            # is enabled independently (enable_warm_start) and is the other
+            # thing that can wreck a solve: the previous sample's displacement
+            # field is a poor starting point for a substantially different
+            # matrix, and KSP then reports DIVERGED_DTOL (reason=-4) because the
+            # residual grew relative to its initial value. The Monte Carlo loop
+            # runs with warm start ON and reuse OFF, so the zero-initial-guess
+            # retry -- the one fallback that addresses that failure mode -- was
+            # unreachable in exactly the configuration that needed it.
             logger.warning(
-                "KSP solve failed to converge with a REUSED preconditioner "
-                "(converged reason=%d); rebuilding the preconditioner fresh "
-                "for this matrix and retrying once.", reason,
+                "KSP solve failed to converge (reason=%d, reuse_pc=%s, "
+                "warm_start=%s); retrying once from a zero initial guess with a "
+                "freshly built preconditioner.",
+                reason, self._reuse_pc_active,
+                self.solver.getInitialGuessNonzero(),
             )
             self.set_reuse_preconditioner(False)
-            # The failed solve may have left u_wrap holding a poor (though
-            # finite) unconverged iterate. Force a zero initial guess for just
-            # this retry so it cannot compound the failure -- this reproduces
-            # the exact original (pre-warm-start, pre-reuse) solve from
-            # scratch, the safest possible fallback. Restore whatever warm-
-            # start setting the caller had afterwards.
+            # The failed solve may have left u_wrap holding a poor (or
+            # non-finite) iterate; a zero initial guess makes KSP ignore it
+            # entirely. Restore whatever warm-start setting the caller had
+            # afterwards. lhs_mat/rhs_vec are already assembled and unchanged,
+            # so no reassembly is needed.
             had_warm_start = self.solver.getInitialGuessNonzero()
             if had_warm_start:
                 self.solver.setInitialGuessNonzero(False)
@@ -241,11 +241,18 @@ class LinearProblem:
                     self.solver.setInitialGuessNonzero(True)
 
             if retry_reason < 0:
-                # Fresh PC still failed -- a genuine problem, not caused by
-                # reuse. Fail loudly, matching the no-reuse case above.
+                # The safest configuration also failed, so this is a genuine
+                # property of the system, not an artifact of an optimization:
+                # under a sufficiently eroded eta(x) draw the structure can be
+                # near-disconnected and K near-singular. Callers that can
+                # tolerate it (the MC loop) catch this and record the sample as
+                # a failure; that failure RATE is a robustness result.
                 raise RuntimeError(
-                    "KSP solve failed to converge even after rebuilding the "
-                    f"preconditioner fresh (reason={retry_reason})."
+                    "KSP solve failed to converge even from a zero initial "
+                    f"guess with a fresh preconditioner (first attempt "
+                    f"reason={reason}, retry reason={retry_reason}). The "
+                    "system is genuinely near-singular for this design and "
+                    "eta(x) realization."
                 )
 
         self.u.x.scatter_forward()

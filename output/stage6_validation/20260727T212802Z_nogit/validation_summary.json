@@ -1,0 +1,353 @@
+{
+  "n_samples": 32,
+  "seed": 42,
+  "beta": 32.0,
+  "confidence": 0.95,
+  "common_random_numbers": true,
+  "per_design": {
+    "nominal": {
+      "mean": {
+        "value": 65.09691657408727,
+        "ci_low": 54.62223012430113,
+        "ci_high": 78.88704228623543,
+        "standard_error": 6.0615853339774874,
+        "confidence": 0.95,
+        "relative_half_width": 0.18637451233437713
+      },
+      "std": {
+        "value": 34.83617742753001,
+        "ci_low": 27.386680114021544,
+        "ci_high": 45.57101623259191,
+        "standard_error": 4.603435876376894,
+        "confidence": 0.95,
+        "relative_half_width": 0.26099786861516866
+      },
+      "p5": {
+        "value": 25.61156238711752,
+        "ci_low": 23.50186784626141,
+        "ci_high": 32.448538672765345,
+        "standard_error": 3.4490319742448365,
+        "confidence": 0.95,
+        "relative_half_width": 0.17466077803601832
+      },
+      "p95": {
+        "value": 129.30314564041967,
+        "ci_low": 107.81685979709599,
+        "ci_high": 158.11874385801414,
+        "standard_error": 14.690196988141066,
+        "confidence": 0.95,
+        "relative_half_width": 0.1945114475436009
+      },
+      "n_samples": 32,
+      "solver_failure_rate": 0.0,
+      "conditional_on_success": false
+    },
+    "lambda_0.0": {
+      "mean": {
+        "value": 1.444750239668155,
+        "ci_low": 1.0316503251537286,
+        "ci_high": 2.1724113540210306,
+        "standard_error": 0.2739036633275755,
+        "confidence": 0.95,
+        "relative_half_width": 0.3947952378015606
+      },
+      "std": {
+        "value": 1.5745110351750737,
+        "ci_low": 0.985505117282514,
+        "ci_high": 2.387718280415274,
+        "standard_error": 0.36046217275126013,
+        "confidence": 0.95,
+        "relative_half_width": 0.44528527644674293
+      },
+      "p5": {
+        "value": 0.3302139695439864,
+        "ci_low": 0.28416261678070154,
+        "ci_high": 0.3913287832244147,
+        "standard_error": 0.040784655538484815,
+        "confidence": 0.95,
+        "relative_half_width": 0.1622677662482084
+      },
+      "p95": {
+        "value": 4.999620835847265,
+        "ci_low": 2.560911084803913,
+        "ci_high": 6.9959136689335075,
+        "standard_error": 1.272801491192545,
+        "confidence": 0.95,
+        "relative_half_width": 0.44353389284349726
+      },
+      "n_samples": 32,
+      "solver_failure_rate": 0.0,
+      "conditional_on_success": false
+    },
+    "lambda_2.0": {
+      "mean": {
+        "value": 2.989961018959971,
+        "ci_low": 2.400555445054801,
+        "ci_high": 3.8448729840487927,
+        "standard_error": 0.3576849294688277,
+        "confidence": 0.95,
+        "relative_half_width": 0.24152782090389657
+      },
+      "std": {
+        "value": 2.0561442215081644,
+        "ci_low": 1.4869370299687508,
+        "ci_high": 2.8781747059162255,
+        "standard_error": 0.35363856882291833,
+        "confidence": 0.95,
+        "relative_half_width": 0.33831227921527157
+      },
+      "p5": {
+        "value": 0.7360434725993052,
+        "ci_low": 0.691071380801258,
+        "ci_high": 1.2500318834738837,
+        "standard_error": 0.21584675486643382,
+        "confidence": 0.95,
+        "relative_half_width": 0.37970617462218725
+      },
+      "p95": {
+        "value": 7.071415801192966,
+        "ci_low": 5.0093534363087775,
+        "ci_high": 9.384603125919696,
+        "standard_error": 1.2362446632158883,
+        "confidence": 0.95,
+        "relative_half_width": 0.30936164783810355
+      },
+      "n_samples": 32,
+      "solver_failure_rate": 0.0,
+      "conditional_on_success": false
+    }
+  },
+  "paired_comparisons_vs_nominal": {
+    "lambda_0.0": {
+      "design_a": "nominal",
+      "design_b": "lambda_0.0",
+      "n_samples": 32,
+      "paired_common_random_numbers": true,
+      "delta_mean_b_minus_a": {
+        "value": -63.65216633441912,
+        "ci_low": -77.3725284165801,
+        "ci_high": -53.76958869621291,
+        "standard_error": 5.886317818422023,
+        "confidence": 0.95,
+        "relative_half_width": 0.18540562780189457
+      },
+      "delta_std_b_minus_a": {
+        "value": -33.26166639235494,
+        "ci_low": -41.42104459375924,
+        "ci_high": -22.114725036399832,
+        "standard_error": 4.698542661179591,
+        "confidence": 0.95,
+        "relative_half_width": 0.29021876609580943
+      },
+      "sample_correlation_between_designs": 0.14395593395394157,
+      "p_value_mean_difference": 4.656612873077393e-10,
+      "mean_difference_resolvable": true,
+      "std_difference_resolvable": true,
+      "verdict": "mean: lambda_0.0 differs from nominal by -63.65 (95% CI [-77.37, -53.77], excludes 0); std: lambda_0.0 differs from nominal by -33.26 (95% CI [-41.42, -22.11], excludes 0)",
+      "n_realizations_dropped_from_pairing": 0
+    },
+    "lambda_2.0": {
+      "design_a": "nominal",
+      "design_b": "lambda_2.0",
+      "n_samples": 32,
+      "paired_common_random_numbers": true,
+      "delta_mean_b_minus_a": {
+        "value": -62.1069555551273,
+        "ci_low": -75.67728358807247,
+        "ci_high": -52.246619618837904,
+        "standard_error": 5.836386037786566,
+        "confidence": 0.95,
+        "relative_half_width": 0.18863156114967725
+      },
+      "delta_std_b_minus_a": {
+        "value": -32.78003320602185,
+        "ci_low": -40.693200852808545,
+        "ci_high": -21.847953445916364,
+        "standard_error": 4.542252190284669,
+        "confidence": 0.95,
+        "relative_half_width": 0.2874500963505769
+      },
+      "sample_correlation_between_designs": 0.26742995143462844,
+      "p_value_mean_difference": 4.656612873077393e-10,
+      "mean_difference_resolvable": true,
+      "std_difference_resolvable": true,
+      "verdict": "mean: lambda_2.0 differs from nominal by -62.11 (95% CI [-75.68, -52.25], excludes 0); std: lambda_2.0 differs from nominal by -32.78 (95% CI [-40.69, -21.85], excludes 0)",
+      "n_realizations_dropped_from_pairing": 0
+    }
+  },
+  "insample_vs_mc": {
+    "lambda_0.0": {
+      "method": "saa",
+      "insample_mu_C": 1.1044986773835048,
+      "insample_sigma_C": 0.9999684057504045,
+      "mc_mean": {
+        "value": 1.444750239668155,
+        "ci_low": 1.0316503251537286,
+        "ci_high": 2.1724113540210306,
+        "standard_error": 0.2739036633275755,
+        "confidence": 0.95,
+        "relative_half_width": 0.3947952378015606
+      },
+      "mc_std": {
+        "value": 1.5745110351750737,
+        "ci_low": 0.985505117282514,
+        "ci_high": 2.387718280415274,
+        "standard_error": 0.36046217275126013,
+        "confidence": 0.95,
+        "relative_half_width": 0.44528527644674293
+      },
+      "optimism_mean_relative": -0.235508915619078,
+      "optimism_std_relative": -0.36490225637623713,
+      "in_sample_estimate_inside_mc_ci": true,
+      "note": "A positive optimism means the in-loop estimate is HIGHER than the independent MC. The quantity to watch for SAA overfitting is a NEGATIVE optimism in sigma: the design looking less variable on its own samples than on fresh ones."
+    },
+    "lambda_2.0": {
+      "method": "saa",
+      "insample_mu_C": 2.3402299041472556,
+      "insample_sigma_C": 0.9264239755133905,
+      "mc_mean": {
+        "value": 2.989961018959971,
+        "ci_low": 2.400555445054801,
+        "ci_high": 3.8448729840487927,
+        "standard_error": 0.3576849294688277,
+        "confidence": 0.95,
+        "relative_half_width": 0.24152782090389657
+      },
+      "mc_std": {
+        "value": 2.0561442215081644,
+        "ci_low": 1.4869370299687508,
+        "ci_high": 2.8781747059162255,
+        "standard_error": 0.35363856882291833,
+        "confidence": 0.95,
+        "relative_half_width": 0.33831227921527157
+      },
+      "optimism_mean_relative": -0.21730420921631885,
+      "optimism_std_relative": -0.5494362867047009,
+      "in_sample_estimate_inside_mc_ci": false,
+      "note": "A positive optimism means the in-loop estimate is HIGHER than the independent MC. The quantity to watch for SAA overfitting is a NEGATIVE optimism in sigma: the design looking less variable on its own samples than on fresh ones."
+    }
+  },
+  "effect_resolvability": {
+    "lambda_0.0": {
+      "claimed_relative_effect_in_std": 0.9548024165840084,
+      "std_ci_relative_half_width": 0.44528527644674293,
+      "n_samples": 32,
+      "resolvable_at_this_n": true,
+      "required_n_to_resolve": 32,
+      "note": "An effect is only resolvable when the confidence interval on the estimate is narrower than half the effect. Otherwise the reported difference is within the measurement's own noise and must not be presented as an improvement."
+    },
+    "lambda_2.0": {
+      "claimed_relative_effect_in_std": 0.9409767553921329,
+      "std_ci_relative_half_width": 0.33831227921527157,
+      "n_samples": 32,
+      "resolvable_at_this_n": true,
+      "required_n_to_resolve": 32,
+      "note": "An effect is only resolvable when the confidence interval on the estimate is narrower than half the effect. Otherwise the reported difference is within the measurement's own noise and must not be presented as an improvement."
+    }
+  },
+  "boundary_offset_geometric": {
+    "element_size_h": 1.0,
+    "filter_radius_R": 0.6,
+    "min_feature_size_2R": 1.2,
+    "eta_band": [
+      0.25,
+      0.75
+    ],
+    "eta_std": 0.11180339887498948,
+    "interface_area": 16.559436418521404,
+    "mean_displacement_per_unit_eta": 13.335800069037125,
+    "offset_std_absolute": 1.4909877744356699,
+    "offset_std_elements": 1.4909877744356699,
+    "offset_std_as_fraction_of_min_feature": 1.242489812029725,
+    "offset_range_absolute": 6.667900034518563,
+    "offset_range_elements": 6.667900034518563,
+    "resolvable": true,
+    "resolvable_threshold_elements": 0.25,
+    "empirical": {},
+    "note": "offset_std_elements answers the NUMERICAL question (can the mesh resolve the perturbation). offset_std_as_fraction_of_min_feature answers the PHYSICAL question (is this a plausible process tolerance). A band can pass the first and fail the second; report both."
+  },
+  "boundary_offset_realized": {
+    "nominal": {
+      "n_samples": 32,
+      "mean_absolute": 2.335848012039021,
+      "std_absolute": 1.4318544773724888,
+      "min_absolute": -0.058578491461203815,
+      "max_absolute": 6.251943645899444,
+      "mean_elements": 2.335848012039021,
+      "std_elements": 1.4318544773724888,
+      "range_elements": 6.310522137360648,
+      "note": "Displacement realized by the actual eta ensemble, derived from the per-sample volumes with no additional FEA. This is the measured number; the geometric estimator is an independent cross-check and the two should agree to within the interface-area approximation."
+    },
+    "lambda_0.0": {
+      "n_samples": 32,
+      "mean_absolute": 0.8126169498098006,
+      "std_absolute": 2.715952382987213,
+      "min_absolute": -7.359282294307431,
+      "max_absolute": 5.888173464861995,
+      "mean_elements": 0.8126169498098006,
+      "std_elements": 2.715952382987213,
+      "range_elements": 13.247455759169426,
+      "note": "Displacement realized by the actual eta ensemble, derived from the per-sample volumes with no additional FEA. This is the measured number; the geometric estimator is an independent cross-check and the two should agree to within the interface-area approximation."
+    },
+    "lambda_2.0": {
+      "n_samples": 32,
+      "mean_absolute": 0.4172542693941701,
+      "std_absolute": 2.8436956196049277,
+      "min_absolute": -8.103184068661168,
+      "max_absolute": 4.507153838922143,
+      "mean_elements": 0.4172542693941701,
+      "std_elements": 2.8436956196049277,
+      "range_elements": 12.610337907583311,
+      "note": "Displacement realized by the actual eta ensemble, derived from the per-sample volumes with no additional FEA. This is the measured number; the geometric estimator is an independent cross-check and the two should agree to within the interface-area approximation."
+    }
+  },
+  "volume_spread": {
+    "nominal": {
+      "mean": 0.013656603459280546,
+      "std": 0.007903567726208387,
+      "p95": 0.02986990667164741,
+      "max": 0.03527271567853441,
+      "nominal_eta_half": 0.0007631612463838177,
+      "vol_frac_budget": 0.08,
+      "note": "The constraint bounds E[V] only. p95 and max are the realized upper tail, which nothing constrains -- report them so a design whose dilated realization is well over budget is visible."
+    },
+    "lambda_0.0": {
+      "mean": 0.08305240332661468,
+      "std": 0.014991546933936305,
+      "p95": 0.10256889260057621,
+      "max": 0.1110685217931546,
+      "nominal_eta_half": 0.07856691042228524,
+      "vol_frac_budget": 0.08,
+      "note": "The constraint bounds E[V] only. p95 and max are the realized upper tail, which nothing constrains -- report them so a design whose dilated realization is well over budget is visible."
+    },
+    "lambda_2.0": {
+      "mean": 0.0833863406711133,
+      "std": 0.015696665602158703,
+      "p95": 0.10203915467082086,
+      "max": 0.10596181796435904,
+      "nominal_eta_half": 0.08108317548965015,
+      "vol_frac_budget": 0.08,
+      "note": "The constraint bounds E[V] only. p95 and max are the realized upper tail, which nothing constrains -- report them so a design whose dilated realization is well over budget is visible."
+    }
+  },
+  "load_carrying_failure_rate": {
+    "nominal": {
+      "rate": 0.0,
+      "n_failed": 0,
+      "n_samples": 32,
+      "statistics_conditional_on_success": false
+    },
+    "lambda_0.0": {
+      "rate": 0.0,
+      "n_failed": 0,
+      "n_samples": 32,
+      "statistics_conditional_on_success": false
+    },
+    "lambda_2.0": {
+      "rate": 0.0,
+      "n_failed": 0,
+      "n_samples": 32,
+      "statistics_conditional_on_success": false
+    }
+  }
+}

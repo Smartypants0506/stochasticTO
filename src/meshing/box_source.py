@@ -55,17 +55,28 @@ logger = logging.getLogger(__name__)
 # Only Stage 3-6 params (random field / surrogate / MC), which have no
 # beam_3d.py equivalent at all, are sourced from cfg below.
 _DOMAIN = [[0, 0, 0], [10, 30, 10]]
-_ELEMENTS = [25, 75, 25]
+_ELEMENTS = [25, 75, 25]          # refinement level 1.0 -> h = 0.4
 _YOUNGS_MODULUS = 100
 _POISSONS_RATIO = 0.25
 _VOL_FRAC = 0.08
 _PENALTY = 3.0
 _EPSILON = 1e-6
-_FILTER_RADIUS = 0.6   # Helmholtz length = 1.5*h (h=0.4) ~= 5-element classical
-                       # radius; interface is several elements wide (smooth, no
-                       # 1-element snapping). NOTE: config.optimization.filter_radius
-                       # is intentionally NOT honored on the box path (beam_3d
-                       # physics is frozen) -- tune it here, not in the YAML.
+
+# --- FILTER RADIUS: FIXED IN ABSOLUTE UNITS ACROSS EVERY REFINEMENT LEVEL ---
+# Helmholtz length 0.6 = 1.5*h at the reference mesh (h=0.4), i.e. roughly a
+# 5-element classical filter radius.
+#
+# DO NOT scale this with the mesh. The filter is part of the CONTINUUM problem
+# the mesh study converges to: holding R fixed while h shrinks converges to a
+# single well-posed problem, whereas tying R to h (R = 1.5h at every level)
+# defines a DIFFERENT problem at every level and produces a convergence plot
+# that looks clean and proves nothing -- the minimum feature size would shrink
+# with the mesh, so the design, its compliance and its sigma_C would all keep
+# moving and never converge to anything.
+#
+# config.optimization.filter_radius is intentionally NOT honored on the box
+# path (beam_3d physics is frozen); loader.py rejects it. Tune it here.
+_FILTER_RADIUS = 0.6
 _BETA_INTERVAL = 50
 _BETA_MAX = 128
 _USE_OC = True
@@ -95,18 +106,121 @@ _CELL_TYPES = {
 }
 
 
+def elements_for_refinement(refinement: float) -> list[int]:
+    """Element counts at a given refinement level, domain and filter radius fixed.
+
+    refinement=1.0 reproduces beam_3d.py's [25, 75, 25] (h = 0.4) exactly.
+    Values below 1 coarsen (study tier), above 1 refine.
+
+    Element counts are rounded to integers, so the requested and realized h can
+    differ slightly; realized_element_size() reports what was actually built and
+    that is the value written into the run manifest. The domain aspect ratio
+    (1:3:1) is preserved so h stays isotropic.
+
+    Args:
+        refinement: Multiplier on the reference element counts. Must be > 0.
+
+    Returns:
+        [nx, ny, nz], each at least 1.
+    """
+    if refinement <= 0:
+        raise ValueError(f"box_mesh.refinement must be > 0, got {refinement}")
+    return [max(1, int(round(n * refinement))) for n in _ELEMENTS]
+
+
+def realized_element_size(elements: list[int]) -> float:
+    """Actual element size h of a built mesh, for reporting and for expressing
+    the boundary offset in units of h."""
+    return (_DOMAIN[1][0] - _DOMAIN[0][0]) / elements[0]
+
+
 def _disp_bc(x):
     """Identical to beam_3d.py's fem['disp_bc']: clamp the two short edges
     at y=0."""
     return np.isclose(x[1], 0) & (np.less(x[0], 1.5) | np.greater(x[0], 8.5))
 
 
-def _load_membership(x):
-    """Identical to beam_3d.py's traction_bcs membership fn: a small patch
-    at y=30, centered at x=5, z=5."""
-    return (np.isclose(x[1], 30)
-            & np.greater(x[0], 4.5) & np.less(x[0], 5.5)
-            & np.greater(x[2], 4.5) & np.less(x[2], 5.5))
+# beam_3d.py's load: traction (0,0,-2.0) over the patch |x-5|<0.5, |z-5|<0.5 at
+# y=30. At h=0.4 that patch admits exactly the quad [4.8,5.2]x[4.8,5.2], so the
+# reference TOTAL FORCE is 2.0 * 0.4 * 0.4:
+_REFERENCE_LOAD_TOTAL_FORCE = 0.32
+_LOAD_CENTRE = (5.0, 5.0)
+_LOAD_NOMINAL_HALFWIDTH = 0.5
+
+
+def _load_patch_halfwidth(element_size: float, override: float | None = None) -> float:
+    """Half-width of the traction patch at a given mesh size.
+
+    WHY THIS IS NOT SIMPLY beam_3d's 0.5. dolfinx's locate_entities_boundary
+    selects a facet only when ALL of its vertices satisfy the predicate, so the
+    patch must contain two CONSECUTIVE grid nodes to admit any facet at all.
+    A fixed half-width of 0.5 does that only for a handful of meshes: at h=1.0,
+    0.833, 0.625 and 0.5 it contains the single node x=5.0, no facet is
+    selected, the traction is applied to nothing, and the solve returns u=0 and
+    compliance=0 -- silently, with no error anywhere. That is exactly what
+    happened when the refinement knob was added: of the mesh-study levels
+    (0.48, 0.64, 1.0) only 1.0 had any load.
+
+    max(0.5, 1.5h) guarantees at least two nodes inside at any h. At the
+    reference mesh h=0.4 it evaluates to 0.6, which is WIDER than beam_3d's 0.5
+    yet selects exactly the same facets: the patch bounds 4.4 and 5.6 are not
+    grid nodes, so the selected set is still {4.8, 5.2} and the normalized
+    traction still comes out at exactly -2.0. beam_3d is reproduced bit for bit.
+
+    `override` pins the half-width to one value across a family of meshes. A
+    mesh-convergence study MUST use it: with the per-mesh rule the patch shrinks
+    as h refines (half-width 1.25 at h=0.833 down to 0.6 at h=0.4), so the load
+    becomes progressively more concentrated and each level solves a slightly
+    DIFFERENT problem -- the same defect that scaling the filter radius with the
+    mesh would introduce. Pinning it to the coarsest level's value makes every
+    level solve one problem, at the cost of no longer matching beam_3d.
+    """
+    if override is not None:
+        return float(override)
+    return max(_LOAD_NOMINAL_HALFWIDTH, 1.5 * element_size)
+
+
+def loaded_area(element_size: float, halfwidth_override: float | None = None) -> float:
+    """Area of the facets the traction predicate will actually select.
+
+    Computed analytically from the structured grid: the selected facets are the
+    cells whose two bounding nodes both lie strictly inside the patch, in x and
+    in z. Used to normalize the traction so the TOTAL applied force is identical
+    at every refinement level -- without that, a coarser mesh gets a wider patch
+    and therefore a larger total load, i.e. a different physical problem at each
+    level, which would make a mesh-convergence study meaningless in precisely
+    the way the fixed filter radius is meant to prevent.
+    """
+    halfwidth = _load_patch_halfwidth(element_size, halfwidth_override)
+    n_nodes = int(round((_DOMAIN[1][0] - _DOMAIN[0][0]) / element_size))
+    nodes = np.arange(n_nodes + 1) * element_size
+    inside = nodes[
+        (nodes > _LOAD_CENTRE[0] - halfwidth) & (nodes < _LOAD_CENTRE[0] + halfwidth)
+    ]
+    n_intervals = inside.size - 1
+    if n_intervals < 1:
+        raise RuntimeError(
+            f"The traction patch (half-width {halfwidth:.4g}) contains "
+            f"{inside.size} grid node(s) at h={element_size:.4g}, so NO facet "
+            "can be selected and the load would be applied to nothing "
+            "(compliance would come out exactly zero). Widen the patch: either "
+            "raise box_mesh.load_patch_halfwidth, or leave it null to use the "
+            "automatic max(0.5, 1.5h) rule."
+        )
+    return (n_intervals * element_size) ** 2
+
+
+def _make_load_membership(element_size: float, halfwidth_override: float | None = None):
+    """beam_3d's traction patch, widened just enough to remain resolvable."""
+    halfwidth = _load_patch_halfwidth(element_size, halfwidth_override)
+    x0, z0 = _LOAD_CENTRE
+
+    def _membership(x):
+        return (np.isclose(x[1], 30)
+                & np.greater(x[0], x0 - halfwidth) & np.less(x[0], x0 + halfwidth)
+                & np.greater(x[2], z0 - halfwidth) & np.less(x[2], z0 + halfwidth))
+
+    return _membership
 
 
 def _solid_zone(x):
@@ -119,21 +233,30 @@ def _void_zone(x):
     return np.full(x.shape[1], False)
 
 
-def build_box_mesh(comm: MPI.Comm, cell_type: str):
-    """Recreate beam_3d.py's `mesh` + `mesh_serial` exactly (module-level
-    call in beam_3d_DOMAIN = [[0, 0, 0], [10, 30, 10]]
-_ELEMENTS = [25, 75, 25].py; wrapped in a function here so main.py controls
-    when/whether it runs)."""
+def build_box_mesh(comm: MPI.Comm, cell_type: str, refinement: float = 1.0):
+    """Build the beam_3d domain at a given refinement level.
+
+    At refinement=1.0 this reproduces beam_3d.py's mesh exactly. The DOMAIN and
+    the filter radius are identical at every level -- only h changes -- which is
+    what makes a mesh-convergence study measure convergence to the continuum
+    problem rather than tracking a moving target.
+
+    mesh_serial is built on COMM_SELF and is therefore byte-identical across the
+    world communicator and every sample-parallel sub-communicator, which is the
+    correctness linchpin for recombining grouped results (see
+    build_group_fea_context).
+    """
     if cell_type not in _CELL_TYPES:
         raise ValueError(
             f"box_mesh.cell_type={cell_type!r} not supported; expected one "
             f"of {list(_CELL_TYPES)}"
         )
     dolfinx_cell_type = _CELL_TYPES[cell_type]
+    elements = elements_for_refinement(refinement)
 
-    mesh = create_box(comm, _DOMAIN, _ELEMENTS, dolfinx_cell_type)
+    mesh = create_box(comm, _DOMAIN, elements, dolfinx_cell_type)
     if comm.rank == 0:
-        mesh_serial = create_box(MPI.COMM_SELF, _DOMAIN, _ELEMENTS, dolfinx_cell_type)
+        mesh_serial = create_box(MPI.COMM_SELF, _DOMAIN, elements, dolfinx_cell_type)
     else:
         mesh_serial = None
     return mesh, mesh_serial
@@ -158,7 +281,10 @@ def build_box_fenitop_dicts(config: ProjectConfig, comm: MPI.Comm):
     separate downstream code path is required.
     """
     cell_type = config.box_mesh.cell_type
-    mesh, mesh_serial = build_box_mesh(comm, cell_type)
+    refinement = config.box_mesh.refinement
+    elements = elements_for_refinement(refinement)
+    element_size = realized_element_size(elements)
+    mesh, mesh_serial = build_box_mesh(comm, cell_type, refinement)
 
     tagged_mesh = TaggedMesh(
         mesh=mesh,
@@ -190,7 +316,20 @@ def build_box_fenitop_dicts(config: ProjectConfig, comm: MPI.Comm):
         # create_box(COMM_SELF, ...) makes mesh_serial byte-identical across the
         # world and every group, so their serial cell/node ordering matches and
         # gathered global arrays remain interchangeable (see build_group_fea_context).
-        "mesh_factory": (lambda c, ct=cell_type: build_box_mesh(c, ct)),
+        # refinement is bound here so the group meshes match the world mesh --
+        # a group built at a different level would silently produce gradient
+        # rows for the wrong elements.
+        "mesh_factory": (
+            lambda c, ct=cell_type, r=refinement: build_box_mesh(c, ct, r)
+        ),
+        # Geometry facts the downstream measurements need. element_size is what
+        # the boundary offset is reported in units of; filter_radius is repeated
+        # here (it is also in opt) because the minimum feature size ~ 2R is the
+        # other scale the offset must be compared against.
+        "element_size": element_size,
+        "domain": _DOMAIN,
+        "elements": elements,
+        "refinement": refinement,
     }
 
     rf_cfg = config.random_field
@@ -251,21 +390,57 @@ def build_box_fenitop_dicts(config: ProjectConfig, comm: MPI.Comm):
         "pce_max_escalations": config.optimization.pce_max_escalations,
         "pce_n_train_escalation_cap": config.optimization.pce_n_train_escalation_cap,
         "pce_divergence_patience": config.optimization.pce_divergence_patience,
+
+        # --- robust-solve control (config-driven: these are run control, not
+        # beam_3d physics, so they belong in config.yaml and are read here) ---
         "saa_beta": config.optimization.saa_beta,
+        "saa_beta_max": config.optimization.saa_beta_max,
+        "saa_beta_continuation": config.optimization.saa_beta_continuation,
+        # robust_opt_tol is the MMA stationarity tolerance and is deliberately a
+        # SEPARATE key from opt_tol above, which is the nominal Stage-2 OC
+        # design-change threshold (_OPT_TOL, frozen beam_3d run control). The
+        # two used to share one key while meaning different things.
+        "robust_opt_tol": config.optimization.robust_opt_tol,
+        "constraint_tol": config.optimization.constraint_tol,
     }
 
-    # Vector kept as a plain tuple (not np.array) to match beam_3d.py's
-    # own traction_bcs entry verbatim: [(0, 0, -2.0), lambda ...].
+    # Traction is normalized to hold the TOTAL applied force fixed across
+    # refinement levels: the patch has to widen on coarse meshes to remain
+    # resolvable (see _load_patch_halfwidth), and a fixed traction over a wider
+    # patch would be a larger -- i.e. different -- load at every level. At
+    # h=0.4 the patch area is 0.16 and this returns exactly beam_3d's -2.0.
+    halfwidth_override = config.box_mesh.load_patch_halfwidth
+    halfwidth = _load_patch_halfwidth(element_size, halfwidth_override)
+    area = loaded_area(element_size, halfwidth_override)
+    traction_z = -_REFERENCE_LOAD_TOTAL_FORCE / area
     load_cases = {
-        "beam_3d_reference": [((0.0, 0.0, -2.0), _load_membership)],
+        "beam_3d_reference": [
+            (
+                (0.0, 0.0, traction_z),
+                _make_load_membership(element_size, halfwidth_override),
+            )
+        ],
     }
+    if comm.rank == 0:
+        logger.info(
+            "Traction patch: half-width %.4g (%s), area %.6g, traction_z %.6g "
+            "(total force %.6g held fixed across refinement levels)",
+            halfwidth,
+            "PINNED via box_mesh.load_patch_halfwidth -- required for a "
+            "mesh-convergence study, and NOT beam_3d-equivalent unless it "
+            "happens to select the same facets"
+            if halfwidth_override is not None else "auto max(0.5, 1.5h)",
+            area, traction_z, _REFERENCE_LOAD_TOTAL_FORCE,
+        )
 
     if comm.rank == 0:
         logger.info(
             "Built box-mesh fenitop dicts (beam_3d.py reference): "
-            "cell_type=%s, domain=%s, elements=%s, E=%.6g, nu=%.6g, "
+            "cell_type=%s, domain=%s, refinement=%.4g -> elements=%s, h=%.4g, "
+            "R=%.4g (R/h=%.3g, FIXED across levels), E=%.6g, nu=%.6g, "
             "vol_frac=%.3g",
-            cell_type, _DOMAIN, _ELEMENTS,
+            cell_type, _DOMAIN, refinement, elements, element_size,
+            _FILTER_RADIUS, _FILTER_RADIUS / element_size,
             fem["young's modulus"], fem["poisson's ratio"], opt["vol_frac"],
         )
 

@@ -77,13 +77,50 @@ class SurrogateTrainingData:
         dC_drho_samples: [n_train x n_elems_local] adjoint dC_i/drho, chained
             through Heaviside.backward() and DensityFilter.backward().
             n_elems_local is THIS RANK's local element count under MPI.
+            None in ACCUMULATE mode -- see below.
         dV_drho_samples: [n_train x n_elems_local] adjoint dV_i/drho, same
-            chaining and same local-sizing convention.
+            chaining and same local-sizing convention. None in accumulate mode.
+
+    ACCUMULATE MODE (accumulate_gradients=True)
+    -------------------------------------------
+    The SAA robust objective never needs the individual gradient rows. It needs
+    exactly two reductions of them:
+
+        dmu/drho    = (1/N)  sum_i dC_i
+        dsigma/drho = (1/((N-1) sigma)) sum_i (C_i - mu) dC_i
+        dE[V]/drho  = (1/N)  sum_i dV_i
+
+    all of which accumulate in place as the batch runs. Materializing the full
+    [N x n_elems] matrices instead cost, per objective evaluation, an
+    [N x n_elems_local] buffer AND -- in the sample-parallel path -- 2N
+    world-broadcasts of a full global array, one pair per sample. At N=512 and
+    400 iterations that was the dominant communication cost of the whole solve.
+
+    The accumulator fields below are algebraically identical to reducing the
+    stored rows; the only difference is that nothing is stored.
+
+        dC_sum:          sum_i dC_i/drho
+        dC_centered_sum: sum_i (C_i - C_reference) dC_i/drho
+        dV_sum:          sum_i dV_i/drho
+        C_reference:     the shift used in dC_centered_sum, and the reason it
+            exists: accumulating sum_i C_i dC_i and subtracting mu*sum_i dC_i
+            afterwards is mathematically the same but numerically poor here,
+            because C_i ~ 0.16 with a spread of ~0.008 -- a 20:1 ratio that
+            loses over a digit to cancellation. Shifting by a value already
+            inside the sample range keeps every accumulated term the size of
+            the spread rather than the size of the mean. The exact centered sum
+            is recovered as
+                sum_i (C_i - mu) dC_i = dC_centered_sum + (C_reference - mu) * dC_sum
+            which is an identity, not an approximation.
     """
     compliance_samples: np.ndarray
     volume_samples: np.ndarray
-    dC_drho_samples: np.ndarray
-    dV_drho_samples: np.ndarray
+    dC_drho_samples: np.ndarray | None
+    dV_drho_samples: np.ndarray | None
+    dC_sum: np.ndarray | None = None
+    dC_centered_sum: np.ndarray | None = None
+    dV_sum: np.ndarray | None = None
+    C_reference: float | None = None
 
 
 
@@ -99,6 +136,7 @@ def run_fea_at_samples(
     linear_problem,
     rho_field,
     raise_on_nonfinite: bool = True,
+    accumulate_gradients: bool = False,
 ) -> SurrogateTrainingData:
     """Evaluate compliance and volume at each training sample's perturbed density field.
 
@@ -159,8 +197,21 @@ def run_fea_at_samples(
     n_elems_local = rho_nominal.size
     compliance_samples = np.empty(n_train)
     volume_samples = np.empty(n_train)
-    dC_drho_samples = np.empty((n_train, n_elems_local))
-    dV_drho_samples = np.empty((n_train, n_elems_local))
+
+    # In accumulate mode the per-sample gradient rows are never materialized --
+    # only the three reductions the SAA objective actually consumes. See
+    # SurrogateTrainingData's docstring.
+    if accumulate_gradients:
+        dC_drho_samples = dV_drho_samples = None
+        dC_sum = np.zeros(n_elems_local)
+        dC_centered_sum = np.zeros(n_elems_local)
+        dV_sum = np.zeros(n_elems_local)
+        C_reference = None
+    else:
+        dC_drho_samples = np.empty((n_train, n_elems_local))
+        dV_drho_samples = np.empty((n_train, n_elems_local))
+        dC_sum = dC_centered_sum = dV_sum = None
+        C_reference = None
 
     # rho_nominal is fixed across all samples -- only eta(x) varies -- so the
     # density write + Helmholtz filter solve only needs to happen ONCE, not
@@ -234,8 +285,18 @@ def run_fea_at_samples(
 
         compliance_samples[j] = C_value
         volume_samples[j] = V_value
-        dC_drho_samples[j, :] = dCdrho
-        dV_drho_samples[j, :] = dVdrho
+        if accumulate_gradients:
+            if C_reference is None:
+                # First finite compliance in this batch: any value inside the
+                # sample range works as the shift, and using one from the batch
+                # itself needs no extra information.
+                C_reference = float(C_value)
+            dC_sum += dCdrho
+            dC_centered_sum += (C_value - C_reference) * dCdrho
+            dV_sum += dVdrho
+        else:
+            dC_drho_samples[j, :] = dCdrho
+            dV_drho_samples[j, :] = dVdrho
 
         if is_root and ((j + 1) % 50 == 0 or j == n_train - 1):
             logger.info("FEA-at-samples: completed %d/%d solves (%.2fs for last batch)",
@@ -252,4 +313,8 @@ def run_fea_at_samples(
         volume_samples=volume_samples,
         dC_drho_samples=dC_drho_samples,
         dV_drho_samples=dV_drho_samples,
+        dC_sum=dC_sum,
+        dC_centered_sum=dC_centered_sum,
+        dV_sum=dV_sum,
+        C_reference=C_reference,
     )

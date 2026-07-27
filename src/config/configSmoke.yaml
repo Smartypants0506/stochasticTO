@@ -1,96 +1,135 @@
 # =============================================================================
-# SMOKE-TEST CONFIG -- fast end-to-end validation of the SAA (surrogate-free)
-# robust-TO pipeline before committing to a full overnight run.
+# SMOKE TEST — exercises all six stages end to end in minutes, not days.
 #
-# Uses the synthetic BOX mesh (beam_3d reference) so there is NO CAD/STEP
-# dependency, and drives every stage with tiny budgets so the whole 6-stage run
-# finishes in a few minutes. The numbers here are NOT accurate -- they only
-# prove the pipeline runs end-to-end without crashing and produces sane
-# artifacts. Bump saa_n_samples / max_iter / mc_validation.n_samples for the
-# real run (or just use config.yaml).
-#
-# Run:
 #   mpirun -n 8 python src/mainClean.py src/config/configSmoke.yaml
-# (mainClean now takes the config path as its first CLI arg.)
+#
+# Not a scientific configuration. Every fidelity knob is set as low as the code
+# allows, so the numbers it produces are meaningless. What it checks is that the
+# PIPELINE is sound:
+#
+#   * the four verification gates run and pass
+#   * the boundary-offset measurement runs and reports
+#   * the Pareto sweep produces a non-dominated set (or fails loudly)
+#   * beta continuation runs its stages
+#   * Stage 6 validates every design on a common ensemble with CIs
+#   * a manifest is written with the effective parameters
+#
+# Target: under 10 minutes on 8 ranks. If it takes materially longer, something
+# has regressed into doing production-scale work.
 # =============================================================================
 
-mesh_source: "box"            # synthetic beam_3d mesh -- no STEP file needed
+mesh_source: "box"
 
 box_mesh:
-  cell_type: "tetrahedron"    # required for the Stage-3 KL expansion
-
-# --- Ignored on the box path, but the loader requires these top-level keys ---
-step_file: "data/cad/unused_for_box.step"
-mesh_out_path: "output/meshes/unused_for_box.xdmf"
-mesh_size_max: 2.0e-3
-snap_tol: 1.0e-4
-
-material:                     # box path uses hardcoded beam_3d E/nu; kept for schema
-  youngs_modulus: 68900000000
-  poissons_ratio: 0.33
-
-petsc:
-  ksp_type: "fgmres"   # robust to indefinite GAMG PC (cg bails with -8 on hard eta draws)
-  pc_type: "gamg"
-
-load_cases:                   # ignored on box path (single hardcoded beam_3d case),
-  smoke:                      # but MUST be the mapping form or the loader rejects it
-    - group_name: "load_1"
-      vector: [0.0, 0.0, -1.0]
+  cell_type: "tetrahedron"
+  # -> [10, 30, 10], h = 1.0. R/h = 0.6, i.e. the filter is SMALLER than one
+  # element. That is deliberate for a smoke test (it keeps the KL eigensolve at
+  # ~3.8k nodes instead of ~17k) but it means the eta model is NOT physically
+  # meaningful here: with a sub-element filter there is no resolved interface
+  # band, so the boundary-offset gate will correctly report the perturbation as
+  # unresolvable. THAT WARNING IS EXPECTED IN THIS CONFIG ONLY. It must never be
+  # ignored on configStudy.yaml or config.yaml, where R/h is 0.96 and 1.5.
+  #
+  # An earlier version used refinement 0.24 (h = 1.67, R/h = 0.36) with
+  # saa_beta_max = 128. That combination is not merely coarse, it is DEGENERATE:
+  # see the beta note below.
+  refinement: 0.4
 
 optimization:
-  max_iter: 15                # SHORT: caps BOTH the Stage-2 warm-start and the
-                              # Stage-5 SAA loop (now config-driven on the box path)
-  opt_tol: 1.0e-5
-  vol_frac: 0.08
-  penalty: 3.0
-  epsilon: 1.0e-4             # void/solid stiffness ratio -- 1e-4 keeps GAMG well-conditioned
-                             # (the box path now honors this; 1e-6 caused indefinite-PC solve failures)
-  filter_radius: 0.6
-  beta_interval: 50
-  beta_max: 128
-  use_oc: true
-  move: 0.02
-  opt_compliance: true
-  quadrature_degree: 2
-  body_force: [0.0, 0.0, 0.0]
-  lambda_sweep: [0.0, 1.0]    # 2 points -> exercises the sweep + lambda-continuation
-  # --- SAA (surrogate-free) robust TO ---
+  max_iter: 20               # split across the beta stages
+  epsilon: 1.0e-4
+
   robust_method: "saa"
-  saa_n_samples: 8            # TINY sample set for speed -- smoke only, NOT accurate
-  saa_sampling_strategy: "lhs"
-  saa_seed: 7                 # must differ from mc_validation.seed below
+  saa_n_samples: 16
+  saa_sampling_strategy: "monte_carlo"
+  saa_seed: 7
+
+  # Stages 8 -> 16 -> 32. Continuation is exercised; beta_max is deliberately
+  # NOT 128 here.
+  #
+  # WHY beta_max IS CAPPED ON THIS MESH. The projection tanh(beta*(rho_tilde -
+  # eta)) saturates to +/-1 in double precision once |rho_tilde - eta| exceeds
+  # about 19/beta. At beta=128 that is 0.15, so only nodes with rho_tilde in
+  # roughly [0.10, 0.90] respond to eta at all. On a mesh this coarse the
+  # filtered field jumps between 0 and 1 inside a single element, so almost no
+  # node lands there -- every eta draw then yields the SAME compliance, sigma_C
+  # is exactly zero, and dsigma_C/drho divides by zero. That is precisely how
+  # this config crashed with beta_max=128 at refinement 0.24.
+  #
+  # At beta=32 the responsive band is +/-0.59 around the eta band, which covers
+  # the whole [0,1] range, so the smoke run is non-degenerate by construction.
+  # The production and study configs keep beta_max=128 because their meshes
+  # resolve the filter (R/h = 1.5 and 0.96) and therefore have a real interface
+  # band for eta to act on.
   saa_beta: 8.0
-  sample_parallel_ranks_per_group: 4   # with `mpirun -n 8` this makes 2 groups,
-                                       # so the smoke run EXERCISES the grouped
-                                       # sample-parallel MPI path (the riskiest code)
+  saa_beta_max: 32.0
+  saa_beta_continuation: true
 
-random_field:                 # drives the KL expansion + the eta-field model
-  # sigma is INERT for the eta spread now (field is standardized to unit
-  # variance before the marginal map -> exact Beta on [eta_min,eta_max],
-  # sigma cancels). Magnitude = the band + alpha/beta; length_scale = correlation.
-  sigma: 0.2
-  length_scale: 4
+  robust_opt_tol: 1.0e-3
+  constraint_tol: 1.0e-2     # loose: 20 iterations will not converge properly
+
+  lambda_sweep: [0.0, 2.0]
+  lambda_sweep_start: "common"
+  # A 20-iteration solve is nowhere near converged, so its two points may well
+  # dominate each other. That is expected here and is NOT a pipeline failure --
+  # this is the one configuration where the check is turned off deliberately.
+  sweep_check_dominance: false
+
+  sample_parallel_ranks_per_group: 4
+
+random_field:
+  sigma: 1.0
+  # Correlation length is in domain units and the domain is unchanged, so this
+  # stays 4.0 -- the coarse mesh resolves fewer modes, which is fine here.
+  length_scale: 4.0
   spatial_dim: 3
-  eta_min: 0.45              # tight manufacturing envelope eta in [0.45,0.55]
-  eta_max: 0.55              # (~4x less boundary motion than the old [0.3,0.7])
-  alpha: 2.0
-  beta: 2.0                   # Beta(2,2) marginal -- SAME model the MC validates against
-  variance_threshold: 0.95
-  n_kl_hint: 20
+  variance_threshold: 0.90   # fewer KL modes -> faster eigensolve
+  n_kl_hint: 10
   seed: 42
+  eta_min: 0.25
+  eta_max: 0.75
+  alpha: 2.0
+  beta: 2.0
 
-surrogate:                    # unused when robust_method=saa, but a required key
-  n_train: 32
-  n_test: 16
+surrogate:
+  n_train: 20
+  n_test: 10
   hyperbolic_q: 0.75
-  max_degree_attempts: 4
-  q2_threshold: 0.90
+  max_degree_attempts: 2
+  q2_threshold: 0.50
 
 mc_validation:
-  n_samples: 8                # tiny INDEPENDENT validation ensemble
-  beta: 8.0                   # match saa_beta (same eta-field sharpness)
-  seed: 42                    # != saa_seed=7  ->  unbiased in-loop-vs-MC check
+  n_samples: 32
+  beta: 32.0                 # must equal optimization.saa_beta_max (loader enforces)
+  seed: 42
   percentile_low: 5.0
   percentile_high: 95.0
-  output_dir: "output/mc_validation"
+  output_dir: "output/mc_validation_smoke"
+  n_bootstrap: 500
+  confidence: 0.95
+  bootstrap_seed: 0
+  write_ensemble: false
+  # Tolerated on this mesh only. R/h = 0.6 plus vol_frac = 0.08 makes the
+  # eroded realizations genuinely near-disconnected, so a few percent of solves
+  # legitimately fail -- a smoke test must not halt on that. The rate is still
+  # reported, and the compliance statistics are flagged as conditional.
+  # Production and study tiers keep this much tighter.
+  max_solver_failure_rate: 0.20
+
+validation:
+  # Gates stay ON. They are the point of the smoke test: a pipeline change that
+  # breaks the adjoint or the eta marginal must fail here, in minutes, rather
+  # than in a six-day production run.
+  run_gates: true
+  gradient_fd: true
+  fd_n_samples: 4
+  fd_n_elements: 6
+  fd_step: 1.0e-3
+  fd_rtol: 1.0e-2            # loose: tiny mesh, few samples
+  fd_ksp_rtol: 1.0e-12
+  correlation_n_nodes: 32
+  correlation_n_samples: 1000
+  correlation_rtol: 0.10
+  marginal_n_nodes: 32
+  marginal_n_samples: 500
+  marginal_alpha: 0.01

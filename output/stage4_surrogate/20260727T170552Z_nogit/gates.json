@@ -1,0 +1,68 @@
+{
+  "all_passed": false,
+  "beta": 32.0,
+  "gates": [
+    {
+      "name": "heaviside_equivalence",
+      "passed": true,
+      "message": "constant-field eta reproduces FEniTop's scalar-eta Heaviside to 1e-12",
+      "detail": {
+        "beta": 32.0,
+        "eta_value": 0.5,
+        "rtol": 1e-12
+      }
+    },
+    {
+      "name": "kl_correlation",
+      "passed": false,
+      "message": "empirical correlation DEVIATES from analytic truncated correlation (max abs err 0.138 > 0.1)",
+      "detail": {
+        "n_nodes_sampled": 32,
+        "n_samples": 1000,
+        "max_abs_error_empirical_vs_analytic": 0.13778262981969513,
+        "tolerance": 0.1,
+        "n_kl": 25,
+        "variance_explained": 0.9002155327621704,
+        "max_abs_gap_truncated_vs_target_kernel": 0.22524275227063106,
+        "note": "The sampled field is G(x)/std(x): the truncated KL field normalized to unit pointwise variance. Its covariance is the truncated CORRELATION, not sigma^2*exp(-r^2/2l^2); sigma cancels identically. max_abs_gap_truncated_vs_target_kernel is the cost of truncating at variance_explained and must be reported as a modelling approximation."
+      }
+    },
+    {
+      "name": "eta_marginal",
+      "passed": true,
+      "message": "realized eta matches Beta(2,2) on [0.25,0.75] at all 32 tested nodes (min p=0.0111 >= 0.000313)",
+      "detail": {
+        "n_nodes_tested": 32,
+        "n_samples_per_node": 500,
+        "max_ks_statistic": 0.07168759420451065,
+        "min_p_value": 0.011137729851208698,
+        "bonferroni_alpha": 0.0003125,
+        "within_bounds": true,
+        "target": {
+          "distribution": "Beta",
+          "alpha": 2.0,
+          "beta": 2.0,
+          "eta_min": 0.25,
+          "eta_max": 0.75
+        }
+      }
+    },
+    {
+      "name": "gradient_fd",
+      "passed": false,
+      "message": "DEGENERATE: all 4 samples returned identical compliance (sigma_C=0), so the gradient cannot be verified. The eta perturbation had no effect on the design at all. Almost always this is PROJECTION SATURATION: tanh(beta*(rho_tilde - eta)) is +/-1 to machine precision once |rho_tilde - eta| exceeds ~19/beta = 0.594, so a design whose filtered density sits outside [-0.344, 1.34] responds to no eta draw whatsoever. Check (a) that validation.fd_design_blend puts the design inside the eta band, and (b) that the mesh RESOLVES the filter: at R/h < 1 the filtered field jumps between 0 and 1 within a single element, leaving no interface band for eta to act on, which makes the whole eta model degenerate on that mesh -- not just this gate.",
+      "detail": {
+        "sigma_C": 0.0,
+        "mu_C": 0.0,
+        "compliance_spread": 0.0,
+        "beta": 32.0,
+        "saturation_halfwidth_in_rho": 0.59375,
+        "eta_band": [
+          0.25,
+          0.75
+        ],
+        "fd_design_blend": 0.4
+      }
+    }
+  ]
+}

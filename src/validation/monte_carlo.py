@@ -128,6 +128,19 @@ class MCConfig:
     ensemble_dir: Path | None = None
     reliability_threshold: float = 0.5
     store_eta_samples: bool = False
+    # Fraction of samples allowed to fail to solve before the run is halted.
+    #
+    # A failed solve at the ERODED end of a wide eta band is not noise -- it
+    # means that realization of the structure does not carry load. That is a
+    # ROBUSTNESS RESULT, and the failure rate is the headline number it
+    # produces, so it is always reported. But it also means the compliance
+    # statistics are CONDITIONAL on the structure surviving, which biases them
+    # optimistically: the realizations that were hardest on the design are
+    # exactly the ones missing.
+    #
+    # Default 0.0 (any failure halts) so the value has to be an explicit,
+    # visible decision in each config rather than a silent tolerance.
+    max_solver_failure_rate: float = 0.0
 
 
     def __post_init__(self) -> None:
@@ -209,11 +222,55 @@ class MCResult:
     n_kl: int
     variance_explained: float
     xi_samples: np.ndarray
+    # Per-sample realized volume FRACTION, and the eta=0.5 reference. Collected
+    # for one extra scalar assembly per sample: they carry the spread of the
+    # (mean-only-constrained) volume, and they yield the realized boundary
+    # displacement with no extra FEA -- see src/validation/boundary_offset.py.
+    volume_samples: np.ndarray | None = None
+    nominal_volume_fraction: float | None = None
+    total_volume: float | None = None
+    n_solver_failures: int = 0
+    # Fraction of realizations in which the structure failed to carry load. For
+    # a robustness study this is a first-class result, not an error count.
+    solver_failure_rate: float = 0.0
+    # True when some samples failed: mean/std/percentiles are then computed only
+    # over the surviving realizations and are optimistically biased.
+    statistics_conditional_on_success: bool = False
     reliability_mean: np.ndarray | None = None
     reliability_std: np.ndarray | None = None
     reliability_prob_void: np.ndarray | None = None
     probability_weights: np.ndarray | None = None
     ensemble_pvd_path: Path | None = None
+
+
+    def summary_with_intervals(
+        self, percentiles: tuple[float, float] = (5.0, 95.0), seed: int = 0
+    ) -> dict:
+        """Point estimates WITH bootstrap confidence intervals.
+
+        `mean` and `std` on this object are bare point estimates; at the sample
+        sizes this pipeline runs, the interval around them is often wider than
+        the differences being claimed between designs. Report this instead --
+        see src/validation/statistics.py for why.
+        """
+        from src.validation.statistics import summarize_samples
+
+        # compliance_samples keeps NaN for failed realizations as the full
+        # record; the statistics are over the survivors only, which is what
+        # statistics_conditional_on_success flags.
+        finite = self.compliance_samples[np.isfinite(self.compliance_samples)]
+        summary = summarize_samples(finite, percentiles=percentiles, seed=seed)
+        summary["solver_failure_rate"] = self.solver_failure_rate
+        summary["conditional_on_success"] = self.statistics_conditional_on_success
+        if self.statistics_conditional_on_success:
+            summary["note"] = (
+                "CONDITIONAL statistics: "
+                f"{self.n_solver_failures} realization(s) "
+                f"({100 * self.solver_failure_rate:.3g}%) did not carry load "
+                "and are excluded. These figures are optimistically biased and "
+                "must be reported together with the failure rate."
+            )
+        return summary
 
 
     def cdf(self) -> tuple[np.ndarray, np.ndarray]:
@@ -439,13 +496,28 @@ def run_monte_carlo_validation(
 
 
     compliance_form = form(opt_config["compliance"])
+    # Per-sample VOLUME, collected alongside compliance for two reasons, at the
+    # cost of one extra scalar assembly per sample and no extra FEA:
+    #   1. The volume constraint is on E[V] only, so the realized spread of V
+    #      across the ensemble -- and its 95th percentile -- is uncontrolled and
+    #      was never reported. A design whose dilated realization is 20% over
+    #      budget is a finding.
+    #   2. It yields the realized boundary displacement for free, via
+    #      d_s = (V_i - V_nominal) * total_volume / interface_area. See
+    #      src/validation/boundary_offset.py.
+    volume_form = form(opt_config["volume"])
+    total_volume = comm.allreduce(
+        assemble_scalar(form(opt_config["total_volume"])), op=MPI.SUM
+    )
+
     compliance_samples = np.zeros(mc_config.n_samples)
+    volume_samples = np.zeros(mc_config.n_samples)
     n_failed_samples = 0
+    n_ksp_failures = 0
     n_dofs_local = local_node_coordinates.shape[0]
     eta_samples_all = (
         np.zeros((mc_config.n_samples, n_dofs_local)) if mc_config.store_eta_samples else None
     )
-    xi_samples_all = np.zeros((mc_config.n_samples, rf_heaviside.kl_result.n_kl))
 
     # rho_converged is fixed across all samples -- only eta(x) varies -- so the
     # density write + Helmholtz filter solve happens ONCE here, not once per
@@ -465,13 +537,37 @@ def run_monte_carlo_validation(
     _PC_REBUILD_INTERVAL = 1
     linear_problem.enable_warm_start(True)
 
+    # --- COMMON RANDOM NUMBERS -------------------------------------------
+    # The whole xi block is drawn UP FRONT from a single generator, rather than
+    # per-sample from default_rng(seed + i). Two properties this buys, both of
+    # which the pipeline depends on:
+    #
+    #   1. Two designs validated with the same mc_config.seed see the IDENTICAL
+    #      eta(x) ensemble, so their compliance samples are paired and the
+    #      difference between them can be estimated with far lower variance than
+    #      either design's own mean (see src/validation/statistics.py). Comparing
+    #      designs on different draws -- which is what a per-sample reseed makes
+    #      easy to do by accident -- discards that.
+    #   2. Drawing (M, n_kl) from one stream is prefix-stable: the first N rows
+    #      of an M-sample block equal an N-sample block from the same seed. So an
+    #      N-convergence study nests, instead of resampling everything at each N.
+    xi_samples_all = np.random.default_rng(mc_config.seed).standard_normal(
+        size=(mc_config.n_samples, rf_heaviside.kl_result.n_kl)
+    )
+
+    # Volume of the NOMINAL realization (eta = 0.5), the reference the realized
+    # boundary displacement of every sample is measured against.
+    rf_heaviside.rho_phys.x.petsc_vec.array[:] = rho_tilde_cached
+    rf_heaviside.forward(mc_config.beta, eta=0.5)
+    nominal_volume_fraction = (
+        comm.allreduce(assemble_scalar(volume_form), op=MPI.SUM) / total_volume
+    )
+
     for i in range(mc_config.n_samples):
         rf_heaviside.rho_phys.x.petsc_vec.array[:] = rho_tilde_cached
 
-        rng = np.random.default_rng(mc_config.seed + i)
-        xi_sample = rng.standard_normal(size=rf_heaviside.kl_result.n_kl)
+        xi_sample = xi_samples_all[i, :]
         eta_sample = rf_heaviside.set_eta_from_xi(xi_sample)
-        xi_samples_all[i, :] = xi_sample
         if mc_config.store_eta_samples:
             eta_samples_all[i, :] = eta_sample
         rf_heaviside.forward(mc_config.beta)
@@ -487,18 +583,29 @@ def run_monte_carlo_validation(
             # after that retry also failed, or reuse wasn't in play). PETSc.Error
             # is kept for any other, unrelated PETSc-level failure.
             n_failed_samples += 1
+            n_ksp_failures += 1
             if comm.rank == 0:
                 logger.warning(
                     "MC sample %d/%d: FEA solve failed (%s: %s). "
-                    "seed=%d, xi_sample=%s. Recording compliance as NaN and "
-                    "continuing.",
-                    i + 1, mc_config.n_samples, type(exc).__name__,
-                    exc, mc_config.seed + i, xi_sample.tolist(),
+                    "seed=%d, eta band [%.3g, %.3g]. Recording compliance as "
+                    "NaN and continuing. A solver failure at the ERODED end of "
+                    "a wide eta band is not a numerical accident -- it usually "
+                    "means that realization of the structure does not carry "
+                    "load, which is a RESULT about the design's robustness and "
+                    "must be reported, not swallowed.",
+                    i + 1, mc_config.n_samples, type(exc).__name__, exc,
+                    mc_config.seed,
+                    float(np.min(eta_sample)) if eta_sample is not None else float("nan"),
+                    float(np.max(eta_sample)) if eta_sample is not None else float("nan"),
                 )
             compliance_samples[i] = np.nan
+            volume_samples[i] = np.nan
             continue
-        
+
         compliance_samples[i] = C_value
+        volume_samples[i] = (
+            comm.allreduce(assemble_scalar(volume_form), op=MPI.SUM) / total_volume
+        )
 
 
         if write_ensemble:
@@ -528,26 +635,65 @@ def run_monte_carlo_validation(
             )
 
 
-    if not np.all(np.isfinite(compliance_samples)):
-        n_bad = np.sum(~np.isfinite(compliance_samples))
+    finite_mask = np.isfinite(compliance_samples)
+    n_bad = int(np.sum(~finite_mask))
+    failure_rate = n_bad / mc_config.n_samples
+
+    if failure_rate > mc_config.max_solver_failure_rate:
         raise RuntimeError(
             f"{n_bad}/{mc_config.n_samples} compliance samples are non-finite "
-            "(NaN/inf). This indicates an FEA solver failure for some eta(x) "
-            "realization, not a valid result -- investigate before trusting "
-            "any statistics below."
+            f"(NaN/inf), i.e. a {100 * failure_rate:.3g}% solver failure rate, "
+            f"above the configured tolerance of "
+            f"{100 * mc_config.max_solver_failure_rate:.3g}% "
+            "(mc_validation.max_solver_failure_rate). Two readings, and they "
+            "need different responses:\n"
+            "  * Concentrated at the ERODED end of the eta band: a RESULT -- "
+            "those realizations do not carry load. Raise the tolerance to "
+            "accept and report it, or reconsider vol_frac / the eta band. Do "
+            "not simply drop them: the statistics would then be conditional on "
+            "survival and biased toward the realizations the design handled.\n"
+            "  * Scattered across the band: a conditioning problem. Raise "
+            "optimization.epsilon, or loosen the KSP tolerance.\n"
+            "Note the solver already retries every failure once from a zero "
+            "initial guess with a fresh preconditioner, so these are not "
+            "warm-start artifacts."
         )
 
+    statistics_conditional = n_bad > 0
+    if statistics_conditional and comm.rank == 0:
+        logger.error(
+            "%d/%d samples (%.3g%%) failed to solve and are EXCLUDED from the "
+            "statistics below, which are therefore CONDITIONAL ON THE "
+            "STRUCTURE CARRYING LOAD. They are biased optimistically: the "
+            "realizations that were hardest on the design are the ones "
+            "missing. Report the failure rate alongside any compliance number "
+            "from this ensemble -- for a robustness study it is arguably the "
+            "more important of the two.",
+            n_bad, mc_config.n_samples, 100 * failure_rate,
+        )
 
-    mean = float(compliance_samples.mean())
-    variance = float(compliance_samples.var(ddof=1))
+    successful = compliance_samples[finite_mask]
+    mean = float(successful.mean())
+    variance = float(successful.var(ddof=1))
     std = float(np.sqrt(variance))
-    p_low, p_high = np.percentile(compliance_samples, mc_config.percentiles)
+    p_low, p_high = np.percentile(successful, mc_config.percentiles)
 
 
     if comm.rank == 0:
         logger.info(
             "MC validation complete: mean=%.6g, std=%.6g, p%d=%.6g, p%d=%.6g",
             mean, std, mc_config.percentiles[0], p_low, mc_config.percentiles[1], p_high,
+        )
+        # The volume constraint bounds E[V] only, so the realized spread is
+        # uncontrolled. A dilated realization well over budget is a finding
+        # about the design, not a rounding detail.
+        successful_volumes = volume_samples[finite_mask]
+        logger.info(
+            "MC realized volume: E[V]=%.6g, std=%.4g, p95=%.6g, max=%.6g "
+            "(nominal eta=0.5 realization: %.6g)",
+            successful_volumes.mean(), successful_volumes.std(ddof=1),
+            np.percentile(successful_volumes, 95.0), successful_volumes.max(),
+            nominal_volume_fraction,
         )
 
 
@@ -600,6 +746,12 @@ def run_monte_carlo_validation(
         percentile_high=float(p_high),
         eta_samples=eta_samples_all,
         xi_samples=xi_samples_all,
+        volume_samples=volume_samples,
+        nominal_volume_fraction=float(nominal_volume_fraction),
+        total_volume=float(total_volume),
+        n_solver_failures=int(n_ksp_failures),
+        solver_failure_rate=float(failure_rate),
+        statistics_conditional_on_success=bool(statistics_conditional),
         n_kl=rf_heaviside.kl_result.n_kl,
         variance_explained=rf_heaviside.kl_result.variance_explained,
         reliability_mean=reliability_mean,

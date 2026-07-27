@@ -520,6 +520,7 @@ def build_group_fea_context(fem: dict, opt: dict, kl_result: KLExpansionResult):
 def run_fea_at_samples_grouped(
     world_ctx, group_ctx: GroupFEAContext, opt: dict,
     rho_current_local: np.ndarray, xi_train: np.ndarray, beta: float,
+    accumulate_gradients: bool = False,
 ) -> SurrogateTrainingData:
     """Sample-parallel drop-in for run_fea_at_samples.
 
@@ -527,6 +528,13 @@ def run_fea_at_samples_grouped(
     scalar C/V and per-element gradients are recombined into world-partitioned
     arrays in the ORIGINAL sample order. Return value is field-for-field
     identical (shape/ordering/partition) to the serial run_fea_at_samples.
+
+    accumulate_gradients=True returns only the three reductions the SAA
+    objective consumes instead of the per-sample rows. That collapses the
+    communication from 2N world-broadcasts of a full global array (one pair per
+    sample -- 1024 of them per objective evaluation at N=512) down to 3
+    all-reductions total, and removes the [N x n_elems_local] buffers entirely.
+    The result is algebraically identical; see SurrogateTrainingData.
     """
     world = MPI.COMM_WORLD
     n_train = xi_train.shape[0]
@@ -570,6 +578,7 @@ def run_fea_at_samples_grouped(
             group_ctx.group_sens_problem, xi_train[my_ids], beta,
             group_ctx.group_linear_problem, group_ctx.group_rho_field,
             raise_on_nonfinite=False,
+            accumulate_gradients=accumulate_gradients,
         )
 
     # --- reassemble scalar C/V in absolute sample order (SUM: one writer each) ---
@@ -581,7 +590,68 @@ def run_fea_at_samples_grouped(
     world.Allreduce(MPI.IN_PLACE, compliance_world, op=MPI.SUM)
     world.Allreduce(MPI.IN_PLACE, volume_world, op=MPI.SUM)
 
-    # --- gather each owned sample's gradient to serial-global on the group root ---
+    # --- single collective finiteness check on world-identical arrays ---
+    # Done BEFORE the gradient reduction so a bad batch fails before paying for
+    # the communication.
+    if not (np.all(np.isfinite(compliance_world)) and np.all(np.isfinite(volume_world))):
+        n_bad = int(np.sum(~np.isfinite(compliance_world)) + np.sum(~np.isfinite(volume_world)))
+        raise RuntimeError(
+            f"{n_bad} non-finite compliance/volume value(s) in the grouped "
+            "FEA-at-samples batch (likely a near-disconnected structure under "
+            "some eta(x) draw). Investigate before trusting the result."
+        )
+
+    widx = world_design_comm.idx
+
+    def _reduce_group_vector(group_local: np.ndarray | None) -> np.ndarray:
+        """group-local -> serial-global on the group root -> world Allreduce ->
+        this rank's world-local slice.
+
+        Groups own DISJOINT sample subsets, so summing the group roots'
+        serial-global partial sums reproduces the full-batch sum exactly. Ranks
+        that are not a group root contribute zeros.
+        """
+        gathered = (
+            group_ctx.group_design_comm.gather(group_local)
+            if group_local is not None else None
+        )
+        buf = np.zeros(n_elems_global, dtype=np.float64)
+        if is_group_root and gathered is not None:
+            buf[:] = np.ascontiguousarray(gathered, dtype=np.float64)
+        world.Allreduce(MPI.IN_PLACE, buf, op=MPI.SUM)
+        return buf[widx]
+
+    if accumulate_gradients:
+        # Fold each group's shift into a single world-consistent centering
+        # BEFORE reducing, using the batch mean that is now known. The identity
+        #     sum_i (C_i - mu) dC_i
+        #       = sum_g [ sum_{i in g} (C_i - C_ref_g) dC_i + (C_ref_g - mu) sum_{i in g} dC_i ]
+        # is exact for any per-group shift C_ref_g, so each group may keep its
+        # own numerically-convenient reference.
+        mu_C = float(compliance_world.mean())
+        if group_data is not None:
+            group_centered = (
+                group_data.dC_centered_sum
+                + (group_data.C_reference - mu_C) * group_data.dC_sum
+            )
+            group_dC_sum = group_data.dC_sum
+            group_dV_sum = group_data.dV_sum
+        else:
+            group_centered = group_dC_sum = group_dV_sum = None
+
+        return SurrogateTrainingData(
+            compliance_samples=compliance_world,
+            volume_samples=volume_world,
+            dC_drho_samples=None,
+            dV_drho_samples=None,
+            dC_sum=_reduce_group_vector(group_dC_sum),
+            dC_centered_sum=_reduce_group_vector(group_centered),
+            dV_sum=_reduce_group_vector(group_dV_sum),
+            # Already centered on the true batch mean by the fold above.
+            C_reference=mu_C,
+        )
+
+    # --- per-sample rows (PCE path): gather + broadcast each sample in turn ---
     gradC_by_j: dict[int, np.ndarray] = {}
     gradV_by_j: dict[int, np.ndarray] = {}
     for k, j in enumerate(my_ids):
@@ -591,10 +661,8 @@ def run_fea_at_samples_grouped(
             gradC_by_j[int(j)] = np.ascontiguousarray(gC, dtype=np.float64)
             gradV_by_j[int(j)] = np.ascontiguousarray(gV, dtype=np.float64)
 
-    # --- stream each sample's serial-global row back to world-local rows ---
     dC_world = np.empty((n_train, n_elems_world_local))
     dV_world = np.empty((n_train, n_elems_world_local))
-    widx = world_design_comm.idx
     bufC = np.empty(n_elems_global, dtype=np.float64)
     bufV = np.empty(n_elems_global, dtype=np.float64)
     for j in range(n_train):
@@ -606,15 +674,6 @@ def run_fea_at_samples_grouped(
         world.Bcast(bufV, root=root_world_rank)
         dC_world[j, :] = bufC[widx]
         dV_world[j, :] = bufV[widx]
-
-    # --- single collective finiteness check on world-identical arrays ---
-    if not (np.all(np.isfinite(compliance_world)) and np.all(np.isfinite(volume_world))):
-        n_bad = int(np.sum(~np.isfinite(compliance_world)) + np.sum(~np.isfinite(volume_world)))
-        raise RuntimeError(
-            f"{n_bad} non-finite compliance/volume value(s) in the grouped "
-            "FEA-at-samples batch (likely a near-disconnected structure under "
-            "some eta(x) draw). Investigate before trusting the PCE surrogate."
-        )
 
     return SurrogateTrainingData(
         compliance_samples=compliance_world,
@@ -842,14 +901,17 @@ def run_mma_with_pce(
             needs_refresh() never returns True.
 
     Returns:
-        Same dict shape as the original run_robust_topopt: "rho_robust",
-        "mu_C", "sigma_C", "mean_volume", "kkt_residual",
-        "tao_converged_reason", "iteration_log", "compliance_pce",
-        "volume_pce".
+        "rho_robust", "mu_C", "sigma_C", "mean_volume", "converged",
+        "optimality", "grad_norm", "tao_converged_reason", "iteration_log",
+        "compliance_pce", "volume_pce". ("kkt_residual" is gone: it held the
+        raw objective-gradient norm, which is not a KKT residual for this
+        constrained problem -- see src/optimization/optimality.py. The same
+        number is still available as the diagnostic "grad_norm".)
 
     Raises:
-        RuntimeError: If TAO reports a non-converged reason, or if a
-            mid-solve refresh (when allow_refresh=True) fails its Q^2 gate.
+        RuntimeError: If a mid-solve refresh (when allow_refresh=True) fails
+            its Q^2 gate. Non-convergence is REPORTED via "converged" rather
+            than raised, matching the SAA driver.
     """
     fem = ctx.fem
     rho_field = ctx.rho_field
@@ -973,6 +1035,9 @@ def run_mma_with_pce(
         J.assemble()
 
     tao = PETSc.TAO().create(comm)
+    mma_context = MMA()
+    mma_context.set_constraint_scales((opt["vol_frac"],))
+    mma_context.set_constraint_tolerance(float(opt.get("constraint_tol", 1e-4)))
 
     def mma_iteration_monitor(tao: PETSc.TAO) -> None:
         """Fires exactly once per real MMA outer iteration."""
@@ -1121,7 +1186,7 @@ def run_mma_with_pce(
                         _freeze_refresh_policy(state.refresh_policy)
 
     tao.setType(PETSc.TAO.Type.PYTHON)
-    tao.setPythonContext(MMA())
+    tao.setPythonContext(mma_context)
 
     x0 = rho_field.x.petsc_vec.copy()
     x0.setArray(ctx.rho_warm_start_local)
@@ -1149,7 +1214,9 @@ def run_mma_with_pce(
     jacobian_mat.setUp()
     tao.setJacobianInequality(jacobian_inequality_callback, jacobian_mat, jacobian_mat)
 
-    tao.setTolerances(gatol=opt["opt_tol"])
+    # See saa_robust_driver: gatol governs the RELATIVE stationarity residual,
+    # and robust_opt_tol is a distinct key from the OC loop's opt_tol.
+    tao.setTolerances(gatol=float(opt.get("robust_opt_tol", 1.0e-3)))
     tao.setMaximumIterations(opt["max_iter"])
 
     prefix = tao.getOptionsPrefix() or ""
@@ -1177,15 +1244,19 @@ def run_mma_with_pce(
     tao.solve()
 
     converged_reason = tao.getConvergedReason()
-    # A negative reason normally means non-convergence and is fatal. But when we
-    # deliberately diverged (froze refreshes and will restore the checkpoint),
-    # TAO running on to its iteration limit is EXPECTED, not an error -- so we
-    # must not raise in that case, or the divergence guard would just move the
-    # crash here. The restored design is the best FEASIBLE one we evaluated.
-    if converged_reason < 0 and not state.diverged:
-        raise RuntimeError(
-            f"TAO MMA did not converge (reason code={converged_reason}). "
-            "Check iteration_log for divergence pattern before trusting rho_robust."
+    optimality = mma_context.optimality
+    # reason > 0 is a genuine TAO convergence code. reason == 0
+    # (TAO_CONTINUE_ITERATING) is NOT success -- it used to be the normal exit
+    # here, silently passing every max-iteration run as converged.
+    converged = converged_reason > 0
+    if not converged and comm.rank == 0:
+        logger.warning(
+            "TAO MMA did NOT reach first-order optimality (reason=%d, "
+            "diverged_guard=%s) for lambda=%.3g. The returned design is the "
+            "best iterate evaluated, not a converged optimum. Final "
+            "optimality: %s",
+            converged_reason, state.diverged, lambda_tradeoff,
+            optimality.summary() if optimality is not None else "unavailable",
         )
 
     rho_robust_local = tao.getSolution().getArray(readonly=True).copy()
@@ -1240,10 +1311,15 @@ def run_mma_with_pce(
         "mu_C": result_mu_C,
         "sigma_C": result_sigma_C,
         "mean_volume": result_mean_volume,
-        # KKT residual belongs to the FINAL iterate; when we restore an earlier
-        # checkpoint it does not describe the returned design, so report NaN
-        # rather than a misleading value.
-        "kkt_residual": float("nan") if state.diverged else float(grad_vec.norm()),
+        # Optimality belongs to the FINAL iterate; when we restore an earlier
+        # checkpoint it does not describe the returned design, so report None
+        # rather than a misleading value. `grad_norm` is what this function used
+        # to call "kkt_residual" -- diagnostic only, not an optimality measure.
+        "converged": converged and not state.diverged,
+        "optimality": (
+            None if (state.diverged or optimality is None) else optimality.as_dict()
+        ),
+        "grad_norm": float("nan") if state.diverged else float(grad_vec.norm()),
         "tao_converged_reason": converged_reason,
         "diverged": state.diverged,
         "iteration_log": iteration_log,

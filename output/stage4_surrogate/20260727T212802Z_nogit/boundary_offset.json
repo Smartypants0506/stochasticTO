@@ -1,0 +1,21 @@
+{
+  "element_size_h": 1.0,
+  "filter_radius_R": 0.6,
+  "min_feature_size_2R": 1.2,
+  "eta_band": [
+    0.25,
+    0.75
+  ],
+  "eta_std": 0.11180339887498948,
+  "interface_area": 16.559436418521404,
+  "mean_displacement_per_unit_eta": 13.335800069037125,
+  "offset_std_absolute": 1.4909877744356699,
+  "offset_std_elements": 1.4909877744356699,
+  "offset_std_as_fraction_of_min_feature": 1.242489812029725,
+  "offset_range_absolute": 6.667900034518563,
+  "offset_range_elements": 6.667900034518563,
+  "resolvable": true,
+  "resolvable_threshold_elements": 0.25,
+  "empirical": {},
+  "note": "offset_std_elements answers the NUMERICAL question (can the mesh resolve the perturbation). offset_std_as_fraction_of_min_feature answers the PHYSICAL question (is this a plausible process tolerance). A band can pass the first and fail the second; report both."
+}

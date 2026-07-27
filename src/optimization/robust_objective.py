@@ -76,21 +76,36 @@ class RobustEvaluationResult:
             Heaviside projection).
         dC_drho_samples: [n_mc_samples x n_elems] dC_i/drho (unfiltered design
             variable), one row per MC sample, already chained through both
-            Heaviside.backward() and DensityFilter.backward().
+            Heaviside.backward() and DensityFilter.backward(). None when the
+            batch ran in accumulate mode (see below).
         dV_drho_samples: [n_mc_samples x n_elems] dV_i/drho, same chaining.
+            None in accumulate mode.
         mu_C: Sample mean of compliance across MC draws.
         sigma_C: Sample standard deviation of compliance across MC draws.
         mean_volume: Sample mean of volume fraction across MC draws (E[V]).
+
+    ACCUMULATE MODE
+    ---------------
+    dC_sum / dC_centered_sum / dV_sum carry the only three reductions of the
+    per-sample gradients that the robust objective needs, accumulated during the
+    batch so the [N x n_elems] matrices are never built. dC_centered_sum is
+    already centered on mu_C. See src/surrogate/fea_at_samples.py's
+    SurrogateTrainingData for the derivation; the gradient functions in
+    robust_gradient.py accept either representation and produce identical
+    results from both.
     """
 
-    
+
     compliance_samples: np.ndarray
     volume_samples: np.ndarray
-    dC_drho_samples: np.ndarray
-    dV_drho_samples: np.ndarray
+    dC_drho_samples: np.ndarray | None
+    dV_drho_samples: np.ndarray | None
     mu_C: float
     sigma_C: float
     mean_volume: float
+    dC_sum: np.ndarray | None = None
+    dC_centered_sum: np.ndarray | None = None
+    dV_sum: np.ndarray | None = None
 
 
 def evaluate_robust_samples(

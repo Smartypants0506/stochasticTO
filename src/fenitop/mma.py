@@ -5,8 +5,14 @@ from petsc4py import PETSc
 import numpy as np
 
 from src.fenitop.la import negative_part, positive_part
+from src.optimization.optimality import compute_first_order_optimality
 
 logger = logging.getLogger(__name__)
+
+# Default tolerance on the feasibility and complementarity residuals, used
+# alongside TAO's gatol (which now governs the RELATIVE stationarity residual).
+# Override per-solve with MMA.set_constraint_tolerance().
+DEFAULT_CONSTRAINT_TOL = 1e-4
 
 
 class MMA:
@@ -94,6 +100,15 @@ class MMA:
         self._tmp_3 = None
 
         self._zero = None
+
+        # First-order optimality state. self._optimality holds the most recent
+        # FirstOrderOptimality record and is what the driver should report --
+        # NOT the raw objective-gradient norm, which is not an optimality
+        # measure for this constrained problem (see optimality.py).
+        self._optimality = None
+        self._constraint_tol = DEFAULT_CONSTRAINT_TOL
+        self._constraint_scales = None
+        self._optimality_work = None
 
     def create(self, tao: PETSc.TAO) -> None:
         logger.debug("create")
@@ -184,6 +199,12 @@ class MMA:
         #
         if (constraint := tao.getInequalityConstraints())[1] is not None:
             self._λ = constraint[0].copy()
+            # Vec.copy() duplicates the constraint vector's CONTENTS, which at
+            # setUp time are whatever the caller's createMPI() left there --
+            # i.e. an undefined initial guess for the dual subsolver, and an
+            # undefined multiplier in the first iteration's KKT residual.
+            # Start from the only defensible value, mu = 0.
+            self._λ.set(0.0)
             self._λ.assemble()
             self._J_λ = self._λ.copy()
             self._J_λ.assemble()
@@ -271,6 +292,22 @@ class MMA:
         self._zero = self._x.copy()
         self._zero.set(0.0)
 
+        self._optimality_work = self._x.copy()
+
+    def set_constraint_tolerance(self, tol: float) -> None:
+        """Tolerance on the feasibility and complementarity residuals.
+
+        TAO's gatol governs the RELATIVE stationarity residual; this governs the
+        other two first-order conditions. All three must hold to converge.
+        """
+        self._constraint_tol = float(tol)
+
+    def set_constraint_scales(self, scales) -> None:
+        """Per-constraint normalizers for the feasibility/complementarity
+        residuals, e.g. (vol_frac,) so a volume violation is reported as a
+        fraction of the budget rather than an absolute volume fraction."""
+        self._constraint_scales = None if scales is None else tuple(float(s) for s in scales)
+
     def solve(self, tao):
         """Follows TaoSolve_Python_default."""
         logger.debug("solve")
@@ -287,10 +324,17 @@ class MMA:
         J, _, Jh_tuple = tao.getJacobianInequality()
         Jh, Jh_args, Jh_kwargs = Jh_tuple if Jh_tuple else (None, None, None)
 
-        # TODO: workaround - see https://gitlab.com/petsc/petsc/-/merge_requests/8618.
+        # NOTE: there used to be a pre-loop `if self._gradient.norm() <= gatol:
+        # setConvergedReason(CONVERGED_GATOL)` here. It is deliberately gone.
+        # ||grad f|| is not an optimality measure for a bound- and
+        # volume-constrained problem: at a KKT point grad f is balanced by the
+        # volume multiplier and the bound multipliers, not zero. The test could
+        # therefore never fire, and the value it tested was nonetheless reported
+        # downstream as "the KKT residual". Convergence is now decided by the
+        # full first-order conditions (stationarity + feasibility +
+        # complementarity) computed each iteration below -- see
+        # src/optimization/optimality.py.
         gatol, _, _ = tao.getTolerances()
-        if self._gradient.norm() <= gatol:
-            tao.setConvergedReason(PETSc.TAO.ConvergedReason.CONVERGED_GATOL)
 
         lb, ub = tao.getVariableBounds()
 
@@ -326,7 +370,10 @@ class MMA:
         # to avoid one log line per outer iteration per rank.
         warned_subsolver_nonconvergence = False
 
-        for it in range(1, tao.getMaximumIterations()):
+        # range(1, max_it + 1): the previous range(1, max_it) silently ran one
+        # fewer outer iteration than the configured budget, so a run capped at
+        # max_iter=400 actually performed 399 MMA steps.
+        for it in range(1, tao.getMaximumIterations() + 1):
             if tao.reason:
                 break
 
@@ -358,6 +405,29 @@ class MMA:
                     J.getTransposeMat().scale(-1)
                 else:
                     J.scale(-1)
+
+            # --- first-order optimality at the CURRENT iterate ---------------
+            # Evaluated here, immediately after the sign flip, because this is
+            # the only point in the loop where the objective gradient, the
+            # constraint values and the constraint Jacobian all refer to the
+            # SAME x. (The multiplier is necessarily the one from the previous
+            # dual solve -- that is the multiplier that produced this iterate,
+            # which is the standard choice.) self._x_m1 still holds the
+            # iterate that entered the PREVIOUS step, so the design-change
+            # measure describes the move just taken.
+            self._optimality = compute_first_order_optimality(
+                self._x,
+                self._gradient,
+                lb,
+                ub,
+                constraint_vec=c if h else None,
+                jacobian=J if h else None,
+                multipliers=self._λ if h else None,
+                x_previous=self._x_m1 if it > 1 else None,
+                constraint_scales=self._constraint_scales,
+                work_vec=self._optimality_work,
+            )
+            logger.info("[MMA opt] it=%d %s", it, self._optimality.summary())
 
             # Compute MMA subproblem dependencies
 
@@ -659,8 +729,56 @@ class MMA:
             self._objective = tao.computeObjectiveGradient(self._x, self._gradient)
 
             tao.setIterationNumber(it)
-            tao.monitor(f=self._objective, res=self._gradient.norm())  # TODO: cnorm
-            tao.checkConverged()
+            # `res` is the RELATIVE stationarity residual, not ||grad f||. The
+            # latter is retained inside self._optimality purely as a diagnostic.
+            residual = (
+                self._optimality.stationarity_rel
+                if self._optimality is not None
+                else float("inf")
+            )
+            cnorm = self._optimality.feasibility if self._optimality is not None else 0.0
+            try:
+                tao.monitor(f=self._objective, res=residual, cnorm=cnorm)
+            except TypeError:
+                # Older petsc4py builds expose no `cnorm` keyword on TAO.monitor.
+                tao.monitor(f=self._objective, res=residual)
+
+            # Converge only when ALL THREE first-order conditions hold. TAO's
+            # default test would look at `res` alone, which would let a
+            # stationary-but-INFEASIBLE point report success.
+            if self._optimality is not None and self._optimality.satisfied(
+                gatol, self._constraint_tol
+            ):
+                tao.setConvergedReason(PETSc.TAO.ConvergedReason.CONVERGED_GATOL)
+                logger.info(
+                    "[MMA opt] first-order optimality reached at it=%d: %s "
+                    "(gatol=%.3g, constraint_tol=%.3g)",
+                    it, self._optimality.summary(), gatol, self._constraint_tol,
+                )
+
+        # Exhausting the iteration budget without meeting the first-order
+        # conditions must be reported as such. Previously the loop simply fell
+        # through with tao.reason == 0 (TAO_CONTINUE_ITERATING), which every
+        # caller that checks `reason < 0` read as a clean convergence.
+        if not tao.reason:
+            tao.setConvergedReason(PETSc.TAO.ConvergedReason.DIVERGED_MAXITS)
+            logger.warning(
+                "[MMA opt] iteration budget (%d) exhausted WITHOUT meeting the "
+                "first-order conditions: %s. Reporting DIVERGED_MAXITS -- the "
+                "returned design is the best iterate reached, not a converged "
+                "optimum.",
+                tao.getMaximumIterations(),
+                self._optimality.summary() if self._optimality else "no iterations ran",
+            )
+
+    @property
+    def optimality(self):
+        """The most recent FirstOrderOptimality record (or None before solve).
+
+        This -- not the objective-gradient norm -- is what callers should
+        report as the convergence evidence for a design.
+        """
+        return self._optimality
 
     @property
     def subsolver(self) -> PETSc.TAO:
@@ -729,6 +847,7 @@ class MMA:
             self._tmp_2,
             self._tmp_3,
             self._zero,
+            self._optimality_work,
         )
         for o in filter(lambda o: o is not None, to_destroy):
             o.destroy()

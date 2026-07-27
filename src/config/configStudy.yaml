@@ -1,0 +1,118 @@
+# =============================================================================
+# STUDY TIER — coarse mesh for convergence, replication and baseline work.
+#
+# Same problem as config.yaml (same domain, same filter radius, same eta model),
+# only coarser and cheaper. Everything that has to be *converged* or *replicated*
+# runs here; the production mesh is spent once, at the end, on parameters this
+# tier has already settled.
+#
+#   refinement 0.64 -> [16, 48, 16], h = 0.625, ~42k dofs, ~1 s/FEA solve
+#   production       -> [25, 75, 25], h = 0.400, ~154k dofs, ~4 s/FEA solve
+#
+# THE FILTER RADIUS IS THE SAME AT BOTH TIERS (R = 0.6, in box_source.py). It is
+# part of the continuum problem, not a mesh parameter. Do not "scale it for the
+# coarse mesh" -- that would make this a different problem from production and
+# every conclusion drawn here would fail to transfer.
+#
+# Indicative costs on 64 ranks (8 groups x 8):
+#   one lambda, N=128, 150 iters ....... 0.7 h
+#   SAA gap study, 10 replications ..... 7 h
+#   N-convergence, re-optimizing ....... 5 h
+#   N-convergence, fixed design ........ 20 min
+#   erode/dilate baseline .............. 3 min
+# =============================================================================
+
+mesh_source: "box"
+
+box_mesh:
+  cell_type: "tetrahedron"
+  refinement: 0.64           # -> [16, 48, 16], h = 0.625
+
+optimization:
+  # Reduced budget: enough to converge this mesh, not enough to waste a queue
+  # slot. Whether 150 iterations and N=128 are sufficient is itself one of the
+  # things the N-convergence study answers -- do not assume it.
+  max_iter: 150
+  epsilon: 1.0e-4
+
+  robust_method: "saa"
+  saa_n_samples: 128
+  # monte_carlo, NOT lhs, for study runs. An optimized LHS design is NOT nested:
+  # the first 512 points of a 1024-point design are not a 512-point design. So an
+  # LHS N-convergence curve carries design-to-design jitter that looks like, but
+  # is not, convergence. The MC draw is prefix-stable (one generator, drawn as a
+  # block), so the curve nests and the trend is real.
+  saa_sampling_strategy: "monte_carlo"
+  saa_seed: 7                # the gap study overrides this per replication
+
+  saa_beta: 8.0
+  saa_beta_max: 128.0
+  saa_beta_continuation: true
+
+  robust_opt_tol: 1.0e-3
+  constraint_tol: 1.0e-4
+
+  # 3 points is enough to see the trade-off on a study mesh; the 5-point front
+  # is a production deliverable.
+  lambda_sweep: [0.0, 1.0, 4.0]
+  lambda_sweep_start: "common"
+  sweep_check_dominance: true
+
+  sample_parallel_ranks_per_group: 8
+
+random_field:
+  # IDENTICAL eta model to production -- this is the point of the tier split.
+  # See config.yaml for the derivation of the [0.25, 0.75] band.
+  sigma: 1.0
+  length_scale: 4.0
+  spatial_dim: 3
+  variance_threshold: 0.95
+  n_kl_hint: 20
+  seed: 42
+  eta_min: 0.25
+  eta_max: 0.75
+  alpha: 2.0
+  beta: 2.0
+
+surrogate:
+  n_train: 200
+  n_test: 50
+  hyperbolic_q: 0.75
+  max_degree_attempts: 4
+  q2_threshold: 0.90
+
+mc_validation:
+  # Smaller than production, but still large enough that the CI on sigma is
+  # narrower than the effects being compared. Stage 6 reports the required n for
+  # whatever effect actually shows up; if it says this is too small, raise it
+  # rather than reporting an unresolvable difference.
+  n_samples: 1000
+  beta: 128.0
+  seed: 42
+  percentile_low: 5.0
+  percentile_high: 95.0
+  output_dir: "output/mc_validation_study"
+  n_bootstrap: 10000
+  confidence: 0.95
+  bootstrap_seed: 0
+  write_ensemble: false
+  # A few failures at the eroded end are informative and should not abort a
+  # study run, but anything above this means the design routinely does not
+  # carry load and the compliance statistics have become badly conditional.
+  max_solver_failure_rate: 0.05
+
+validation:
+  run_gates: true
+  gradient_fd: true
+  # Cheap enough on this mesh to check more elements than production does.
+  fd_n_samples: 8
+  fd_n_elements: 32
+  fd_step: 1.0e-3
+  fd_rtol: 1.0e-3
+  fd_ksp_rtol: 1.0e-12
+  correlation_n_nodes: 64
+  correlation_n_samples: 4000
+  correlation_rtol: 0.05
+  marginal_n_nodes: 128
+  marginal_n_samples: 2000
+  marginal_alpha: 0.01

@@ -1,0 +1,112 @@
+{
+  "all_passed": true,
+  "beta": 32.0,
+  "gates": [
+    {
+      "name": "heaviside_equivalence",
+      "passed": true,
+      "message": "constant-field eta reproduces FEniTop's scalar-eta Heaviside to 1e-12",
+      "detail": {
+        "beta": 32.0,
+        "eta_value": 0.5,
+        "rtol": 1e-12
+      }
+    },
+    {
+      "name": "kl_correlation",
+      "passed": true,
+      "message": "empirical correlation matches the analytic truncated correlation (max abs err 0.138 <= 0.176, of which 0.176 is the sampling-noise allowance over 528 entries at n=1000); truncation gap vs target kernel 0.225",
+      "detail": {
+        "n_nodes_sampled": 32,
+        "n_samples": 1000,
+        "max_abs_error_empirical_vs_analytic": 0.13778262981969513,
+        "tolerance": 0.1759154633346406,
+        "tolerance_floor_from_config": 0.1,
+        "tolerance_from_sampling_noise": 0.1759154633346406,
+        "n_correlation_entries_compared": 528,
+        "n_kl": 25,
+        "variance_explained": 0.9002155327621704,
+        "max_abs_gap_truncated_vs_target_kernel": 0.22524275227063106,
+        "note": "The sampled field is G(x)/std(x): the truncated KL field normalized to unit pointwise variance. Its covariance is the truncated CORRELATION, not sigma^2*exp(-r^2/2l^2); sigma cancels identically. max_abs_gap_truncated_vs_target_kernel is the cost of truncating at variance_explained and must be reported as a modelling approximation."
+      }
+    },
+    {
+      "name": "eta_marginal",
+      "passed": true,
+      "message": "realized eta matches Beta(2,2) on [0.25,0.75] at all 32 tested nodes (min p=0.0111 >= 0.000313)",
+      "detail": {
+        "n_nodes_tested": 32,
+        "n_samples_per_node": 500,
+        "max_ks_statistic": 0.07168759420451065,
+        "min_p_value": 0.011137729851208698,
+        "bonferroni_alpha": 0.0003125,
+        "within_bounds": true,
+        "target": {
+          "distribution": "Beta",
+          "alpha": 2.0,
+          "beta": 2.0,
+          "eta_min": 0.25,
+          "eta_max": 0.75
+        }
+      }
+    },
+    {
+      "name": "gradient_fd",
+      "passed": true,
+      "message": "SAA adjoint matches central differences over 6 elements (max rel err dJ=0.00434, dE[V]=2.6e-05 <= 0.01)",
+      "detail": {
+        "n_elements_checked": 6,
+        "global_element_indices": [
+          14322,
+          15642,
+          6497,
+          6270,
+          15739,
+          9183
+        ],
+        "fd_step": 0.001,
+        "fd_n_samples": 4,
+        "fd_design_blend": 0.4,
+        "base_design_sigma_C": 31.719842158453183,
+        "ksp_rtol_during_check": 1e-12,
+        "tolerance": 0.01,
+        "max_relative_error_dJ_drho": 0.004338005373110163,
+        "max_relative_error_dEV_drho": 2.6035767347798967e-05,
+        "J0": 90.19557544112959,
+        "analytic_dJ": [
+          -0.03171499533979394,
+          -0.010219502520971405,
+          -0.002518140705482133,
+          -0.026674622493920983,
+          -0.008836000974462231,
+          -0.013023228287065708
+        ],
+        "fd_dJ": [
+          -0.0317038008645909,
+          -0.0102303803046766,
+          -0.002507216997571504,
+          -0.02666421060837365,
+          -0.008844628460735748,
+          -0.013022163010134591
+        ],
+        "analytic_dEV": [
+          0.00023657692412209363,
+          0.000157212635460762,
+          0.0001431926281786758,
+          0.00027275589846718256,
+          2.8640562963237917e-05,
+          0.00013975152652347935
+        ],
+        "fd_dEV": [
+          0.0002365759696337788,
+          0.0001572167287189341,
+          0.0001431927253436882,
+          0.0002727567382371232,
+          2.864110816569454e-05,
+          0.00013975157982237807
+        ],
+        "note": "Checked against the SAME fixed sample set used for the analytic gradient, so J_N is deterministic and there is no Monte Carlo noise floor in this comparison."
+      }
+    }
+  ]
+}

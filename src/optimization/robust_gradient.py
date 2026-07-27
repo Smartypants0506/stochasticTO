@@ -34,13 +34,22 @@ logger = logging.getLogger(__name__)
 def compute_dmu_drho(result: RobustEvaluationResult) -> np.ndarray:
     """Compute dmu_C/drho = mean_i(dC_i/drho), vectorized over MC samples.
 
+    Accepts either representation of the per-sample gradients: the full
+    [n_samples x n_elems] matrix, or the pre-accumulated dC_sum (see
+    RobustEvaluationResult). The two give identical results; the accumulated
+    form exists because the matrix is never needed and was expensive to build
+    and communicate.
+
     Args:
-        result: Output of evaluate_robust_samples.
+        result: Output of evaluate_robust_samples or the SAA batch evaluator.
 
     Returns:
         [n_elems] gradient of the mean compliance w.r.t. the unfiltered
         design variable rho.
     """
+    n_samples = result.compliance_samples.size
+    if result.dC_sum is not None:
+        return result.dC_sum / n_samples
     return result.dC_drho_samples.mean(axis=0)
 
 
@@ -61,14 +70,35 @@ def compute_dsigma_drho(result: RobustEvaluationResult) -> np.ndarray:
     n_samples = result.compliance_samples.size
     if result.sigma_C < 1e-14:
         raise RuntimeError(
-            f"sigma_C={result.sigma_C:.3g} is numerically zero -- cannot "
-            "compute dsigma_C/drho (division by zero). This indicates either "
-            "n_mc_samples is too small, or eta(x) variation is negligible "
-            "relative to beta/design sensitivity."
+            f"sigma_C={result.sigma_C:.3g} is numerically zero over "
+            f"{n_samples} samples -- cannot compute dsigma_C/drho (division by "
+            "zero). Every eta draw produced the same compliance, so the "
+            "perturbation had no effect on this design at all.\n"
+            "\n"
+            "The usual cause is PROJECTION SATURATION, not too few samples: "
+            "tanh(beta*(rho_tilde - eta)) is +/-1 to machine precision once "
+            "|rho_tilde - eta| exceeds about 19/beta (0.15 at beta=128). A "
+            "design whose filtered density lies outside the eta band by more "
+            "than that responds to no draw whatsoever.\n"
+            "\n"
+            "Check, in order:\n"
+            "  1. R/h -- the mesh must RESOLVE the filter. Below R/h ~ 1 the "
+            "filtered field jumps 0 to 1 inside one element, leaving no "
+            "interface band for eta to act on, and the eta model is degenerate "
+            "on that mesh regardless of beta.\n"
+            "  2. beta -- at the sharp end of the continuation only a narrow "
+            "band of rho_tilde still responds.\n"
+            "  3. the eta band (random_field.eta_min/eta_max) relative to that "
+            "band."
         )
 
-    centered_compliance = result.compliance_samples - result.mu_C  # [n_mc_samples]
-    weighted_sum = centered_compliance @ result.dC_drho_samples  # [n_elems], vectorized dot
+    if result.dC_centered_sum is not None:
+        # Already equals sum_i (C_i - mu_C) dC_i/drho, accumulated during the
+        # batch rather than formed from the stored rows.
+        weighted_sum = result.dC_centered_sum
+    else:
+        centered_compliance = result.compliance_samples - result.mu_C  # [n_mc_samples]
+        weighted_sum = centered_compliance @ result.dC_drho_samples  # [n_elems], vectorized dot
     return weighted_sum / ((n_samples - 1) * result.sigma_C)
 
 
@@ -106,12 +136,17 @@ def compute_mean_volume_gradient(result: RobustEvaluationResult) -> np.ndarray:
     Companion to compute_mean_volume_constraint in robust_objective.py,
     implementing Section 3.5's mean-volume constraint gradient consistently.
 
+    Accepts either the full per-sample matrix or the accumulated dV_sum.
+
     Args:
-        result: Output of evaluate_robust_samples.
+        result: Output of evaluate_robust_samples or the SAA batch evaluator.
 
     Returns:
         [n_elems] gradient of the mean volume fraction w.r.t. rho.
     """
+    n_samples = result.volume_samples.size
+    if result.dV_sum is not None:
+        return result.dV_sum / n_samples
     return result.dV_drho_samples.mean(axis=0)
 
 
@@ -124,7 +159,22 @@ def verify_robust_gradient_fd(
     rtol: float = 1e-3,
     rng_seed: int = 0,
 ) -> dict:
-    """Finite-difference verification gate for the robust gradient.
+    """Finite-difference verification gate for the robust gradient. SERIAL ONLY.
+
+    .. warning::
+       This helper is valid at ``comm.size == 1`` only, and is superseded by
+       :func:`src.validation.gates.gate_gradient_fd`, which is what the pipeline
+       actually runs. Two reasons it must not be used under MPI:
+
+       * ``rho_values`` is the rank-LOCAL slice, so ``rho_values[idx]`` refers to
+         a DIFFERENT global element on every rank. Every rank would perturb a
+         different element simultaneously and the resulting difference quotient
+         would not correspond to any single derivative.
+       * ``fd_step=1e-6`` against an iteratively solved FEA measures KSP noise,
+         not the derivative: at a default KSP tolerance the compliance carries
+         ~1e-5 relative error while the finite-difference signal is orders of
+         magnitude smaller. The pipeline gate tightens the solver tolerance and
+         enlarges the step for exactly this reason.
 
     Master-context Section 7 mandatory gate: "TO sensitivities: finite-
     difference check (perturbation 1e-6 on all elements), relative error

@@ -1,0 +1,74 @@
+{
+  "sweep_start_policy": "common",
+  "points": [
+    {
+      "lambda": 0.0,
+      "mu_C": 1.1044986773761876,
+      "sigma_C": 0.9999684057392676,
+      "mean_volume": 0.07985397355987578,
+      "volume_violation": 0.0,
+      "M_nd_percent": 2.598055081399414,
+      "beta": 32.0,
+      "beta_schedule": [
+        8.0,
+        16.0,
+        32.0
+      ],
+      "converged": false,
+      "optimality": {
+        "stationarity": 0.0333854171499294,
+        "stationarity_rel": 0.9090680740399224,
+        "feasibility": 0.0,
+        "complementarity": 0.06449224159147866,
+        "design_change": 0.020000000000000018,
+        "grad_norm_diagnostic_only": 0.23996802015367924,
+        "grad_inf_diagnostic_only": 0.036724881340914034,
+        "multipliers": [
+          27.69564468409933
+        ],
+        "constraints": [
+          -0.0001862884719300434
+        ]
+      },
+      "grad_norm_diagnostic_only": 0.18334918353231516,
+      "n_fea_batches_total": 23
+    },
+    {
+      "lambda": 2.0,
+      "mu_C": 2.3402298867339324,
+      "sigma_C": 0.9264240648047796,
+      "mean_volume": 0.07969630142849062,
+      "volume_violation": 0.0,
+      "M_nd_percent": 3.1304366354759567,
+      "beta": 32.0,
+      "beta_schedule": [
+        8.0,
+        16.0,
+        32.0
+      ],
+      "converged": false,
+      "optimality": {
+        "stationarity": 0.6263930507810569,
+        "stationarity_rel": 0.9916570110571399,
+        "feasibility": 0.0033926528504181486,
+        "complementarity": 0.1917619045805629,
+        "design_change": 0.020000000000000018,
+        "grad_norm_diagnostic_only": 2.8709724904376044,
+        "grad_inf_diagnostic_only": 0.6316630082747066,
+        "multipliers": [
+          56.52270156580506
+        ],
+        "constraints": [
+          0.0002714122280334519
+        ]
+      },
+      "grad_norm_diagnostic_only": 1.6830395851286017,
+      "n_fea_batches_total": 23
+    }
+  ],
+  "dominated_points": [],
+  "non_converged_lambdas": [
+    0.0,
+    2.0
+  ]
+}

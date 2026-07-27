@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!DOCTYPE Xdmf SYSTEM "Xdmf.dtd" []>
+<Xdmf Version="3.0" xmlns:xi="https://www.w3.org/2001/XInclude">
+  <Domain>
+    <Grid Name="mesh" GridType="Uniform">
+      <Topology TopologyType="Tetrahedron" NumberOfElements="70656" NodesPerElement="4">
+        <DataItem Dimensions="70656 4" NumberType="Int" Format="HDF">mesh_0.62_optimized_design.h5:/Mesh/mesh/topology</DataItem>
+      </Topology>
+      <Geometry GeometryType="XYZ">
+        <DataItem Dimensions="13583 3" Format="HDF">mesh_0.62_optimized_design.h5:/Mesh/mesh/geometry</DataItem>
+      </Geometry>
+    </Grid>
+    <Grid Name="density" GridType="Collection" CollectionType="Temporal">
+      <Grid Name="density" GridType="Uniform">
+        <xi:include xpointer="xpointer(/Xdmf/Domain/Grid[@GridType='Uniform'][1]/*[self::Topology or self::Geometry])" />
+        <Time Value="0" />
+        <Attribute Name="density" AttributeType="Scalar" Center="Node">
+          <DataItem Dimensions="13583 1" Format="HDF">mesh_0.62_optimized_design.h5:/Function/density/0</DataItem>
+        </Attribute>
+      </Grid>
+    </Grid>
+  </Domain>
+</Xdmf>

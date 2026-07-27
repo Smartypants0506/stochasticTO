@@ -1,0 +1,185 @@
+WARNING:src.config.loader:optimization.lambda_sweep has only 3 points. That is enough to compare designs but too few to present as a Pareto front.
+WARNING:__main__:Mesh study spans h = [0.625, 0.4762, 0.4], a range of only 1.56x. That is about one refinement step and is a NARROW basis for a convergence claim -- state the range alongside any conclusion drawn from it. The cap comes from the dense KL eigensolve at the fine end and the R/h >= 0.9 interface-resolution requirement at the coarse end.
+INFO:__main__:Mesh study: pinning the traction patch half-width to 0.9375 (the value the coarsest level, refinement=0.62, requires) so every level solves the same load case. This deliberately differs from beam_3d's own 0.5.
+INFO:__main__:=== mesh level refinement=0.62 -> [16, 46, 16] ===
+INFO:src.meshing.box_source:Traction patch: half-width 0.9375 (PINNED via box_mesh.load_patch_halfwidth -- required for a mesh-convergence study, and NOT beam_3d-equivalent unless it happens to select the same facets), area 1.5625, traction_z -0.2048 (total force 0.32 held fixed across refinement levels)
+INFO:src.meshing.box_source:Built box-mesh fenitop dicts (beam_3d.py reference): cell_type=tetrahedron, domain=[[0, 0, 0], [10, 30, 10]], refinement=0.62 -> elements=[16, 46, 16], h=0.625, R=0.6 (R/h=0.96, FIXED across levels), E=100, nu=0.25, vol_frac=0.08
+WARNING:src.fenitop.topopt:No 'solid' cell_tags/solid_tag found in fem dict -- bolt/mount regions will NOT be hard-pinned to solid density. This mirrors the exact bug that caused bolt bosses to be optimized away; check fenitop_adapter.py wires cell_tags + solid_tag through.
+opt_iter: 1, opt_time: 0.226 (s), beta: 1, C: 36.237, V: 0.071, U: 0.000, change: 0.020
+opt_iter: 2, opt_time: 0.109 (s), beta: 1, C: 21.168, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 3, opt_time: 0.0915 (s), beta: 1, C: 14.737, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 4, opt_time: 0.0899 (s), beta: 1, C: 11.183, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 5, opt_time: 0.0948 (s), beta: 1, C: 8.984, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 6, opt_time: 0.109 (s), beta: 1, C: 7.489, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 7, opt_time: 0.0953 (s), beta: 1, C: 6.383, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 8, opt_time: 0.0927 (s), beta: 1, C: 5.512, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 9, opt_time: 0.0949 (s), beta: 1, C: 4.798, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 10: max |u| over all load cases = 1.319427e+01 m (13194.270984 mm)
+opt_iter: 10, opt_time: 0.0939 (s), beta: 1, C: 4.208, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 11, opt_time: 0.0952 (s), beta: 1, C: 3.718, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 12, opt_time: 0.0959 (s), beta: 1, C: 3.314, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 13, opt_time: 0.11 (s), beta: 1, C: 2.979, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 14, opt_time: 0.102 (s), beta: 1, C: 2.701, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 15, opt_time: 0.0929 (s), beta: 1, C: 2.467, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 16, opt_time: 0.093 (s), beta: 1, C: 2.270, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 17, opt_time: 0.0949 (s), beta: 1, C: 2.101, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 18, opt_time: 0.0942 (s), beta: 1, C: 1.956, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 19, opt_time: 0.0942 (s), beta: 1, C: 1.830, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 20: max |u| over all load cases = 5.381050e+00 m (5381.049781 mm)
+opt_iter: 20, opt_time: 0.103 (s), beta: 1, C: 1.719, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 21, opt_time: 0.113 (s), beta: 1, C: 1.621, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 22, opt_time: 0.104 (s), beta: 1, C: 1.534, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 23, opt_time: 0.0965 (s), beta: 1, C: 1.455, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 24, opt_time: 0.0964 (s), beta: 1, C: 1.385, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 25, opt_time: 0.0999 (s), beta: 1, C: 1.321, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 26, opt_time: 0.102 (s), beta: 1, C: 1.263, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 27, opt_time: 0.0988 (s), beta: 1, C: 1.210, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 28, opt_time: 0.106 (s), beta: 1, C: 1.161, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 29, opt_time: 0.107 (s), beta: 1, C: 1.115, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 30: max |u| over all load cases = 3.361319e+00 m (3361.318681 mm)
+opt_iter: 30, opt_time: 0.103 (s), beta: 1, C: 1.073, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 31, opt_time: 0.101 (s), beta: 1, C: 1.033, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 32, opt_time: 0.105 (s), beta: 1, C: 0.995, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 33, opt_time: 0.104 (s), beta: 1, C: 0.958, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 34, opt_time: 0.107 (s), beta: 1, C: 0.922, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 35, opt_time: 0.107 (s), beta: 1, C: 0.886, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 36, opt_time: 0.114 (s), beta: 1, C: 0.851, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 37, opt_time: 0.107 (s), beta: 1, C: 0.816, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 38, opt_time: 0.109 (s), beta: 1, C: 0.782, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 39, opt_time: 0.107 (s), beta: 1, C: 0.749, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 40: max |u| over all load cases = 2.362757e+00 m (2362.756659 mm)
+opt_iter: 40, opt_time: 0.108 (s), beta: 1, C: 0.718, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 41, opt_time: 0.111 (s), beta: 1, C: 0.688, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 42, opt_time: 0.116 (s), beta: 1, C: 0.660, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 43, opt_time: 0.119 (s), beta: 1, C: 0.634, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 44, opt_time: 0.11 (s), beta: 1, C: 0.609, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 45, opt_time: 0.112 (s), beta: 1, C: 0.586, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 46, opt_time: 0.123 (s), beta: 1, C: 0.565, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 47, opt_time: 0.117 (s), beta: 1, C: 0.545, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 48, opt_time: 0.111 (s), beta: 1, C: 0.534, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 49, opt_time: 0.11 (s), beta: 1, C: 0.523, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 50: max |u| over all load cases = 1.859834e+00 m (1859.833694 mm)
+opt_iter: 50, opt_time: 0.117 (s), beta: 2, C: 0.523, V: 0.073, U: 0.000, change: 0.020
+opt_iter: 51, opt_time: 0.116 (s), beta: 2, C: 0.487, V: 0.076, U: 0.000, change: 0.020
+opt_iter: 52, opt_time: 0.115 (s), beta: 2, C: 0.452, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 53, opt_time: 0.114 (s), beta: 2, C: 0.442, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 54, opt_time: 0.114 (s), beta: 2, C: 0.434, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 55, opt_time: 0.11 (s), beta: 2, C: 0.427, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 56, opt_time: 0.11 (s), beta: 2, C: 0.421, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 57, opt_time: 0.112 (s), beta: 2, C: 0.416, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 58, opt_time: 0.112 (s), beta: 2, C: 0.411, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 59, opt_time: 0.119 (s), beta: 2, C: 0.407, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 60: max |u| over all load cases = 1.519382e+00 m (1519.381819 mm)
+opt_iter: 60, opt_time: 0.115 (s), beta: 2, C: 0.403, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 61, opt_time: 0.111 (s), beta: 2, C: 0.400, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 62, opt_time: 0.109 (s), beta: 2, C: 0.397, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 63, opt_time: 0.116 (s), beta: 2, C: 0.394, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 64, opt_time: 0.114 (s), beta: 2, C: 0.391, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 65, opt_time: 0.106 (s), beta: 2, C: 0.389, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 66, opt_time: 0.111 (s), beta: 2, C: 0.387, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 67, opt_time: 0.107 (s), beta: 2, C: 0.385, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 68, opt_time: 0.107 (s), beta: 2, C: 0.383, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 69, opt_time: 0.112 (s), beta: 2, C: 0.381, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 70: max |u| over all load cases = 1.446857e+00 m (1446.857477 mm)
+opt_iter: 70, opt_time: 0.111 (s), beta: 2, C: 0.380, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 71, opt_time: 0.11 (s), beta: 2, C: 0.378, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 72, opt_time: 0.108 (s), beta: 2, C: 0.377, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 73, opt_time: 0.108 (s), beta: 2, C: 0.376, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 74, opt_time: 0.11 (s), beta: 2, C: 0.376, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 75, opt_time: 0.113 (s), beta: 2, C: 0.375, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 76, opt_time: 0.113 (s), beta: 2, C: 0.374, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 77, opt_time: 0.125 (s), beta: 2, C: 0.374, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 78, opt_time: 0.104 (s), beta: 2, C: 0.373, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 79, opt_time: 0.105 (s), beta: 2, C: 0.372, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 80: max |u| over all load cases = 1.418717e+00 m (1418.717177 mm)
+opt_iter: 80, opt_time: 0.106 (s), beta: 2, C: 0.372, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 81, opt_time: 0.104 (s), beta: 2, C: 0.372, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 82, opt_time: 0.108 (s), beta: 2, C: 0.371, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 83, opt_time: 0.106 (s), beta: 2, C: 0.371, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 84, opt_time: 0.105 (s), beta: 2, C: 0.370, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 85, opt_time: 0.102 (s), beta: 2, C: 0.370, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 86, opt_time: 0.103 (s), beta: 2, C: 0.370, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 87, opt_time: 0.102 (s), beta: 2, C: 0.369, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 88, opt_time: 0.111 (s), beta: 2, C: 0.369, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 89, opt_time: 0.109 (s), beta: 2, C: 0.369, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 90: max |u| over all load cases = 1.404413e+00 m (1404.413487 mm)
+opt_iter: 90, opt_time: 0.105 (s), beta: 2, C: 0.369, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 91, opt_time: 0.102 (s), beta: 2, C: 0.368, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 92, opt_time: 0.0997 (s), beta: 2, C: 0.368, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 93, opt_time: 0.1 (s), beta: 2, C: 0.368, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 94, opt_time: 0.115 (s), beta: 2, C: 0.368, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 95, opt_time: 0.105 (s), beta: 2, C: 0.367, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 96, opt_time: 0.103 (s), beta: 2, C: 0.367, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 97, opt_time: 0.104 (s), beta: 2, C: 0.367, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 98, opt_time: 0.109 (s), beta: 2, C: 0.367, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 99, opt_time: 0.112 (s), beta: 2, C: 0.367, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 100: max |u| over all load cases = 1.274443e+00 m (1274.442699 mm)
+opt_iter: 100, opt_time: 0.141 (s), beta: 4, C: 0.335, V: 0.070, U: 0.000, change: 0.020
+opt_iter: 101, opt_time: 0.123 (s), beta: 4, C: 0.324, V: 0.072, U: 0.000, change: 0.020
+opt_iter: 102, opt_time: 0.119 (s), beta: 4, C: 0.311, V: 0.074, U: 0.000, change: 0.020
+opt_iter: 103, opt_time: 0.123 (s), beta: 4, C: 0.298, V: 0.076, U: 0.000, change: 0.020
+opt_iter: 104, opt_time: 0.126 (s), beta: 4, C: 0.285, V: 0.078, U: 0.000, change: 0.020
+opt_iter: 105, opt_time: 0.12 (s), beta: 4, C: 0.274, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 106, opt_time: 0.111 (s), beta: 4, C: 0.273, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 107, opt_time: 0.112 (s), beta: 4, C: 0.272, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 108, opt_time: 0.114 (s), beta: 4, C: 0.271, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 109, opt_time: 0.111 (s), beta: 4, C: 0.270, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 110: max |u| over all load cases = 1.067393e+00 m (1067.393055 mm)
+opt_iter: 110, opt_time: 0.109 (s), beta: 4, C: 0.270, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 111, opt_time: 0.111 (s), beta: 4, C: 0.269, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 112, opt_time: 0.119 (s), beta: 4, C: 0.268, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 113, opt_time: 0.115 (s), beta: 4, C: 0.268, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 114, opt_time: 0.108 (s), beta: 4, C: 0.267, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 115, opt_time: 0.107 (s), beta: 4, C: 0.267, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 116, opt_time: 0.113 (s), beta: 4, C: 0.266, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 117, opt_time: 0.112 (s), beta: 4, C: 0.266, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 118, opt_time: 0.108 (s), beta: 4, C: 0.266, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 119, opt_time: 0.106 (s), beta: 4, C: 0.265, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 120: max |u| over all load cases = 1.054395e+00 m (1054.395016 mm)
+opt_iter: 120, opt_time: 0.11 (s), beta: 4, C: 0.265, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 121, opt_time: 0.109 (s), beta: 4, C: 0.264, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 122, opt_time: 0.106 (s), beta: 4, C: 0.264, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 123, opt_time: 0.107 (s), beta: 4, C: 0.264, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 124, opt_time: 0.108 (s), beta: 4, C: 0.264, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 125, opt_time: 0.111 (s), beta: 4, C: 0.263, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 126, opt_time: 0.108 (s), beta: 4, C: 0.263, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 127, opt_time: 0.106 (s), beta: 4, C: 0.263, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 128, opt_time: 0.104 (s), beta: 4, C: 0.262, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 129, opt_time: 0.107 (s), beta: 4, C: 0.262, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 130: max |u| over all load cases = 1.043861e+00 m (1043.861030 mm)
+opt_iter: 130, opt_time: 0.108 (s), beta: 4, C: 0.262, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 131, opt_time: 0.115 (s), beta: 4, C: 0.262, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 132, opt_time: 0.109 (s), beta: 4, C: 0.261, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 133, opt_time: 0.112 (s), beta: 4, C: 0.261, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 134, opt_time: 0.11 (s), beta: 4, C: 0.261, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 135, opt_time: 0.105 (s), beta: 4, C: 0.261, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 136, opt_time: 0.102 (s), beta: 4, C: 0.261, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 137, opt_time: 0.102 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 138, opt_time: 0.103 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 139, opt_time: 0.108 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 140: max |u| over all load cases = 1.033830e+00 m (1033.830492 mm)
+opt_iter: 140, opt_time: 0.105 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 141, opt_time: 0.104 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 142, opt_time: 0.104 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 143, opt_time: 0.104 (s), beta: 4, C: 0.259, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 144, opt_time: 0.104 (s), beta: 4, C: 0.259, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 145, opt_time: 0.102 (s), beta: 4, C: 0.259, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 146, opt_time: 0.1 (s), beta: 4, C: 0.259, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 147, opt_time: 0.101 (s), beta: 4, C: 0.259, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 148, opt_time: 0.101 (s), beta: 4, C: 0.259, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 149, opt_time: 0.101 (s), beta: 4, C: 0.258, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 150: max |u| over all load cases = 8.654510e-01 m (865.450992 mm)
+opt_iter: 150, opt_time: 0.127 (s), beta: 8, C: 0.211, V: 0.074, U: 0.000, change: 0.020
+[0m[33m2026-07-27 21:31:53.493 (  19.189s) [    7FB70CE23140]vtkXOpenGLRenderWindow.:1460  WARN| bad X server connection. DISPLAY=[0m
+INFO:src.random_fields.kernel:Built squared-exponential kernel: sigma=1, l=4 mm, dim=3
+INFO:src.random_fields.kl_expansion:KL expansion truncated at N_kl=37 modes (95.10% variance explained, threshold=95%)
+INFO:src.random_fields.kl_expansion:KL expansion cached to output/cache/kl_expansion/kl_ced1d1c20696c27aa20212e6.npz
+INFO:src.random_fields.threshold_transform:Initialized threshold marginal transform: eta in [0.250, 0.750], Beta(alpha=2.00, beta=2.00)
+INFO:src.topology.heaviside_projection_glue:RandomFieldHeaviside ready: N_kl=37, variance_explained=0.9510, n_local_dofs=218 matched to global KL nodes
+INFO:src.random_fields.threshold_transform:Initialized threshold marginal transform: eta in [0.250, 0.750], Beta(alpha=2.00, beta=2.00)
+INFO:src.topology.heaviside_projection_glue:RandomFieldHeaviside ready: N_kl=37, variance_explained=0.9510, n_local_dofs=1693 matched to global KL nodes
+INFO:src.optimization.dolfiny_mma_driver:Sample-parallelism enabled: 8 group(s) x 8 rank(s); each PCE/MC sample batch is split across groups and solved concurrently.
+INFO:src.validation.boundary_offset:Boundary offset: boundary offset std = 0.2577 (0.412 h, 21.5% of min feature); range = 1.84 h -- RESOLVABLE
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.000 solve=0.575 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.000 solve=0.525 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.000 solve=0.542 sens=0.007

@@ -1,0 +1,725 @@
+{
+  "run_id": "20260727T212802Z_nogit",
+  "started_utc": "2026-07-27T21:28:02.953321+00:00",
+  "git": {
+    "commit": null,
+    "branch": null,
+    "dirty": null,
+    "dirty_paths": []
+  },
+  "libraries": {
+    "python": "3.12.3",
+    "platform": "Linux-5.15.0-1106-nvidia-x86_64-with-glibc2.39",
+    "numpy": "2.4.6",
+    "scipy": "1.17.1",
+    "mpi4py": "4.1.2",
+    "petsc4py": "3.25.1",
+    "dolfinx": "0.11.0.post0",
+    "ufl": "2026.1.0",
+    "openturns": "1.27.post1",
+    "pyvista": "0.48.4"
+  },
+  "mpi": {
+    "world_size": 64,
+    "vendor": "('MPICH', (5, 0, 1))"
+  },
+  "stage_seconds": {
+    "stage2_nominal_topopt": 1.6058943271636963,
+    "verification_gates": 6.062443017959595,
+    "stage5_lambda_0.0": 7.678897857666016,
+    "stage5_lambda_2.0": 9.611538648605347,
+    "stage6_mc_nominal": 2.7569124698638916,
+    "stage6_mc_lambda_0.0": 2.7952194213867188,
+    "stage6_mc_lambda_2.0": 2.9579265117645264
+  },
+  "seeds": {
+    "random_field": 42,
+    "saa": 7,
+    "mc_validation": 42,
+    "bootstrap": 0
+  },
+  "config_declared": {
+    "optimization": {
+      "max_iter": 20,
+      "opt_tol": 1e-05,
+      "vol_frac": 0.5,
+      "penalty": 3.0,
+      "epsilon": 0.0001,
+      "filter_radius": 1.2,
+      "beta_interval": 50,
+      "beta_max": 128.0,
+      "use_oc": true,
+      "move": 0.02,
+      "opt_compliance": true,
+      "quadrature_degree": 2,
+      "body_force": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pce_refresh_interval": 5,
+      "lambda_sweep": [
+        0.0,
+        2.0
+      ],
+      "pce_n_train_refresh": 60,
+      "pce_n_test_refresh": 20,
+      "sample_parallel_ranks_per_group": 4,
+      "pce_max_escalations": 3,
+      "pce_n_train_escalation_cap": 800,
+      "pce_divergence_patience": 3,
+      "robust_method": "saa",
+      "saa_n_samples": 16,
+      "saa_sampling_strategy": "monte_carlo",
+      "saa_seed": 7,
+      "saa_beta": 8.0,
+      "saa_beta_max": 32.0,
+      "saa_beta_continuation": true,
+      "robust_opt_tol": 0.001,
+      "constraint_tol": 0.01,
+      "lambda_sweep_start": "common",
+      "sweep_check_dominance": false
+    },
+    "random_field": {
+      "sigma": 1.0,
+      "length_scale": 4.0,
+      "spatial_dim": 3,
+      "eta_min": 0.25,
+      "eta_max": 0.75,
+      "alpha": 2.0,
+      "beta": 2.0,
+      "variance_threshold": 0.9,
+      "n_kl_hint": 10,
+      "seed": 42
+    },
+    "surrogate": {
+      "n_train": 20,
+      "n_test": 10,
+      "hyperbolic_q": 0.75,
+      "max_degree_attempts": 2,
+      "q2_threshold": 0.5
+    },
+    "mesh_source": "box",
+    "box_mesh": {
+      "cell_type": "tetrahedron",
+      "refinement": 0.4,
+      "load_patch_halfwidth": null
+    },
+    "mc_validation": {
+      "n_samples": 32,
+      "beta": 32.0,
+      "seed": 42,
+      "percentile_low": 5.0,
+      "percentile_high": 95.0,
+      "output_dir": "output/mc_validation_smoke",
+      "n_bootstrap": 500,
+      "confidence": 0.95,
+      "bootstrap_seed": 0,
+      "write_ensemble": false,
+      "max_solver_failure_rate": 0.2
+    },
+    "validation": {
+      "run_gates": true,
+      "gradient_fd": true,
+      "fd_n_samples": 4,
+      "fd_n_elements": 6,
+      "fd_step": 0.001,
+      "fd_rtol": 0.01,
+      "fd_ksp_rtol": 1e-12,
+      "correlation_n_nodes": 32,
+      "correlation_n_samples": 1000,
+      "correlation_rtol": 0.1,
+      "marginal_n_nodes": 32,
+      "marginal_n_samples": 500,
+      "marginal_alpha": 0.01
+    },
+    "step_file": null,
+    "mesh_out_path": null,
+    "mesh_size_max": null,
+    "snap_tol": null,
+    "material": null,
+    "petsc": null,
+    "load_cases": {},
+    "color_targets": {},
+    "solid_volume_color": [
+      255,
+      255,
+      0,
+      255
+    ],
+    "keep_alive": {
+      "enabled": false,
+      "groups": [],
+      "corridor_radius": null,
+      "cluster_eps": null
+    }
+  },
+  "fem_effective": {
+    "mesh": "<dolfinx.mesh.Mesh>",
+    "mesh_serial": "<dolfinx.mesh.Mesh>",
+    "young's modulus": 100,
+    "poisson's ratio": 0.25,
+    "disp_bc": "<callable _disp_bc>",
+    "body_force": [
+      0,
+      0,
+      0
+    ],
+    "quadrature_degree": 2,
+    "petsc_options": {
+      "ksp_type": "fgmres",
+      "ksp_gmres_restart": 100,
+      "pc_type": "gamg",
+      "ksp_max_it": 2000,
+      "ksp_error_if_not_converged": null
+    },
+    "cell_tags": null,
+    "solid_tag": null,
+    "mesh_factory": "<callable <lambda>>",
+    "element_size": 1.0,
+    "domain": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        10,
+        30,
+        10
+      ]
+    ],
+    "elements": [
+      10,
+      30,
+      10
+    ],
+    "refinement": 0.4,
+    "traction_bcs": [
+      [
+        [
+          0.0,
+          0.0,
+          -0.08
+        ],
+        "<callable _membership>"
+      ]
+    ]
+  },
+  "opt_effective": {
+    "max_iter": 20,
+    "opt_tol": 1e-05,
+    "vol_frac": 0.08,
+    "solid_zone": "<callable _solid_zone>",
+    "void_zone": "<callable _void_zone>",
+    "penalty": 3.0,
+    "epsilon": 0.0001,
+    "filter_radius": 0.6,
+    "beta_interval": 50,
+    "beta_max": 128,
+    "use_oc": true,
+    "move": 0.02,
+    "opt_compliance": true,
+    "kl_model": null,
+    "kernel_params": {
+      "sigma": 1.0,
+      "length_scale": 4.0,
+      "spatial_dim": 3
+    },
+    "transform_params": {
+      "eta_min": 0.25,
+      "eta_max": 0.75,
+      "alpha": 2.0,
+      "beta": 2.0
+    },
+    "kl_variance_threshold": 0.9,
+    "random_field_seed": 42,
+    "n_kl": 10,
+    "pce_n_train": 20,
+    "pce_n_test": 10,
+    "pce_hyperbolic_q": 0.75,
+    "pce_max_degree_attempts": 2,
+    "pce_q2_threshold": 0.5,
+    "pce_refresh_interval": 5,
+    "sample_parallel_ranks_per_group": 4,
+    "pce_max_escalations": 3,
+    "pce_n_train_escalation_cap": 800,
+    "pce_divergence_patience": 3,
+    "saa_beta": 8.0,
+    "saa_beta_max": 32.0,
+    "saa_beta_continuation": true,
+    "robust_opt_tol": 0.001,
+    "constraint_tol": 0.01,
+    "l_vec": null,
+    "f_int": "<callable Form([Integral(Inner(Sum(ComponentTensor(Product(Indexed(Sym(Grad(Coefficient(FunctionSpace(Mesh(blocked element (Basix element (P, tetrahedron, 1, gll_warped, unset, False, float64, []), (3,)), 2), blocked element (Basix element (P, tetrahedron, 1, gll_warped, unset, False, float64, []), (3,))), 10))), MultiIndex((Index(36), Index(37)))), Product(IntValue(2), Division(Product(IntValue(100), Sum(FloatValue(0.0001), Product(FloatValue(0.9999), Power(Coefficient(FunctionSpace(Mesh(blocked element (Basix element (P, tetrahedron, 1, gll_warped, unset, False, float64, []), (3,)), 2), Basix element (P, tetrahedron, 1, gll_warped, unset, False, float64, [])), 13), FloatValue(3.0))))), FloatValue(2.5)))), MultiIndex((Index(36), Index(37)))), ComponentTensor(Product(Indexed(Identity(3), MultiIndex((Index(38), Index(39)))), Product(Division(Division(Product(FloatValue(0.25), Product(IntValue(100), Sum(FloatValue(0.0001), Product(FloatValue(0.9999), Power(Coefficient(FunctionSpace(Mesh(blocked element (Basix element (P, tetrahedron, 1, gll_warped, unset, False, float64, []), (3,)), 2), Basix element (P, tetrahedron, 1, gll_warped, unset, False, float64, [])), 13), FloatValue(3.0)))))), FloatValue(1.25)), FloatValue(0.5)), Trace(Sym(Grad(Coefficient(FunctionSpace(Mesh(blocked element (Basix element (P, tetrahedron, 1, gll_warped, unset, False, float64, []), (3,)), 2), blocked element (Basix element (P, tetrahedron, 1, gll_warped, unset, False, float64, []), (3,))), 10)))))), MultiIndex((Index(38), Index(39))))), Sym(Grad(Argument(FunctionSpace(Mesh(blocked element (Basix element (P, tetrahedron, 1, gll_warped, unset, False, float64, []), (3,)), 2), blocked element (Basix element (P, tetrahedron, 1, gll_warped, unset, False, float64, []), (3,))), 0, None)))), 'cell', Mesh(blocked element (Basix element (P, tetrahedron, 1, gll_warped, unset, False, float64, []), (3,)), 2), 'everywhere', {'quadrature_degree': 2}, None, extra_domain_integral_type_map={})])>",
+    "compliance": "<callable Form([Integral(Inner(Sum(ComponentTensor(Product(Indexed(Sym(Grad(Coefficient(FunctionSpace(Mesh(blocked element (Basix element (P, tetrahedron, 1, gll_warped, unset, False, float64, []), (3,)), 2), blocked element (Basix element (P, tetrahedron, 1, gll_warped, unset, False, float64, []), (3,))), 10))), MultiIndex((Index(40), Index(41)))), Product(IntValue(2), Division(Product(IntValue(100), Sum(FloatValue(0.0001), Product(FloatValue(0.9999), Power(Coefficient(FunctionSpace(Mesh(blocked element (Basix element (P, tetrahedron, 1, gll_warped, unset, False, float64, []), (3,)), 2), Basix element (P, tetrahedron, 1, gll_warped, unset, False, float64, [])), 13), FloatValue(3.0))))), FloatValue(2.5)))), MultiIndex((Index(40), Index(41)))), ComponentTensor(Product(Indexed(Identity(3), MultiIndex((Index(42), Index(43)))), Product(Division(Division(Product(FloatValue(0.25), Product(IntValue(100), Sum(FloatValue(0.0001), Product(FloatValue(0.9999), Power(Coefficient(FunctionSpace(Mesh(blocked element (Basix element (P, tetrahedron, 1, gll_warped, unset, False, float64, []), (3,)), 2), Basix element (P, tetrahedron, 1, gll_warped, unset, False, float64, [])), 13), FloatValue(3.0)))))), FloatValue(1.25)), FloatValue(0.5)), Trace(Sym(Grad(Coefficient(FunctionSpace(Mesh(blocked element (Basix element (P, tetrahedron, 1, gll_warped, unset, False, float64, []), (3,)), 2), blocked element (Basix element (P, tetrahedron, 1, gll_warped, unset, False, float64, []), (3,))), 10)))))), MultiIndex((Index(42), Index(43))))), Sym(Grad(Coefficient(FunctionSpace(Mesh(blocked element (Basix element (P, tetrahedron, 1, gll_warped, unset, False, float64, []), (3,)), 2), blocked element (Basix element (P, tetrahedron, 1, gll_warped, unset, False, float64, []), (3,))), 10)))), 'cell', Mesh(blocked element (Basix element (P, tetrahedron, 1, gll_warped, unset, False, float64, []), (3,)), 2), 'everywhere', {'quadrature_degree': 2}, None, extra_domain_integral_type_map={})])>",
+    "volume": "<callable Form([Integral(Coefficient(FunctionSpace(Mesh(blocked element (Basix element (P, tetrahedron, 1, gll_warped, unset, False, float64, []), (3,)), 2), Basix element (P, tetrahedron, 1, gll_warped, unset, False, float64, [])), 13), 'cell', Mesh(blocked element (Basix element (P, tetrahedron, 1, gll_warped, unset, False, float64, []), (3,)), 2), 'everywhere', {'quadrature_degree': 2}, None, extra_domain_integral_type_map={})])>",
+    "total_volume": "<callable Form([Integral(Constant(Mesh(blocked element (Basix element (P, tetrahedron, 1, gll_warped, unset, False, float64, []), (3,)), 2), (), 11), 'cell', Mesh(blocked element (Basix element (P, tetrahedron, 1, gll_warped, unset, False, float64, []), (3,)), 2), 'everywhere', {'quadrature_degree': 2}, None, extra_domain_integral_type_map={})])>"
+  },
+  "config_overridden_by_code": {
+    "vol_frac": {
+      "declared_in_config": 0.5,
+      "effective_in_run": 0.08
+    },
+    "filter_radius": {
+      "declared_in_config": 1.2,
+      "effective_in_run": 0.6
+    }
+  },
+  "gates": [
+    {
+      "name": "heaviside_equivalence",
+      "passed": true,
+      "message": "constant-field eta reproduces FEniTop's scalar-eta Heaviside to 1e-12",
+      "detail": {
+        "beta": 32.0,
+        "eta_value": 0.5,
+        "rtol": 1e-12
+      }
+    },
+    {
+      "name": "kl_correlation",
+      "passed": true,
+      "message": "empirical correlation matches the analytic truncated correlation (max abs err 0.138 <= 0.176, of which 0.176 is the sampling-noise allowance over 528 entries at n=1000); truncation gap vs target kernel 0.225",
+      "detail": {
+        "n_nodes_sampled": 32,
+        "n_samples": 1000,
+        "max_abs_error_empirical_vs_analytic": 0.13778262981969513,
+        "tolerance": 0.1759154633346406,
+        "tolerance_floor_from_config": 0.1,
+        "tolerance_from_sampling_noise": 0.1759154633346406,
+        "n_correlation_entries_compared": 528,
+        "n_kl": 25,
+        "variance_explained": 0.9002155327621704,
+        "max_abs_gap_truncated_vs_target_kernel": 0.22524275227063106,
+        "note": "The sampled field is G(x)/std(x): the truncated KL field normalized to unit pointwise variance. Its covariance is the truncated CORRELATION, not sigma^2*exp(-r^2/2l^2); sigma cancels identically. max_abs_gap_truncated_vs_target_kernel is the cost of truncating at variance_explained and must be reported as a modelling approximation."
+      }
+    },
+    {
+      "name": "eta_marginal",
+      "passed": true,
+      "message": "realized eta matches Beta(2,2) on [0.25,0.75] at all 32 tested nodes (min p=0.0111 >= 0.000313)",
+      "detail": {
+        "n_nodes_tested": 32,
+        "n_samples_per_node": 500,
+        "max_ks_statistic": 0.07168759420451065,
+        "min_p_value": 0.011137729851208698,
+        "bonferroni_alpha": 0.0003125,
+        "within_bounds": true,
+        "target": {
+          "distribution": "Beta",
+          "alpha": 2.0,
+          "beta": 2.0,
+          "eta_min": 0.25,
+          "eta_max": 0.75
+        }
+      }
+    },
+    {
+      "name": "gradient_fd",
+      "passed": true,
+      "message": "SAA adjoint matches central differences over 6 elements (max rel err dJ=0.00434, dE[V]=2.6e-05 <= 0.01)",
+      "detail": {
+        "n_elements_checked": 6,
+        "global_element_indices": [
+          14322,
+          15642,
+          6497,
+          6270,
+          15739,
+          9183
+        ],
+        "fd_step": 0.001,
+        "fd_n_samples": 4,
+        "fd_design_blend": 0.4,
+        "base_design_sigma_C": 31.719842158453183,
+        "ksp_rtol_during_check": 1e-12,
+        "tolerance": 0.01,
+        "max_relative_error_dJ_drho": 0.004338005373110163,
+        "max_relative_error_dEV_drho": 2.6035767347798967e-05,
+        "J0": 90.19557544112959,
+        "analytic_dJ": [
+          -0.03171499533979394,
+          -0.010219502520971405,
+          -0.002518140705482133,
+          -0.026674622493920983,
+          -0.008836000974462231,
+          -0.013023228287065708
+        ],
+        "fd_dJ": [
+          -0.0317038008645909,
+          -0.0102303803046766,
+          -0.002507216997571504,
+          -0.02666421060837365,
+          -0.008844628460735748,
+          -0.013022163010134591
+        ],
+        "analytic_dEV": [
+          0.00023657692412209363,
+          0.000157212635460762,
+          0.0001431926281786758,
+          0.00027275589846718256,
+          2.8640562963237917e-05,
+          0.00013975152652347935
+        ],
+        "fd_dEV": [
+          0.0002365759696337788,
+          0.0001572167287189341,
+          0.0001431927253436882,
+          0.0002727567382371232,
+          2.864110816569454e-05,
+          0.00013975157982237807
+        ],
+        "note": "Checked against the SAME fixed sample set used for the analytic gradient, so J_N is deterministic and there is no Monte Carlo noise floor in this comparison."
+      }
+    }
+  ],
+  "boundary_offset": {
+    "element_size_h": 1.0,
+    "filter_radius_R": 0.6,
+    "min_feature_size_2R": 1.2,
+    "eta_band": [
+      0.25,
+      0.75
+    ],
+    "eta_std": 0.11180339887498948,
+    "interface_area": 16.559436418521404,
+    "mean_displacement_per_unit_eta": 13.335800069037125,
+    "offset_std_absolute": 1.4909877744356699,
+    "offset_std_elements": 1.4909877744356699,
+    "offset_std_as_fraction_of_min_feature": 1.242489812029725,
+    "offset_range_absolute": 6.667900034518563,
+    "offset_range_elements": 6.667900034518563,
+    "resolvable": true,
+    "resolvable_threshold_elements": 0.25,
+    "empirical": {},
+    "note": "offset_std_elements answers the NUMERICAL question (can the mesh resolve the perturbation). offset_std_as_fraction_of_min_feature answers the PHYSICAL question (is this a plausible process tolerance). A band can pass the first and fail the second; report both."
+  },
+  "nominal_M_nd_percent": 0.5860631694974084,
+  "pareto": [
+    {
+      "lambda": 0.0,
+      "mu_C": 1.1044986773835048,
+      "sigma_C": 0.9999684057504045,
+      "mean_volume": 0.07985397355988658,
+      "volume_violation": 0.0,
+      "M_nd_percent": 2.5980550815804198,
+      "beta": 32.0,
+      "beta_schedule": [
+        8.0,
+        16.0,
+        32.0
+      ],
+      "converged": false,
+      "optimality": {
+        "stationarity": 0.03338541714301415,
+        "stationarity_rel": 0.9090680740225215,
+        "feasibility": 0.0,
+        "complementarity": 0.06449224160685968,
+        "design_change": 0.020000000000000018,
+        "grad_norm_diagnostic_only": 0.23996802013124727,
+        "grad_inf_diagnostic_only": 0.03672488133401003,
+        "multipliers": [
+          27.69564468447571
+        ],
+        "constraints": [
+          -0.00018628847197194043
+        ]
+      },
+      "grad_norm_diagnostic_only": 0.18334918353704843,
+      "n_fea_batches_total": 23
+    },
+    {
+      "lambda": 2.0,
+      "mu_C": 2.3402299041472556,
+      "sigma_C": 0.9264239755133905,
+      "mean_volume": 0.07969630045316162,
+      "volume_violation": 0.0,
+      "M_nd_percent": 3.130437214380735,
+      "beta": 32.0,
+      "beta_schedule": [
+        8.0,
+        16.0,
+        32.0
+      ],
+      "converged": false,
+      "optimality": {
+        "stationarity": 0.6263931960847813,
+        "stationarity_rel": 0.9916570139195341,
+        "feasibility": 0.0033926796331283995,
+        "complementarity": 0.1917633775504971,
+        "design_change": 0.020000000000000018,
+        "grad_norm_diagnostic_only": 2.8709731486976717,
+        "grad_inf_diagnostic_only": 0.6316631529776168,
+        "multipliers": [
+          56.522689521872586
+        ],
+        "constraints": [
+          0.00027141437065027196
+        ]
+      },
+      "grad_norm_diagnostic_only": 1.6830377811890378,
+      "n_fea_batches_total": 23
+    }
+  ],
+  "pareto_dominated_points": [],
+  "pareto_non_converged_lambdas": [
+    0.0,
+    2.0
+  ],
+  "validation_summary": {
+    "nominal": {
+      "mean": {
+        "value": 65.09691657408727,
+        "ci_low": 54.62223012430113,
+        "ci_high": 78.88704228623543,
+        "standard_error": 6.0615853339774874,
+        "confidence": 0.95,
+        "relative_half_width": 0.18637451233437713
+      },
+      "std": {
+        "value": 34.83617742753001,
+        "ci_low": 27.386680114021544,
+        "ci_high": 45.57101623259191,
+        "standard_error": 4.603435876376894,
+        "confidence": 0.95,
+        "relative_half_width": 0.26099786861516866
+      },
+      "p5": {
+        "value": 25.61156238711752,
+        "ci_low": 23.50186784626141,
+        "ci_high": 32.448538672765345,
+        "standard_error": 3.4490319742448365,
+        "confidence": 0.95,
+        "relative_half_width": 0.17466077803601832
+      },
+      "p95": {
+        "value": 129.30314564041967,
+        "ci_low": 107.81685979709599,
+        "ci_high": 158.11874385801414,
+        "standard_error": 14.690196988141066,
+        "confidence": 0.95,
+        "relative_half_width": 0.1945114475436009
+      },
+      "n_samples": 32,
+      "solver_failure_rate": 0.0,
+      "conditional_on_success": false
+    },
+    "lambda_0.0": {
+      "mean": {
+        "value": 1.444750239668155,
+        "ci_low": 1.0316503251537286,
+        "ci_high": 2.1724113540210306,
+        "standard_error": 0.2739036633275755,
+        "confidence": 0.95,
+        "relative_half_width": 0.3947952378015606
+      },
+      "std": {
+        "value": 1.5745110351750737,
+        "ci_low": 0.985505117282514,
+        "ci_high": 2.387718280415274,
+        "standard_error": 0.36046217275126013,
+        "confidence": 0.95,
+        "relative_half_width": 0.44528527644674293
+      },
+      "p5": {
+        "value": 0.3302139695439864,
+        "ci_low": 0.28416261678070154,
+        "ci_high": 0.3913287832244147,
+        "standard_error": 0.040784655538484815,
+        "confidence": 0.95,
+        "relative_half_width": 0.1622677662482084
+      },
+      "p95": {
+        "value": 4.999620835847265,
+        "ci_low": 2.560911084803913,
+        "ci_high": 6.9959136689335075,
+        "standard_error": 1.272801491192545,
+        "confidence": 0.95,
+        "relative_half_width": 0.44353389284349726
+      },
+      "n_samples": 32,
+      "solver_failure_rate": 0.0,
+      "conditional_on_success": false
+    },
+    "lambda_2.0": {
+      "mean": {
+        "value": 2.989961018959971,
+        "ci_low": 2.400555445054801,
+        "ci_high": 3.8448729840487927,
+        "standard_error": 0.3576849294688277,
+        "confidence": 0.95,
+        "relative_half_width": 0.24152782090389657
+      },
+      "std": {
+        "value": 2.0561442215081644,
+        "ci_low": 1.4869370299687508,
+        "ci_high": 2.8781747059162255,
+        "standard_error": 0.35363856882291833,
+        "confidence": 0.95,
+        "relative_half_width": 0.33831227921527157
+      },
+      "p5": {
+        "value": 0.7360434725993052,
+        "ci_low": 0.691071380801258,
+        "ci_high": 1.2500318834738837,
+        "standard_error": 0.21584675486643382,
+        "confidence": 0.95,
+        "relative_half_width": 0.37970617462218725
+      },
+      "p95": {
+        "value": 7.071415801192966,
+        "ci_low": 5.0093534363087775,
+        "ci_high": 9.384603125919696,
+        "standard_error": 1.2362446632158883,
+        "confidence": 0.95,
+        "relative_half_width": 0.30936164783810355
+      },
+      "n_samples": 32,
+      "solver_failure_rate": 0.0,
+      "conditional_on_success": false
+    }
+  },
+  "paired_comparisons_vs_nominal": {
+    "lambda_0.0": {
+      "design_a": "nominal",
+      "design_b": "lambda_0.0",
+      "n_samples": 32,
+      "paired_common_random_numbers": true,
+      "delta_mean_b_minus_a": {
+        "value": -63.65216633441912,
+        "ci_low": -77.3725284165801,
+        "ci_high": -53.76958869621291,
+        "standard_error": 5.886317818422023,
+        "confidence": 0.95,
+        "relative_half_width": 0.18540562780189457
+      },
+      "delta_std_b_minus_a": {
+        "value": -33.26166639235494,
+        "ci_low": -41.42104459375924,
+        "ci_high": -22.114725036399832,
+        "standard_error": 4.698542661179591,
+        "confidence": 0.95,
+        "relative_half_width": 0.29021876609580943
+      },
+      "sample_correlation_between_designs": 0.14395593395394157,
+      "p_value_mean_difference": 4.656612873077393e-10,
+      "mean_difference_resolvable": true,
+      "std_difference_resolvable": true,
+      "verdict": "mean: lambda_0.0 differs from nominal by -63.65 (95% CI [-77.37, -53.77], excludes 0); std: lambda_0.0 differs from nominal by -33.26 (95% CI [-41.42, -22.11], excludes 0)",
+      "n_realizations_dropped_from_pairing": 0
+    },
+    "lambda_2.0": {
+      "design_a": "nominal",
+      "design_b": "lambda_2.0",
+      "n_samples": 32,
+      "paired_common_random_numbers": true,
+      "delta_mean_b_minus_a": {
+        "value": -62.1069555551273,
+        "ci_low": -75.67728358807247,
+        "ci_high": -52.246619618837904,
+        "standard_error": 5.836386037786566,
+        "confidence": 0.95,
+        "relative_half_width": 0.18863156114967725
+      },
+      "delta_std_b_minus_a": {
+        "value": -32.78003320602185,
+        "ci_low": -40.693200852808545,
+        "ci_high": -21.847953445916364,
+        "standard_error": 4.542252190284669,
+        "confidence": 0.95,
+        "relative_half_width": 0.2874500963505769
+      },
+      "sample_correlation_between_designs": 0.26742995143462844,
+      "p_value_mean_difference": 4.656612873077393e-10,
+      "mean_difference_resolvable": true,
+      "std_difference_resolvable": true,
+      "verdict": "mean: lambda_2.0 differs from nominal by -62.11 (95% CI [-75.68, -52.25], excludes 0); std: lambda_2.0 differs from nominal by -32.78 (95% CI [-40.69, -21.85], excludes 0)",
+      "n_realizations_dropped_from_pairing": 0
+    }
+  },
+  "effect_resolvability": {
+    "lambda_0.0": {
+      "claimed_relative_effect_in_std": 0.9548024165840084,
+      "std_ci_relative_half_width": 0.44528527644674293,
+      "n_samples": 32,
+      "resolvable_at_this_n": true,
+      "required_n_to_resolve": 32,
+      "note": "An effect is only resolvable when the confidence interval on the estimate is narrower than half the effect. Otherwise the reported difference is within the measurement's own noise and must not be presented as an improvement."
+    },
+    "lambda_2.0": {
+      "claimed_relative_effect_in_std": 0.9409767553921329,
+      "std_ci_relative_half_width": 0.33831227921527157,
+      "n_samples": 32,
+      "resolvable_at_this_n": true,
+      "required_n_to_resolve": 32,
+      "note": "An effect is only resolvable when the confidence interval on the estimate is narrower than half the effect. Otherwise the reported difference is within the measurement's own noise and must not be presented as an improvement."
+    }
+  },
+  "boundary_offset_realized": {
+    "nominal": {
+      "n_samples": 32,
+      "mean_absolute": 2.335848012039021,
+      "std_absolute": 1.4318544773724888,
+      "min_absolute": -0.058578491461203815,
+      "max_absolute": 6.251943645899444,
+      "mean_elements": 2.335848012039021,
+      "std_elements": 1.4318544773724888,
+      "range_elements": 6.310522137360648,
+      "note": "Displacement realized by the actual eta ensemble, derived from the per-sample volumes with no additional FEA. This is the measured number; the geometric estimator is an independent cross-check and the two should agree to within the interface-area approximation."
+    },
+    "lambda_0.0": {
+      "n_samples": 32,
+      "mean_absolute": 0.8126169498098006,
+      "std_absolute": 2.715952382987213,
+      "min_absolute": -7.359282294307431,
+      "max_absolute": 5.888173464861995,
+      "mean_elements": 0.8126169498098006,
+      "std_elements": 2.715952382987213,
+      "range_elements": 13.247455759169426,
+      "note": "Displacement realized by the actual eta ensemble, derived from the per-sample volumes with no additional FEA. This is the measured number; the geometric estimator is an independent cross-check and the two should agree to within the interface-area approximation."
+    },
+    "lambda_2.0": {
+      "n_samples": 32,
+      "mean_absolute": 0.4172542693941701,
+      "std_absolute": 2.8436956196049277,
+      "min_absolute": -8.103184068661168,
+      "max_absolute": 4.507153838922143,
+      "mean_elements": 0.4172542693941701,
+      "std_elements": 2.8436956196049277,
+      "range_elements": 12.610337907583311,
+      "note": "Displacement realized by the actual eta ensemble, derived from the per-sample volumes with no additional FEA. This is the measured number; the geometric estimator is an independent cross-check and the two should agree to within the interface-area approximation."
+    }
+  },
+  "volume_spread": {
+    "nominal": {
+      "mean": 0.013656603459280546,
+      "std": 0.007903567726208387,
+      "p95": 0.02986990667164741,
+      "max": 0.03527271567853441,
+      "nominal_eta_half": 0.0007631612463838177,
+      "vol_frac_budget": 0.08,
+      "note": "The constraint bounds E[V] only. p95 and max are the realized upper tail, which nothing constrains -- report them so a design whose dilated realization is well over budget is visible."
+    },
+    "lambda_0.0": {
+      "mean": 0.08305240332661468,
+      "std": 0.014991546933936305,
+      "p95": 0.10256889260057621,
+      "max": 0.1110685217931546,
+      "nominal_eta_half": 0.07856691042228524,
+      "vol_frac_budget": 0.08,
+      "note": "The constraint bounds E[V] only. p95 and max are the realized upper tail, which nothing constrains -- report them so a design whose dilated realization is well over budget is visible."
+    },
+    "lambda_2.0": {
+      "mean": 0.0833863406711133,
+      "std": 0.015696665602158703,
+      "p95": 0.10203915467082086,
+      "max": 0.10596181796435904,
+      "nominal_eta_half": 0.08108317548965015,
+      "vol_frac_budget": 0.08,
+      "note": "The constraint bounds E[V] only. p95 and max are the realized upper tail, which nothing constrains -- report them so a design whose dilated realization is well over budget is visible."
+    }
+  },
+  "finished_utc": "2026-07-27T21:28:44.958793+00:00",
+  "total_seconds": 42.00549268722534
+}

@@ -410,42 +410,65 @@ def verify_sample_covariance(
     kl_result: KLExpansionResult,
     n_samples: int = 5000,
     seed: int = 0,
-    rtol: float = 0.1,
+    rtol: float = 0.05,
 ) -> dict:
-    """Verification gate: sample covariance must match theoretical kernel.
+    """Verification gate: sampled pointwise variance must match the TRUNCATED
+    expansion's analytic variance.
 
-    Master-context Section 3.3 / Section 7 verification requirement:
-    "sample covariance must match theoretical covariance kernel." Compares
-    the empirical variance at each node (diagonal of covariance) against the
-    theoretical kernel variance sigma^2, since full N_nodes x N_nodes
-    covariance comparison is expensive; the diagonal check is a necessary
-    (not sufficient) condition and is adequate for the MVP gate.
+    WHAT THIS CHECKS, AND WHAT IT USED TO CHECK
+    -------------------------------------------
+    This function previously compared the empirical variance against the nominal
+    kernel variance sigma^2. That was wrong on two counts:
+
+      * Truncating at variance_threshold < 1 removes variance, and removes it
+        unevenly across the domain, so the truncated field's pointwise variance
+        is v(x) = sum_i lambda_i phi_i(x)^2 -- strictly below sigma^2 and
+        spatially varying. Comparing against sigma^2 measures the truncation
+        level, not an implementation error, and fails for a correct expansion.
+      * The pipeline no longer samples this field directly. Downstream, the
+        field is normalized by pointwise_std() before the marginal transform, so
+        sigma cancels identically and the realized field has unit variance
+        everywhere by construction.
+
+    So the meaningful check is: does sampling reproduce the analytic variance of
+    the truncated expansion? That is an implementation check with a definite
+    right answer. The separate, and genuinely interesting, question of how far
+    the truncated correlation sits from the target kernel is reported by
+    src/validation/gates.py's kl_correlation gate, which is the version wired
+    into the pipeline.
 
     Args:
         kl_result: Output of compute_kl_expansion.
         n_samples: Monte Carlo sample size for the empirical estimate.
         seed: RNG seed.
-        rtol: Relative tolerance for pass/fail.
+        rtol: Relative tolerance on the per-node variance mismatch.
 
     Returns:
-        Dict with keys: passed (bool), empirical_var_mean, theoretical_var,
-        relative_error.
+        Dict with keys: passed, max_relative_error, mean_empirical_var,
+        mean_analytic_var, truncated_vs_nominal_variance_ratio.
     """
     samples = sample_gaussian_field(kl_result, n_samples, seed=seed)
-    empirical_var = samples.var(axis=0)  # [N_nodes]
-    theoretical_var = kl_result.kernel_params.sigma ** 2
-    relative_error = float(
-        np.abs(empirical_var.mean() - theoretical_var) / theoretical_var
-    )
-    passed = relative_error < rtol
+    empirical_var = samples.var(axis=0, ddof=1)          # [N_nodes]
+    analytic_var = pointwise_std(kl_result) ** 2         # [N_nodes], exact
+
+    relative_error = np.abs(empirical_var - analytic_var) / np.maximum(analytic_var, 1e-300)
+    max_relative_error = float(relative_error.max())
+    passed = bool(max_relative_error < rtol)
+
+    nominal_var = kl_result.kernel_params.sigma ** 2
+    truncation_ratio = float(analytic_var.mean() / nominal_var) if nominal_var > 0 else float("nan")
+
     logger.info(
-        "KL covariance verification: empirical_var_mean=%.4g, theoretical_var=%.4g, "
-        "relative_error=%.2f%, passed=%s",
-        empirical_var.mean(), theoretical_var, relative_error * 100, passed,
+        "KL variance verification: max_relative_error=%.3g (rtol=%.3g), "
+        "mean empirical=%.4g vs analytic=%.4g, truncated/nominal variance "
+        "ratio=%.4f, passed=%s",
+        max_relative_error, rtol, empirical_var.mean(), analytic_var.mean(),
+        truncation_ratio, passed,
     )
     return {
         "passed": passed,
-        "empirical_var_mean": float(empirical_var.mean()),
-        "theoretical_var": theoretical_var,
-        "relative_error": relative_error,
+        "max_relative_error": max_relative_error,
+        "mean_empirical_var": float(empirical_var.mean()),
+        "mean_analytic_var": float(analytic_var.mean()),
+        "truncated_vs_nominal_variance_ratio": truncation_ratio,
     }

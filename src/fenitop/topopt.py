@@ -79,12 +79,18 @@ def form_fem_multi_case(fem, opt, load_cases: dict[str, list]):
     return problems, rho_field, rho_phys_field
 
 
-def topopt(fem, opt, load_cases: dict[str, list]):
+def topopt(fem, opt, load_cases: dict[str, list], output_prefix: str = ""):
     """Main function for topology optimization.
 
     fem: shared fem TEMPLATE dict (no "traction_bcs" key -- see
         fenitop_adapter.build_fem_dict).
     opt: opt dict, as before.
+    output_prefix: Prefix for this run's artifacts (rho_converged.npy,
+        optimized_design.xdmf/.jpg). Defaults to "" for backward
+        compatibility, which writes optimized_design.* into the CURRENT
+        WORKING DIRECTORY and rho_converged.npy into output/ -- fixed paths
+        that every run and every load case overwrote. Callers should pass a
+        per-run directory prefix so results are not clobbered.
     load_cases: dict[case_name, traction_bcs_list] -- one independently
         solved equilibrium problem per case, sharing one density field.
         Their compliances and sensitivities are summed each iteration
@@ -325,10 +331,15 @@ def topopt(fem, opt, load_cases: dict[str, list]):
 
     values = S_comm.gather(rho_phys_field)
     if comm.rank == 0:
-        plotter.plot(values)
-    save_xdmf(fem["mesh"], rho_phys_field)
+        plotter.plot(values, path=output_prefix)
+    save_xdmf(fem["mesh"], rho_phys_field, path=output_prefix)
 
     rho_S0_comm = Communicator(rho_field.function_space, fem["mesh_serial"])
     rho_global = rho_S0_comm.gather(rho_field)
     if comm.rank == 0:
-        np.save("output/rho_converged.npy", rho_global)
+        rho_path = (f"{output_prefix}rho_converged.npy" if output_prefix
+                    else "output/rho_converged.npy")
+        np.save(rho_path, rho_global)
+    # Returned so the caller does not have to read it back off disk (and so the
+    # design is available even when output_prefix points somewhere unusual).
+    return rho_global

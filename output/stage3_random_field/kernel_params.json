@@ -1,0 +1,5 @@
+{
+  "sigma": 0.2,
+  "length_scale": 4,
+  "spatial_dim": 3
+}

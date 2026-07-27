@@ -31,3 +31,7 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
 addopts = "--tb=short -q"
+markers = [
+    "dolfinx: requires the dolfinx/PETSc stack (skipped in the plain-Python CI job)",
+    "mpi: must be launched under mpirun with more than one rank",
+]

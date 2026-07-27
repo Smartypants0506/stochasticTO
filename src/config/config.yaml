@@ -1,114 +1,144 @@
-# mesh_source: "step" (CAD pipeline, default) or "box" (synthetic mesh
-# ported from FEniTop's scripts/beam_3d.py, for validating topopt()
-# against that reference case -- see src/meshing/box_source.py).
-# step_file/mesh_out_path/snap_tol/color_targets/solid_volume_color/
-# keep_alive below are ignored when mesh_source: "box".
+# =============================================================================
+# Robust topology optimization under a random projection-threshold field.
+# Case: FEniTop beam_3d reference cantilever (mesh_source: "box").
+#
+# READ THIS BEFORE CHANGING ANYTHING
+# ----------------------------------
+# This file contains ONLY parameters that are actually consumed on the box
+# path. src/config/loader.py rejects anything else, by design: the previous
+# version of this file declared vol_frac 0.15, filter_radius 0.006 m,
+# opt_tol 1e-3, E = 68.9 GPa and six SI load cases, NONE of which reached the
+# solver -- src/meshing/box_source.py hardcodes the beam_3d values (0.08, 0.6,
+# 1e-5, 100, one tip load) and ignores them. Anyone reconstructing the study
+# from this file would have reported the wrong number for every one of them.
+#
+# The frozen beam_3d physics -- domain, element counts, E, nu, vol_frac,
+# penalty, filter radius, move limit, load, boundary conditions -- lives in
+# src/meshing/box_source.py and is the single source of truth. Change it there.
+# Every effective value is also written into the run manifest.
+#
+# UNITS: the beam_3d case is DIMENSIONLESS. Domain 10 x 30 x 10, E = 100,
+# element size h = 0.4. random_field.length_scale below is in those same
+# units, NOT metres -- an earlier version of this file carried
+# length_scale: 4 with docstrings claiming metres and a log line claiming
+# millimetres. Quote it as a fraction of the domain (see below).
+# =============================================================================
+
 mesh_source: "box"
- 
+
 box_mesh:
-  # "tetrahedron" (default) required for the full Stage 2-6 pipeline
-  # (Stage 3's KL expansion needs a simplicial mesh_serial). beam_3d.py
-  # itself uses "hexahedron", but that's Stage-2-only -- main.py raises
-  # if you set this to "hexahedron" and let the pipeline run past Stage 2.
+  # "tetrahedron" is required past Stage 2: the KL expansion builds an
+  # OpenTURNS P1 mesh, which needs simplices.
   cell_type: "tetrahedron"
-
-step_file: "data/cad/ge_bracket_rotated_nonds.step"
-mesh_out_path: "output/meshes/ge_bracket_rotated_nonds.xdmf"
-mesh_size_max: 2.0e-3
-snap_tol: 1.0e-4
-
-material:
-  youngs_modulus: 68900000000
-  poissons_ratio: 0.33
-
-petsc:
-  ksp_type: "fgmres"   # robust to GAMG's occasionally-indefinite PC under high SIMP contrast (cg bails with -8)
-  pc_type: "gamg"
-
-load_cases:
-  upward:
-    - group_name: "load_1"
-      vector: [0.0, 0.0, 500000.0]
-    - group_name: "load_2"
-      vector: [0.0, 0.0, 500000.0]
-  downward:
-    - group_name: "load_1"
-      vector: [0.0, 0.0, -500000.0]
-    - group_name: "load_2"
-      vector: [0.0, 0.0, -500000.0]
-  leftward:
-    - group_name: "load_1"
-      vector: [-500000.0, 0.0, 0.0]
-    - group_name: "load_2"
-      vector: [-500000.0, 0.0, 0.0]
-  rightward:
-    - group_name: "load_1"
-      vector: [500000.0, 0.0, 0.0]
-    - group_name: "load_2"
-      vector: [500000.0, 0.0, 0.0]
-  forward:
-    - group_name: "load_1"
-      vector: [0.0, 500000.0, 0.0]
-    - group_name: "load_2"
-      vector: [0.0, 500000.0, 0.0]
-  backward:
-    - group_name: "load_1"
-      vector: [0.0, -500000.0, 0.0]
-    - group_name: "load_2"
-      vector: [0.0, -500000.0, 0.0]
+  # PRODUCTION tier: 1.0 = beam_3d's [25,75,25], h = 0.4, ~4 s/FEA solve.
+  # Use configStudy.yaml (refinement 0.64) for convergence and replication
+  # work. The filter radius R = 0.6 is FIXED in absolute units at every
+  # refinement level -- see box_source._FILTER_RADIUS for why.
+  refinement: 1.0
 
 optimization:
-  max_iter: 400
-  opt_tol: 1.0e-3
-  vol_frac: 0.15
-  penalty: 3.0
-  epsilon: 1.0e-4
-  filter_radius: 0.006
-  beta_interval: 50
-  beta_max: 128
-  use_oc: true
-  move: 0.02
-  opt_compliance: true
-  quadrature_degree: 2
-  body_force: [0.0, 0.0, 0.0]
-  lambda_sweep: [0.0, 1.0]
-  pce_n_train_refresh: 60
-  pce_n_test_refresh: 20
-  # --- Surrogate-free robust TO (Sample Average Approximation) ---
-  robust_method: "saa"         # "saa" (no PCE middleman) or "pce" (legacy surrogate path)
-  saa_n_samples: 512           # fixed sample-set size solved by FEA every iteration
-                               # -- THE fidelity knob; raise for more accuracy / more compute
-  saa_sampling_strategy: "lhs" # "lhs" (space-filling, preferred) or "monte_carlo"
-  saa_seed: 7                  # MUST differ from mc_validation.seed (unbiased Stage-6 check)
-  saa_beta: 8.0                # Heaviside sharpness for the SAA FEA solves
+  # Run control and robust-loop parameters only. Everything governing the
+  # beam_3d physics is in box_source.py -- the loader errors if you put it here.
+  max_iter: 400              # TOTAL budget, split across the beta stages below
+  epsilon: 1.0e-4            # SIMP void stiffness ratio; dominant conditioning knob
 
-color_targets:
-  fixed: [255, 0, 0, 255]
-  load_1: [0, 255, 0, 255]
-  load_2: [0, 0, 255, 255]
+  # --- robust formulation ---
+  robust_method: "saa"       # surrogate-free sample-average approximation
+  saa_n_samples: 512         # fixed sample set solved by FEA every iteration
+  saa_sampling_strategy: "lhs"
+  saa_seed: 7                # MUST differ from mc_validation.seed (loader enforces)
 
-solid_volume_color: [255, 255, 0, 255]
+  # --- Heaviside continuation ---
+  # Stages run at 8, 16, 32, 64, 128, each converged in turn, warm-started from
+  # the last, sharing max_iter. The previous fixed beta=8 left the reported
+  # design gray and broke the eta-as-boundary-offset premise of the whole model.
+  saa_beta: 8.0              # first stage
+  saa_beta_max: 128.0        # final stage; must equal mc_validation.beta
+  saa_beta_continuation: true
+
+  # --- convergence ---
+  # robust_opt_tol bounds the RELATIVE stationarity residual; constraint_tol
+  # bounds feasibility and complementarity. All three must hold. This replaces
+  # the old ||grad f|| <= gatol test, which could never fire on a
+  # volume-constrained problem and reported a non-converged run as finished.
+  # (Distinct from `opt_tol`, the nominal Stage-2 OC design-change threshold,
+  # which is frozen beam_3d run control in box_source.py.)
+  robust_opt_tol: 1.0e-3
+  constraint_tol: 1.0e-4
+
+  # --- Pareto sweep ---
+  # 5 points, each solved from the SAME nominal warm start. The previous 2-point
+  # sweep used lambda-continuation, which made lambda=1 simply lambda=0 plus 400
+  # more descent steps -- it dominated lambda=0 in BOTH mu_C and sigma_C, which
+  # a genuine trade-off curve cannot do.
+  lambda_sweep: [0.0, 0.5, 1.0, 2.0, 4.0]
+  lambda_sweep_start: "common"
+  sweep_check_dominance: true
+
+  # --- parallel layout ---
+  sample_parallel_ranks_per_group: 8
 
 random_field:
-  # sigma is now INERT for the threshold spread: the marginal transform
-  # standardizes the KL field to unit variance before mapping, so eta's
-  # pointwise distribution is exactly Beta(alpha,beta) on [eta_min,eta_max]
-  # regardless of sigma (it cancels). Magnitude of the manufacturing-error
-  # perturbation is set solely by the [eta_min,eta_max] band + alpha/beta;
-  # length_scale still controls spatial correlation. sigma is kept only as
-  # the nominal Gaussian amplitude and no longer affects results.
-  sigma: 0.2
-  length_scale: 4
+  # Squared-exponential kernel on the underlying Gaussian field.
+  #
+  # sigma is INERT and is kept only because KernelParams requires it: the field
+  # is normalized by its own pointwise std before the marginal transform
+  # (heaviside_projection_glue.py), so sigma cancels identically. The realized
+  # field's covariance is the TRUNCATED CORRELATION, not sigma^2*exp(-r^2/2l^2);
+  # the kl_correlation gate reports how far the two differ.
+  sigma: 1.0
+  length_scale: 4.0          # dimensionless; = 0.4 x beam width (10), 0.13 x length (30)
   spatial_dim: 3
-  eta_min: 0.45              # tight manufacturing envelope: eta in [0.45,0.55]
-  eta_max: 0.55              # (~0.1-0.25 element of boundary motion per sample)
-  alpha: 2.0
-  beta: 2.0
-  variance_threshold: 0.75
+  variance_threshold: 0.95   # KL truncation -> 37 modes on this mesh
   n_kl_hint: 20
   seed: 42
 
+  # Manufacturing envelope for the projection threshold eta ~ Beta(a,b) on
+  # [eta_min, eta_max]. THIS IS THE MOST CONSEQUENTIAL SETTING IN THE FILE.
+  #
+  # The projected boundary is the level set rho_tilde = eta, so a threshold
+  # shift d_eta moves it by d_s = d_eta / |grad rho_tilde|. For the Helmholtz
+  # filter the 1-D step response gives |grad rho_tilde| = 1/(2R) = 0.83 at
+  # R = 0.6. With Beta(2,2) (std = 0.2236 x band) and h = 0.4:
+  #
+  #   eta band          offset std     offset range
+  #   [0.45, 0.55]      0.080 h        0.36 h      <- PREVIOUS SETTING
+  #   [0.35, 0.65]      0.24  h        1.07 h
+  #   [0.25, 0.75]      0.40  h        1.79 h      <- current
+  #
+  # The previous band moved the boundary by one twelfth of an element. A
+  # perturbation that far below the discretization scale makes sigma_C the same
+  # order as the discretization error of the compliance itself, so it could not
+  # be shown to be a property of the continuum problem at all -- and it left
+  # the robust design no room to differ from the nominal, which is why
+  # sigma_C/mu_C sat at ~5% and the lambda=0 and lambda=1 designs came out
+  # indistinguishable.
+  #
+  # Mesh refinement CANNOT fix that: d_s is fixed in absolute units (it depends
+  # on the band and R, not on h), so reaching a 0.5 h offset at the old band
+  # needs h = 0.064 -- a 6.3x refinement, 11.5 M hexes. Not affordable.
+  # Widening the band is the only lever that works.
+  #
+  # [0.25, 0.75] is simultaneously the smallest mesh-resolvable band AND the
+  # standard Wang/Lazarov/Sigmund erode-dilate band, so the baseline comparison
+  # is direct. THE TRADE-OFF, WHICH THE WRITE-UP MUST STATE: the offset range is
+  # ~60% of the minimum feature size (~2R), so this is a ROBUSTNESS ENVELOPE in
+  # the erode/dilate tradition, NOT a calibrated process tolerance. A calibrated
+  # +/-0.05 tolerance is not resolvable on any mesh this project can afford;
+  # that is a real limitation and belongs in the limitations section.
+  #
+  # These figures come from the 1-D step estimate of |grad rho_tilde|.
+  # src/validation/boundary_offset.py measures the realized distribution on the
+  # actual design; if the measurement disagrees with the estimate by more than
+  # ~2x, revisit this band before running anything else.
+  eta_min: 0.25
+  eta_max: 0.75
+  alpha: 2.0
+  beta: 2.0
+
 surrogate:
+  # Legacy PCE path (robust_method: "pce") only. Unused while robust_method is
+  # "saa"; retained so the ablation can still be run.
   n_train: 200
   n_test: 50
   hyperbolic_q: 0.75
@@ -116,22 +146,41 @@ surrogate:
   q2_threshold: 0.90
 
 mc_validation:
-  n_samples: 100
-  beta: 8
-  seed: 42
+  # n_samples drives the width of the confidence intervals on every reported
+  # statistic. At n=100 the CI half-width on sigma is ~7% relative -- wider than
+  # the sigma reductions previously being claimed, i.e. the measurement could
+  # not resolve its own headline result. 2000 puts it near 1.6%. Stage 6 reports
+  # the required-n for whatever effect size is actually observed.
+  n_samples: 2000
+  beta: 128.0                # must equal optimization.saa_beta_max (loader enforces)
+  seed: 42                   # must differ from optimization.saa_seed (loader enforces)
   percentile_low: 5.0
   percentile_high: 95.0
   output_dir: "output/mc_validation"
+  n_bootstrap: 10000
+  confidence: 0.95
+  bootstrap_seed: 0
+  write_ensemble: false      # visualization artifact; dominates Stage 6 cost at scale
+  # Tight on the production tier. A failed solve means that manufacturing
+  # realization does not carry load -- at R/h = 1.5 with a converged design that
+  # should be rare, and if it is not, the failure RATE is the headline
+  # robustness result and the compliance numbers are conditional on survival.
+  # Do not raise this to make a run finish; raise it only with a stated reason.
+  max_solver_failure_rate: 0.01
 
-keep_alive:
-  enabled: false
-  groups: ["fixed", "load_1", "load_2"]
-  corridor_radius: 4.0e-3     # ~2x mesh_size_max; null -> auto
-  cluster_eps: 4.0e-3         # null -> auto (~2x mesh_size_max)
-
-recompute:
-  stage1_mesh: false
-  stage2_fea: false
-  stage3_random_field: false
-  stage4_5_surrogate_optimization: true
-  stage6_validation: true
+validation:
+  # Mandatory gates. These are the checks that existed in the tree but were
+  # never called from the pipeline, so no published number had been verified.
+  run_gates: true
+  gradient_fd: true
+  fd_n_samples: 8            # small dedicated sample set -- NOT saa_n_samples
+  fd_n_elements: 16
+  fd_step: 1.0e-3            # large enough that the FD signal is not KSP noise
+  fd_rtol: 1.0e-3
+  fd_ksp_rtol: 1.0e-12       # tightened for the gate only, then restored
+  correlation_n_nodes: 64
+  correlation_n_samples: 4000
+  correlation_rtol: 0.05
+  marginal_n_nodes: 128
+  marginal_n_samples: 2000
+  marginal_alpha: 0.01
