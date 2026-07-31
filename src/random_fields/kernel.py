@@ -25,7 +25,12 @@ class KernelParams:
 
     Attributes:
         sigma: Marginal standard deviation of the underlying Gaussian field (dimensionless).
-        length_scale: Spatial correlation length l, in meters (m).
+        length_scale: Spatial correlation length l, in the DOMAIN's own units.
+            The beam_3d case (src/meshing/box_source.py) is dimensionless --
+            domain 10 x 30 x 10, E = 100 -- so this is NOT metres there. An
+            earlier version of config.yaml carried length_scale: 4 alongside
+            docstrings claiming metres and a log line claiming millimetres;
+            quote it as a fraction of the domain instead.
         spatial_dim: Dimensionality of the domain (2 or 3).
     """
     sigma: float

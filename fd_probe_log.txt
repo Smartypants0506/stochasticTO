@@ -1,0 +1,1594 @@
+WARNING:src.config.loader:optimization.lambda_sweep has only 3 points. That is enough to compare designs but too few to present as a Pareto front.
+INFO:src.meshing.box_source:Traction patch: half-width 0.9375 (auto max(0.5, 1.5h)), area 1.5625, traction_z -0.2048 (total force 0.32 held fixed across refinement levels)
+INFO:src.meshing.box_source:Built box-mesh fenitop dicts (beam_3d.py reference): cell_type=tetrahedron, domain=[[0, 0, 0], [10, 30, 10]], refinement=0.64 -> elements=[16, 48, 16], h=0.625, R=0.6 (R/h=0.96, FIXED across levels), E=100, nu=0.25, vol_frac=0.08
+WARNING:src.provenance:2 config value(s) are OVERRIDDEN in code and did not affect this run as written in config.yaml: filter_radius, vol_frac. The effective values are recorded in the manifest; cite those, not the YAML.
+WARNING:src.fenitop.topopt:No 'solid' cell_tags/solid_tag found in fem dict -- bolt/mount regions will NOT be hard-pinned to solid density. This mirrors the exact bug that caused bolt bosses to be optimized away; check fenitop_adapter.py wires cell_tags + solid_tag through.
+opt_iter: 1, opt_time: 0.3 (s), beta: 1, C: 36.291, V: 0.071, U: 0.000, change: 0.020
+opt_iter: 2, opt_time: 0.138 (s), beta: 1, C: 21.199, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 3, opt_time: 0.157 (s), beta: 1, C: 14.756, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 4, opt_time: 0.138 (s), beta: 1, C: 11.195, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 5, opt_time: 0.146 (s), beta: 1, C: 8.992, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 6, opt_time: 0.165 (s), beta: 1, C: 7.495, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 7, opt_time: 0.147 (s), beta: 1, C: 6.387, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 8, opt_time: 0.148 (s), beta: 1, C: 5.515, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 9, opt_time: 0.14 (s), beta: 1, C: 4.801, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 10: max |u| over all load cases = 1.320315e+01 m (13203.146022 mm)
+opt_iter: 10, opt_time: 0.143 (s), beta: 1, C: 4.210, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 11, opt_time: 0.14 (s), beta: 1, C: 3.720, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 12, opt_time: 0.141 (s), beta: 1, C: 3.316, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 13, opt_time: 0.157 (s), beta: 1, C: 2.981, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 14, opt_time: 0.137 (s), beta: 1, C: 2.703, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 15, opt_time: 0.147 (s), beta: 1, C: 2.469, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 16, opt_time: 0.16 (s), beta: 1, C: 2.272, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 17, opt_time: 0.164 (s), beta: 1, C: 2.103, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 18, opt_time: 0.161 (s), beta: 1, C: 1.958, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 19, opt_time: 0.156 (s), beta: 1, C: 1.831, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 20: max |u| over all load cases = 5.385902e+00 m (5385.902037 mm)
+opt_iter: 20, opt_time: 0.146 (s), beta: 1, C: 1.720, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 21, opt_time: 0.156 (s), beta: 1, C: 1.622, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 22, opt_time: 0.142 (s), beta: 1, C: 1.535, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 23, opt_time: 0.152 (s), beta: 1, C: 1.457, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 24, opt_time: 0.16 (s), beta: 1, C: 1.387, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 25, opt_time: 0.135 (s), beta: 1, C: 1.323, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 26, opt_time: 0.167 (s), beta: 1, C: 1.265, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 27, opt_time: 0.158 (s), beta: 1, C: 1.212, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 28, opt_time: 0.146 (s), beta: 1, C: 1.163, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 29, opt_time: 0.172 (s), beta: 1, C: 1.118, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 30: max |u| over all load cases = 3.369765e+00 m (3369.765372 mm)
+opt_iter: 30, opt_time: 0.163 (s), beta: 1, C: 1.076, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 31, opt_time: 0.148 (s), beta: 1, C: 1.036, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 32, opt_time: 0.163 (s), beta: 1, C: 0.999, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 33, opt_time: 0.153 (s), beta: 1, C: 0.963, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 34, opt_time: 0.162 (s), beta: 1, C: 0.928, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 35, opt_time: 0.167 (s), beta: 1, C: 0.893, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 36, opt_time: 0.16 (s), beta: 1, C: 0.859, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 37, opt_time: 0.157 (s), beta: 1, C: 0.825, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 38, opt_time: 0.174 (s), beta: 1, C: 0.791, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 39, opt_time: 0.171 (s), beta: 1, C: 0.759, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 40: max |u| over all load cases = 2.380865e+00 m (2380.865482 mm)
+opt_iter: 40, opt_time: 0.165 (s), beta: 1, C: 0.727, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 41, opt_time: 0.18 (s), beta: 1, C: 0.697, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 42, opt_time: 0.184 (s), beta: 1, C: 0.669, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 43, opt_time: 0.169 (s), beta: 1, C: 0.643, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 44, opt_time: 0.172 (s), beta: 1, C: 0.618, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 45, opt_time: 0.19 (s), beta: 1, C: 0.594, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 46, opt_time: 0.183 (s), beta: 1, C: 0.573, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 47, opt_time: 0.158 (s), beta: 1, C: 0.552, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 48, opt_time: 0.179 (s), beta: 1, C: 0.540, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 49, opt_time: 0.185 (s), beta: 1, C: 0.530, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 50: max |u| over all load cases = 1.883953e+00 m (1883.952559 mm)
+opt_iter: 50, opt_time: 0.184 (s), beta: 2, C: 0.530, V: 0.073, U: 0.000, change: 0.020
+opt_iter: 51, opt_time: 0.173 (s), beta: 2, C: 0.493, V: 0.076, U: 0.000, change: 0.020
+opt_iter: 52, opt_time: 0.187 (s), beta: 2, C: 0.458, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 53, opt_time: 0.195 (s), beta: 2, C: 0.448, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 54, opt_time: 0.173 (s), beta: 2, C: 0.439, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 55, opt_time: 0.164 (s), beta: 2, C: 0.432, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 56, opt_time: 0.177 (s), beta: 2, C: 0.426, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 57, opt_time: 0.171 (s), beta: 2, C: 0.420, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 58, opt_time: 0.167 (s), beta: 2, C: 0.415, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 59, opt_time: 0.168 (s), beta: 2, C: 0.411, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 60: max |u| over all load cases = 1.536061e+00 m (1536.061316 mm)
+opt_iter: 60, opt_time: 0.173 (s), beta: 2, C: 0.407, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 61, opt_time: 0.154 (s), beta: 2, C: 0.403, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 62, opt_time: 0.161 (s), beta: 2, C: 0.400, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 63, opt_time: 0.17 (s), beta: 2, C: 0.397, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 64, opt_time: 0.163 (s), beta: 2, C: 0.394, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 65, opt_time: 0.167 (s), beta: 2, C: 0.391, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 66, opt_time: 0.172 (s), beta: 2, C: 0.389, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 67, opt_time: 0.156 (s), beta: 2, C: 0.387, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 68, opt_time: 0.152 (s), beta: 2, C: 0.385, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 69, opt_time: 0.163 (s), beta: 2, C: 0.383, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 70: max |u| over all load cases = 1.457917e+00 m (1457.916578 mm)
+opt_iter: 70, opt_time: 0.149 (s), beta: 2, C: 0.382, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 71, opt_time: 0.154 (s), beta: 2, C: 0.380, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 72, opt_time: 0.164 (s), beta: 2, C: 0.379, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 73, opt_time: 0.148 (s), beta: 2, C: 0.378, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 74, opt_time: 0.157 (s), beta: 2, C: 0.377, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 75, opt_time: 0.162 (s), beta: 2, C: 0.376, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 76, opt_time: 0.147 (s), beta: 2, C: 0.375, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 77, opt_time: 0.157 (s), beta: 2, C: 0.375, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 78, opt_time: 0.165 (s), beta: 2, C: 0.374, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 79, opt_time: 0.152 (s), beta: 2, C: 0.374, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 80: max |u| over all load cases = 1.426712e+00 m (1426.712209 mm)
+opt_iter: 80, opt_time: 0.143 (s), beta: 2, C: 0.373, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 81, opt_time: 0.156 (s), beta: 2, C: 0.373, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 82, opt_time: 0.143 (s), beta: 2, C: 0.372, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 83, opt_time: 0.145 (s), beta: 2, C: 0.372, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 84, opt_time: 0.151 (s), beta: 2, C: 0.371, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 85, opt_time: 0.14 (s), beta: 2, C: 0.371, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 86, opt_time: 0.148 (s), beta: 2, C: 0.371, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 87, opt_time: 0.151 (s), beta: 2, C: 0.370, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 88, opt_time: 0.138 (s), beta: 2, C: 0.370, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 89, opt_time: 0.155 (s), beta: 2, C: 0.370, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 90: max |u| over all load cases = 1.412259e+00 m (1412.258575 mm)
+opt_iter: 90, opt_time: 0.152 (s), beta: 2, C: 0.369, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 91, opt_time: 0.141 (s), beta: 2, C: 0.369, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 92, opt_time: 0.155 (s), beta: 2, C: 0.369, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 93, opt_time: 0.149 (s), beta: 2, C: 0.369, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 94, opt_time: 0.148 (s), beta: 2, C: 0.368, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 95, opt_time: 0.153 (s), beta: 2, C: 0.368, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 96, opt_time: 0.145 (s), beta: 2, C: 0.368, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 97, opt_time: 0.146 (s), beta: 2, C: 0.368, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 98, opt_time: 0.151 (s), beta: 2, C: 0.368, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 99, opt_time: 0.137 (s), beta: 2, C: 0.367, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 100: max |u| over all load cases = 1.283749e+00 m (1283.748710 mm)
+opt_iter: 100, opt_time: 0.192 (s), beta: 4, C: 0.336, V: 0.070, U: 0.000, change: 0.020
+opt_iter: 101, opt_time: 0.189 (s), beta: 4, C: 0.325, V: 0.072, U: 0.000, change: 0.020
+opt_iter: 102, opt_time: 0.19 (s), beta: 4, C: 0.312, V: 0.074, U: 0.000, change: 0.020
+opt_iter: 103, opt_time: 0.173 (s), beta: 4, C: 0.299, V: 0.076, U: 0.000, change: 0.020
+opt_iter: 104, opt_time: 0.203 (s), beta: 4, C: 0.286, V: 0.078, U: 0.000, change: 0.020
+opt_iter: 105, opt_time: 0.178 (s), beta: 4, C: 0.275, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 106, opt_time: 0.179 (s), beta: 4, C: 0.274, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 107, opt_time: 0.178 (s), beta: 4, C: 0.273, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 108, opt_time: 0.162 (s), beta: 4, C: 0.272, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 109, opt_time: 0.158 (s), beta: 4, C: 0.271, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 110: max |u| over all load cases = 1.074807e+00 m (1074.807276 mm)
+opt_iter: 110, opt_time: 0.171 (s), beta: 4, C: 0.270, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 111, opt_time: 0.16 (s), beta: 4, C: 0.270, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 112, opt_time: 0.148 (s), beta: 4, C: 0.269, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 113, opt_time: 0.179 (s), beta: 4, C: 0.269, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 114, opt_time: 0.17 (s), beta: 4, C: 0.268, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 115, opt_time: 0.157 (s), beta: 4, C: 0.268, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 116, opt_time: 0.159 (s), beta: 4, C: 0.267, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 117, opt_time: 0.169 (s), beta: 4, C: 0.267, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 118, opt_time: 0.167 (s), beta: 4, C: 0.266, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 119, opt_time: 0.153 (s), beta: 4, C: 0.266, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 120: max |u| over all load cases = 1.060550e+00 m (1060.549560 mm)
+opt_iter: 120, opt_time: 0.165 (s), beta: 4, C: 0.265, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 121, opt_time: 0.177 (s), beta: 4, C: 0.265, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 122, opt_time: 0.158 (s), beta: 4, C: 0.265, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 123, opt_time: 0.16 (s), beta: 4, C: 0.264, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 124, opt_time: 0.17 (s), beta: 4, C: 0.264, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 125, opt_time: 0.169 (s), beta: 4, C: 0.264, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 126, opt_time: 0.151 (s), beta: 4, C: 0.264, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 127, opt_time: 0.171 (s), beta: 4, C: 0.263, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 128, opt_time: 0.179 (s), beta: 4, C: 0.263, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 129, opt_time: 0.171 (s), beta: 4, C: 0.263, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 130: max |u| over all load cases = 1.048191e+00 m (1048.191145 mm)
+opt_iter: 130, opt_time: 0.154 (s), beta: 4, C: 0.263, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 131, opt_time: 0.167 (s), beta: 4, C: 0.262, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 132, opt_time: 0.166 (s), beta: 4, C: 0.262, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 133, opt_time: 0.151 (s), beta: 4, C: 0.262, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 134, opt_time: 0.163 (s), beta: 4, C: 0.262, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 135, opt_time: 0.166 (s), beta: 4, C: 0.261, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 136, opt_time: 0.171 (s), beta: 4, C: 0.261, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 137, opt_time: 0.157 (s), beta: 4, C: 0.261, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 138, opt_time: 0.171 (s), beta: 4, C: 0.261, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 139, opt_time: 0.162 (s), beta: 4, C: 0.261, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 140: max |u| over all load cases = 1.037181e+00 m (1037.181192 mm)
+opt_iter: 140, opt_time: 0.15 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 141, opt_time: 0.161 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 142, opt_time: 0.169 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 143, opt_time: 0.152 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 144, opt_time: 0.155 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 145, opt_time: 0.166 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 146, opt_time: 0.162 (s), beta: 4, C: 0.259, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 147, opt_time: 0.153 (s), beta: 4, C: 0.259, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 148, opt_time: 0.168 (s), beta: 4, C: 0.259, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 149, opt_time: 0.154 (s), beta: 4, C: 0.259, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 150: max |u| over all load cases = 8.687925e-01 m (868.792540 mm)
+opt_iter: 150, opt_time: 0.208 (s), beta: 8, C: 0.211, V: 0.074, U: 0.000, change: 0.020
+2026-07-30 14:19:51.405 (  28.128s) [    7FAB6FECD140]vtkXOpenGLRenderWindow.:1460  WARN| bad X server connection. DISPLAY=
+INFO:src.random_fields.kl_expansion:KL expansion cache hit: loading output/cache/kl_expansion/kl_7b7f32d923c29f6ec2ef5ea2.npz
+INFO:src.random_fields.kl_expansion:KL expansion loaded from cache: N_kl=37 modes (95.10% variance explained, threshold=95%)
+INFO:src.random_fields.threshold_transform:Initialized threshold marginal transform: eta in [0.250, 0.750], Beta(alpha=2.00, beta=2.00)
+INFO:src.topology.heaviside_projection_glue:RandomFieldHeaviside ready: N_kl=37, variance_explained=0.9510, n_local_dofs=417 matched to global KL nodes
+INFO:src.random_fields.threshold_transform:Initialized threshold marginal transform: eta in [0.250, 0.750], Beta(alpha=2.00, beta=2.00)
+INFO:src.topology.heaviside_projection_glue:RandomFieldHeaviside ready: N_kl=37, variance_explained=0.9510, n_local_dofs=1737 matched to global KL nodes
+INFO:src.optimization.dolfiny_mma_driver:Sample-parallelism enabled: 4 group(s) x 8 rank(s); each PCE/MC sample batch is split across groups and solved concurrently.
+INFO:src.sampling.sampler:Generated 8 'monte_carlo' samples in 37-dimensional KL coefficient space (seed=0)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.002 solve=0.955 sens=0.012
+INFO:src.surrogate.fea_at_samples:eta=0.049 proj=0.001 solve=1.248 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.32s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.027 proj=0.000 solve=0.725 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.002 solve=1.156 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.97s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.029 proj=0.001 solve=0.772 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.003 solve=1.220 sens=0.013
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.09s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.003 solve=0.720 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.029 proj=0.001 solve=1.127 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.93s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.002 solve=0.729 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.004 solve=1.150 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.96s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.001 solve=0.801 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.003 solve=1.146 sens=0.006
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.03s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.004 solve=0.748 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.007 solve=1.187 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.02s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.002 solve=0.737 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.000 solve=1.054 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.87s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.027 proj=0.000 solve=0.714 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.000 solve=1.046 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.84s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.000 solve=0.759 sens=0.012
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.004 solve=1.149 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.99s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.030 proj=0.000 solve=0.737 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.000 solve=1.107 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.94s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.006 solve=0.735 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.000 solve=1.058 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.88s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.027 proj=0.000 solve=0.804 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.006 solve=1.249 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.15s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.030 proj=0.000 solve=0.814 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.003 solve=1.191 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.10s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.005 solve=0.749 sens=0.006
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.009 solve=1.136 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.96s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.006 solve=0.700 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.009 solve=1.093 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.88s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.008 solve=0.752 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.002 solve=1.155 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.99s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.000 solve=0.735 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.007 solve=1.172 sens=0.006
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.98s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.000 solve=0.796 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.000 solve=1.281 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.16s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.004 solve=0.820 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.030 proj=0.000 solve=1.241 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.16s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.000 solve=0.769 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.010 solve=1.205 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.06s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.002 solve=0.753 sens=0.005
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.008 solve=1.199 sens=0.006
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.03s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.007 solve=0.726 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.006 solve=1.117 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.93s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.006 solve=0.734 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.007 solve=1.119 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.93s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.005 solve=0.755 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.012 solve=1.244 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.08s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.000 solve=0.801 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.003 solve=1.313 sens=0.011
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.21s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.003 solve=0.813 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.011 solve=1.264 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.17s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.000 solve=0.807 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.002 solve=1.257 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.15s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.010 solve=0.802 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.002 solve=1.250 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.15s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.007 solve=0.796 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.008 solve=1.266 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.15s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.011 solve=0.837 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.010 solve=1.346 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.27s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.005 solve=0.760 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.003 solve=1.175 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.02s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.006 solve=0.806 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.000 solve=1.168 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.06s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.001 solve=0.759 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.004 solve=1.215 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.06s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.003 solve=0.759 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.002 solve=1.239 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.08s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.002 solve=0.810 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.006 solve=1.217 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.11s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.000 solve=0.835 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.001 solve=1.245 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.16s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.027 proj=0.000 solve=0.787 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.001 solve=1.113 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.99s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.003 solve=0.752 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.004 solve=1.107 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.95s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.029 proj=0.001 solve=0.771 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.000 solve=1.264 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.13s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.003 solve=0.744 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.002 solve=1.212 sens=0.006
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.03s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.001 solve=0.772 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.001 solve=1.106 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.96s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.008 solve=0.755 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.000 solve=1.181 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.02s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.002 solve=0.772 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.001 solve=1.298 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.15s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.001 solve=0.723 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.000 solve=1.135 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.94s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.003 solve=0.743 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.001 solve=1.113 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.95s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.001 solve=0.747 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.002 solve=1.172 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.00s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.002 solve=0.755 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.003 solve=1.203 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.04s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.000 solve=0.829 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.001 solve=1.230 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.15s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.001 solve=0.706 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.000 solve=1.204 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.99s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.002 solve=0.751 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.000 solve=1.288 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.13s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.000 solve=0.762 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.003 solve=1.201 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.05s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.002 solve=0.799 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.002 solve=1.202 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.08s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.002 solve=0.748 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.001 solve=1.299 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.13s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.002 solve=0.762 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.008 solve=1.158 sens=0.011
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.01s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.010 solve=0.777 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.006 solve=1.222 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.08s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.002 solve=0.750 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.003 solve=1.145 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.98s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.006 solve=0.761 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.003 solve=1.185 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.03s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.002 solve=0.746 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.027 proj=0.000 solve=1.068 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.90s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.001 solve=0.721 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.001 solve=1.163 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.97s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.001 solve=0.776 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.000 solve=1.120 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.98s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.002 solve=0.764 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.000 solve=1.125 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.97s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.003 solve=0.807 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.002 solve=1.197 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.09s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.002 solve=0.819 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.002 solve=1.170 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.07s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.002 solve=0.719 sens=0.006
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.000 solve=1.088 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.88s for last batch)
+INFO:__main__:beta=32     seed=0  max=3.8035%  median=0.3490%  max|large-half=0.6011%  dEV=5.77e-05  worst-entry=2.92e-04  FAIL
+INFO:src.sampling.sampler:Generated 8 'monte_carlo' samples in 37-dimensional KL coefficient space (seed=1)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.001 solve=2.130 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.002 solve=2.017 sens=0.006
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.23s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.000 solve=2.196 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.006 solve=1.999 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.28s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.002 solve=2.178 sens=0.012
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.004 solve=2.029 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.29s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.002 solve=2.160 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.005 solve=2.032 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.27s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.003 solve=2.065 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.011 solve=2.072 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.22s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.029 proj=0.000 solve=2.283 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.004 solve=1.929 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.30s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.003 solve=2.135 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.002 solve=1.963 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.17s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.027 proj=0.001 solve=2.198 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.005 solve=2.123 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.41s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.027 proj=0.001 solve=2.304 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.006 solve=1.919 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.32s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.002 solve=2.126 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.002 solve=1.840 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.04s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.010 solve=2.233 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.004 solve=1.884 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.21s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.000 solve=2.318 sens=0.012
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.000 solve=2.009 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.41s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.001 solve=2.257 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.000 solve=1.898 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.24s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.001 solve=2.040 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.001 solve=2.127 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.26s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.000 solve=2.084 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.015 solve=2.079 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.26s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.001 solve=2.331 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.004 solve=2.034 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.46s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.001 solve=2.070 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.028 proj=0.001 solve=1.932 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.09s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.000 solve=2.129 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.001 solve=1.982 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.20s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.000 solve=2.175 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.009 solve=2.018 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.28s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.010 solve=2.054 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.005 solve=1.981 sens=0.011
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.13s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.005 solve=2.003 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.003 solve=1.828 sens=0.006
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.91s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.002 solve=1.903 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.000 solve=1.839 sens=0.006
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.82s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.000 solve=1.842 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.001 solve=1.808 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.74s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.000 solve=1.835 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.002 solve=1.725 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.64s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.027 proj=0.001 solve=2.026 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.001 solve=1.690 sens=0.006
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.79s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.000 solve=2.082 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.002 solve=2.053 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.21s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.000 solve=2.004 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.002 solve=1.845 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.93s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.004 solve=1.788 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.002 solve=2.044 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.91s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.001 solve=1.985 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.004 solve=1.947 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.01s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.001 solve=2.047 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.001 solve=1.926 sens=0.017
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.06s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.003 solve=1.999 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.005 solve=1.743 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.82s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.005 solve=2.351 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.005 solve=1.946 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.38s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.005 solve=2.102 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.006 solve=1.953 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.15s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.004 solve=2.044 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.007 solve=1.900 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.03s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.005 solve=2.093 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.011 solve=1.910 sens=0.016
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.11s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.008 solve=1.842 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.003 solve=1.979 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.90s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.010 solve=2.093 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.006 solve=2.193 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.38s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.004 solve=2.484 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.007 solve=2.163 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.74s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.006 solve=2.845 sens=0.035
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.011 solve=2.383 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (5.35s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.006 solve=2.308 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.007 solve=2.291 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.69s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.003 solve=2.568 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.007 solve=2.341 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (5.00s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.008 solve=2.562 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.006 solve=2.215 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.86s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.006 solve=2.165 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.006 solve=2.542 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.79s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.005 solve=2.148 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.000 solve=2.109 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.35s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.003 solve=2.549 sens=0.017
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.006 solve=2.191 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.84s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.003 solve=2.237 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.005 solve=2.458 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.78s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.001 solve=2.374 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.010 solve=2.150 sens=0.014
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.62s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.002 solve=2.384 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.002 solve=1.996 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.47s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.003 solve=2.036 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.004 solve=1.956 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.08s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.003 solve=2.278 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.006 solve=1.986 sens=0.033
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.39s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.003 solve=2.300 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.005 solve=2.086 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.47s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.004 solve=2.003 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.005 solve=2.163 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.25s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.001 solve=2.316 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.001 solve=2.470 sens=0.020
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.88s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.000 solve=2.466 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.002 solve=2.224 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.78s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.010 solve=2.048 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.000 solve=2.006 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.15s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.000 solve=1.971 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.000 solve=2.146 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.20s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.003 solve=2.191 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.000 solve=2.079 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.36s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.000 solve=2.118 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.000 solve=1.872 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.07s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.002 solve=2.314 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.008 solve=2.114 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.52s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.004 solve=2.206 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.002 solve=2.045 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.34s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.001 solve=2.119 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.007 solve=2.165 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.37s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.008 solve=2.320 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.010 solve=2.052 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.47s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.006 solve=2.246 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.003 solve=2.127 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.46s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.007 solve=2.187 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.007 solve=1.959 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.24s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.003 solve=2.073 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.004 solve=1.940 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.10s for last batch)
+INFO:__main__:beta=32     seed=1  max=2.3216%  median=0.2109%  max|large-half=0.3162%  dEV=2.98e-05  worst-entry=1.56e-04  FAIL
+INFO:src.sampling.sampler:Generated 8 'monte_carlo' samples in 37-dimensional KL coefficient space (seed=2)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.005 solve=2.555 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.001 solve=2.109 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.76s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.007 solve=2.654 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.007 solve=1.886 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.63s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.004 solve=2.578 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.005 solve=2.123 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.79s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.009 solve=2.612 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.011 solve=1.955 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.66s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.009 solve=2.479 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.004 solve=2.275 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.84s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.022 solve=2.839 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.001 solve=2.545 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (5.49s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.009 solve=2.541 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.008 solve=2.223 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.85s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.003 solve=2.434 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.008 solve=2.031 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.56s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.008 solve=2.403 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.003 solve=1.950 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.45s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.003 solve=2.299 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.000 solve=1.995 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.38s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.006 solve=2.789 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.007 solve=1.937 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.81s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.003 solve=2.311 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.002 solve=2.108 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.50s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.003 solve=2.385 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.000 solve=1.856 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.32s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.000 solve=2.364 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.008 solve=2.358 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.81s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.003 solve=2.640 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.000 solve=2.292 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (5.01s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.007 solve=2.862 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.009 solve=2.031 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (5.02s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.007 solve=2.674 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.007 solve=1.729 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.49s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.007 solve=2.354 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.003 solve=2.122 sens=0.014
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.57s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.015 solve=2.225 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.006 solve=2.141 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.47s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.009 solve=2.834 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.006 solve=2.023 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.95s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.003 solve=2.367 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.002 solve=2.034 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.49s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.005 solve=2.630 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.004 solve=2.015 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.73s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.008 solve=2.385 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.001 solve=1.859 sens=0.006
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.33s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.001 solve=2.388 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.027 proj=0.000 solve=1.844 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.32s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.001 solve=2.437 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.006 solve=1.765 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.28s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.008 solve=2.557 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.004 solve=1.829 sens=0.006
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.47s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.002 solve=2.277 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.003 solve=1.880 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.24s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.032 proj=0.000 solve=2.349 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.001 solve=1.953 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.40s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.002 solve=2.238 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.004 solve=1.971 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.29s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.004 solve=2.510 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.006 solve=1.978 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.57s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.005 solve=2.598 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.002 solve=1.999 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.69s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.003 solve=2.637 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.004 solve=2.027 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.76s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.003 solve=2.554 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.028 proj=0.000 solve=1.964 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.61s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.001 solve=2.533 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.004 solve=1.807 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.43s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.027 proj=0.001 solve=2.300 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.000 solve=1.963 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.34s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.003 solve=2.532 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.001 solve=1.904 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.52s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.007 solve=2.472 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.030 proj=0.000 solve=1.894 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.46s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.001 solve=2.419 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.002 solve=1.842 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.34s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.002 solve=2.551 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.002 solve=1.790 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.43s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.001 solve=2.455 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.003 solve=1.952 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.50s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.002 solve=2.419 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.000 solve=1.824 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.32s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.002 solve=2.488 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.000 solve=1.979 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.56s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.000 solve=2.661 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.002 solve=1.913 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.66s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.003 solve=2.720 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.001 solve=1.858 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.66s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.002 solve=2.621 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.001 solve=1.804 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.50s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.001 solve=2.258 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.002 solve=2.006 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.34s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.001 solve=2.581 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.000 solve=1.829 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.49s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.001 solve=2.626 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.001 solve=1.864 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.58s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.001 solve=2.689 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.028 proj=0.000 solve=1.812 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.59s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.001 solve=2.308 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.004 solve=1.915 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.31s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.005 solve=2.675 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.001 solve=1.909 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.67s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.000 solve=2.792 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.002 solve=1.858 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.73s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.028 proj=0.000 solve=2.587 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.002 solve=1.863 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.53s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.002 solve=2.552 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.004 solve=1.868 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.51s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.000 solve=2.459 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.001 solve=1.903 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.44s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.003 solve=2.638 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.001 solve=1.797 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.52s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.000 solve=2.506 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.006 solve=1.778 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.36s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.008 solve=2.542 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.006 solve=1.839 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.46s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.010 solve=2.398 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.009 solve=1.836 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.32s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.008 solve=2.379 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.027 proj=0.001 solve=1.854 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.33s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.008 solve=2.508 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.008 solve=2.222 sens=0.011
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.82s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.000 solve=2.431 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.002 solve=1.852 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.38s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.011 solve=2.362 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.013 solve=1.952 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.41s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.010 solve=2.405 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.005 solve=1.903 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.41s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.011 solve=2.519 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.005 solve=1.856 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.45s for last batch)
+INFO:__main__:beta=32     seed=2  max=0.5199%  median=0.0164%  max|large-half=0.0175%  dEV=1.20e-04  worst-entry=3.65e-04  FAIL
+INFO:src.sampling.sampler:Generated 8 'monte_carlo' samples in 37-dimensional KL coefficient space (seed=0)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.000 solve=0.893 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.000 solve=1.123 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.10s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.000 solve=0.816 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.000 solve=1.166 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.07s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.003 solve=0.812 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.000 solve=1.134 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.04s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.001 solve=0.788 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.001 solve=1.061 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.93s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.029 proj=0.001 solve=0.811 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.001 solve=1.167 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.07s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.027 proj=0.002 solve=0.788 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.006 solve=1.058 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.93s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.002 solve=0.744 sens=0.006
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.000 solve=1.112 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.93s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.001 solve=0.753 sens=0.006
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.001 solve=1.081 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.91s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.002 solve=0.748 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.001 solve=1.086 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.92s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.004 solve=0.856 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.001 solve=1.112 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.05s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.004 solve=0.770 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.000 solve=1.055 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.91s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.000 solve=0.769 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.001 solve=1.074 sens=0.006
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.92s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.009 solve=0.799 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.009 solve=1.028 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.92s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.009 solve=0.776 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.009 solve=1.078 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (1.94s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.009 solve=1.480 sens=0.006
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.015 solve=2.282 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.85s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.026 solve=1.466 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.004 solve=2.204 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.77s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.006 solve=1.480 sens=0.013
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.022 solve=2.076 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.66s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.028 solve=1.368 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.013 solve=2.015 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.49s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.016 solve=4.570 sens=0.047
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.028 solve=3.738 sens=0.024
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (8.68s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.040 proj=0.027 solve=2.085 sens=0.018
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.023 solve=3.642 sens=0.024
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (6.03s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.043 proj=0.003 solve=2.032 sens=0.020
+INFO:src.surrogate.fea_at_samples:eta=0.043 proj=0.004 solve=2.339 sens=0.032
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.71s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.042 proj=0.003 solve=1.266 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.041 proj=0.014 solve=2.791 sens=0.011
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.22s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.043 proj=0.003 solve=2.413 sens=0.024
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.009 solve=2.114 sens=0.024
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.78s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.031 proj=0.009 solve=2.187 sens=0.029
+INFO:src.surrogate.fea_at_samples:eta=0.038 proj=0.000 solve=2.642 sens=0.026
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (5.15s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.021 solve=1.959 sens=0.021
+INFO:src.surrogate.fea_at_samples:eta=0.044 proj=0.005 solve=2.347 sens=0.018
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.50s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.040 proj=0.002 solve=2.642 sens=0.014
+INFO:src.surrogate.fea_at_samples:eta=0.042 proj=0.003 solve=2.891 sens=0.023
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (5.71s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.030 proj=0.000 solve=1.654 sens=0.014
+INFO:src.surrogate.fea_at_samples:eta=0.034 proj=0.004 solve=2.713 sens=0.039
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.74s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.043 proj=0.004 solve=1.104 sens=0.012
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.022 solve=2.991 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.33s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.015 solve=1.734 sens=0.014
+INFO:src.surrogate.fea_at_samples:eta=0.042 proj=0.003 solve=2.369 sens=0.023
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.29s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.046 proj=0.005 solve=1.500 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.031 proj=0.012 solve=2.356 sens=0.034
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.08s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.044 proj=0.004 solve=1.738 sens=0.048
+INFO:src.surrogate.fea_at_samples:eta=0.049 proj=0.010 solve=2.447 sens=0.030
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.60s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.029 proj=0.010 solve=1.635 sens=0.022
+INFO:src.surrogate.fea_at_samples:eta=0.043 proj=0.003 solve=2.888 sens=0.028
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.73s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.026 solve=1.868 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.019 solve=2.630 sens=0.027
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.76s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.034 proj=0.013 solve=1.634 sens=0.028
+INFO:src.surrogate.fea_at_samples:eta=0.029 proj=0.004 solve=2.150 sens=0.011
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.97s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.044 proj=0.004 solve=1.113 sens=0.018
+INFO:src.surrogate.fea_at_samples:eta=0.039 proj=0.008 solve=1.732 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.01s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.039 proj=0.000 solve=1.388 sens=0.014
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.003 solve=1.845 sens=0.024
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.39s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.025 solve=1.279 sens=0.046
+INFO:src.surrogate.fea_at_samples:eta=0.031 proj=0.001 solve=2.265 sens=0.038
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.78s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.031 proj=0.022 solve=2.003 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.006 solve=1.605 sens=0.014
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.76s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.020 solve=1.937 sens=0.012
+INFO:src.surrogate.fea_at_samples:eta=0.030 proj=0.013 solve=1.863 sens=0.014
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.99s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.016 solve=2.562 sens=0.030
+INFO:src.surrogate.fea_at_samples:eta=0.043 proj=0.005 solve=2.275 sens=0.014
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (5.08s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.024 solve=1.585 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.019 solve=1.597 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.33s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.012 solve=1.824 sens=0.028
+INFO:src.surrogate.fea_at_samples:eta=0.047 proj=0.013 solve=2.274 sens=0.023
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.31s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.054 proj=0.000 solve=1.134 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.004 solve=1.786 sens=0.023
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.12s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.033 proj=0.007 solve=1.943 sens=0.014
+INFO:src.surrogate.fea_at_samples:eta=0.031 proj=0.003 solve=2.292 sens=0.023
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.43s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.038 proj=0.006 solve=2.255 sens=0.037
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.030 solve=2.930 sens=0.037
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (5.51s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.031 solve=2.043 sens=0.021
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.005 solve=2.134 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.34s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.013 solve=1.992 sens=0.025
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.054 solve=3.520 sens=0.021
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (5.84s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.008 solve=1.217 sens=0.013
+INFO:src.surrogate.fea_at_samples:eta=0.028 proj=0.011 solve=1.969 sens=0.026
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.34s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.043 proj=0.002 solve=1.805 sens=0.027
+INFO:src.surrogate.fea_at_samples:eta=0.030 proj=0.004 solve=1.783 sens=0.015
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.77s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.018 solve=0.939 sens=0.037
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.024 solve=2.144 sens=0.024
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.35s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.002 solve=2.525 sens=0.025
+INFO:src.surrogate.fea_at_samples:eta=0.036 proj=0.014 solve=2.389 sens=0.020
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (5.16s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.008 solve=0.968 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.000 solve=2.146 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.20s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.038 proj=0.008 solve=1.367 sens=0.022
+INFO:src.surrogate.fea_at_samples:eta=0.034 proj=0.000 solve=2.415 sens=0.016
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.96s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.074 proj=0.003 solve=2.683 sens=0.029
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.054 solve=2.048 sens=0.015
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (5.15s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.049 proj=0.012 solve=1.887 sens=0.036
+INFO:src.surrogate.fea_at_samples:eta=0.029 proj=0.010 solve=1.877 sens=0.014
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.97s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.040 solve=2.034 sens=0.020
+INFO:src.surrogate.fea_at_samples:eta=0.029 proj=0.005 solve=3.482 sens=0.032
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (5.75s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.040 solve=1.910 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.023 solve=2.706 sens=0.030
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.98s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.032 proj=0.011 solve=1.658 sens=0.018
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.002 solve=2.811 sens=0.016
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.62s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.042 proj=0.002 solve=2.182 sens=0.020
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.025 solve=2.414 sens=0.026
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.81s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.049 proj=0.007 solve=2.236 sens=0.021
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.047 solve=3.496 sens=0.014
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (6.04s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.025 solve=1.413 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.026 solve=1.623 sens=0.014
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.20s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.009 solve=1.777 sens=0.022
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.010 solve=1.901 sens=0.021
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.86s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.038 proj=0.002 solve=1.523 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.049 proj=0.013 solve=3.224 sens=0.030
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.94s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.038 proj=0.012 solve=1.849 sens=0.022
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.007 solve=2.398 sens=0.021
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.51s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.030 proj=0.009 solve=2.565 sens=0.031
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.025 solve=2.650 sens=0.028
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (5.53s for last batch)
+INFO:__main__:beta=64     seed=0  max=10.6418%  median=0.7088%  max|large-half=2.1101%  dEV=2.63e-04  worst-entry=3.61e-04  FAIL
+INFO:src.sampling.sampler:Generated 8 'monte_carlo' samples in 37-dimensional KL coefficient space (seed=1)
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.024 solve=6.395 sens=0.036
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.013 solve=4.898 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.45s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.019 solve=6.239 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.022 solve=5.952 sens=0.013
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (12.40s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.030 proj=0.006 solve=5.629 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.005 solve=6.308 sens=0.015
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (12.05s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.047 proj=0.014 solve=6.657 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.000 solve=4.629 sens=0.016
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.50s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.002 solve=5.423 sens=0.018
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.016 solve=6.450 sens=0.015
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (12.06s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.011 solve=5.653 sens=0.013
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.007 solve=3.671 sens=0.021
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (9.46s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.026 solve=6.958 sens=0.042
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.052 solve=6.732 sens=0.016
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (14.05s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.032 proj=0.011 solve=5.638 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.003 solve=5.736 sens=0.035
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.57s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.042 proj=0.001 solve=4.367 sens=0.030
+INFO:src.surrogate.fea_at_samples:eta=0.031 proj=0.009 solve=6.691 sens=0.026
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.34s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.038 proj=0.009 solve=5.359 sens=0.021
+INFO:src.surrogate.fea_at_samples:eta=0.049 proj=0.005 solve=6.519 sens=0.031
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (12.19s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.067 proj=0.013 solve=5.850 sens=0.034
+INFO:src.surrogate.fea_at_samples:eta=0.035 proj=0.008 solve=5.888 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.98s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.040 solve=6.625 sens=0.021
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.017 solve=6.462 sens=0.020
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (13.34s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.058 solve=4.937 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.040 proj=0.004 solve=5.074 sens=0.015
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (10.21s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.053 proj=0.003 solve=5.441 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.001 solve=6.632 sens=0.027
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (12.24s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.028 proj=0.014 solve=5.824 sens=0.017
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.008 solve=7.719 sens=0.042
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (13.80s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.044 proj=0.005 solve=8.276 sens=0.014
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.010 solve=6.656 sens=0.015
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (15.09s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.026 solve=6.176 sens=0.013
+INFO:src.surrogate.fea_at_samples:eta=0.033 proj=0.000 solve=5.453 sens=0.015
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.78s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.033 proj=0.066 solve=6.665 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.043 proj=0.004 solve=7.922 sens=0.034
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (14.90s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.021 solve=7.219 sens=0.028
+INFO:src.surrogate.fea_at_samples:eta=0.042 proj=0.014 solve=6.648 sens=0.025
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (14.22s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.006 solve=6.620 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.034 proj=0.009 solve=3.983 sens=0.033
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (10.74s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.046 proj=0.010 solve=5.046 sens=0.026
+INFO:src.surrogate.fea_at_samples:eta=0.043 proj=0.003 solve=6.513 sens=0.015
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.83s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.005 solve=6.672 sens=0.023
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.029 solve=5.836 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (12.65s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.051 proj=0.000 solve=4.569 sens=0.028
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.036 solve=7.515 sens=0.024
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (12.31s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.040 solve=4.663 sens=0.031
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.024 solve=7.085 sens=0.032
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.99s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.030 proj=0.013 solve=5.916 sens=0.038
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.009 solve=5.897 sens=0.011
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.99s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.009 solve=5.477 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.042 proj=0.004 solve=7.871 sens=0.024
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (13.63s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.050 proj=0.000 solve=5.912 sens=0.029
+INFO:src.surrogate.fea_at_samples:eta=0.053 proj=0.009 solve=4.283 sens=0.024
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (10.44s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.043 proj=0.004 solve=4.598 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.043 proj=0.004 solve=5.216 sens=0.021
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (10.05s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.022 solve=7.160 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.002 solve=6.633 sens=0.024
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (13.96s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.044 proj=0.003 solve=5.144 sens=0.017
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.024 solve=6.960 sens=0.015
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (12.30s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.032 proj=0.011 solve=5.956 sens=0.014
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.022 solve=5.616 sens=0.032
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.86s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.030 solve=5.924 sens=0.019
+INFO:src.surrogate.fea_at_samples:eta=0.046 proj=0.007 solve=6.418 sens=0.017
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (12.58s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.014 solve=6.297 sens=0.031
+INFO:src.surrogate.fea_at_samples:eta=0.058 proj=0.000 solve=5.783 sens=0.018
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (12.33s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.041 proj=0.002 solve=7.212 sens=0.040
+INFO:src.surrogate.fea_at_samples:eta=0.056 proj=0.013 solve=6.442 sens=0.031
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (13.90s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.035 solve=5.439 sens=0.017
+INFO:src.surrogate.fea_at_samples:eta=0.051 proj=0.008 solve=6.562 sens=0.043
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (12.24s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.028 solve=5.760 sens=0.014
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.002 solve=6.302 sens=0.024
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (12.30s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.042 proj=0.003 solve=6.576 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.052 proj=0.017 solve=5.005 sens=0.014
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.81s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.042 proj=0.013 solve=5.520 sens=0.033
+INFO:src.surrogate.fea_at_samples:eta=0.038 proj=0.000 solve=5.939 sens=0.013
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.78s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.051 proj=0.005 solve=4.728 sens=0.024
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.017 solve=6.980 sens=0.018
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.98s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.054 proj=0.014 solve=5.928 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.003 solve=6.168 sens=0.013
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (12.25s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.023 solve=4.875 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.033 solve=6.159 sens=0.016
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.27s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.038 proj=0.007 solve=5.909 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.002 solve=5.363 sens=0.015
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.45s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.030 proj=0.018 solve=6.681 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.022 solve=5.541 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (12.37s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.038 proj=0.017 solve=5.948 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.011 solve=5.872 sens=0.029
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (12.09s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.048 proj=0.012 solve=7.138 sens=0.021
+INFO:src.surrogate.fea_at_samples:eta=0.034 proj=0.002 solve=5.885 sens=0.022
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (13.21s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.036 solve=6.244 sens=0.020
+INFO:src.surrogate.fea_at_samples:eta=0.043 proj=0.004 solve=5.733 sens=0.015
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (12.20s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.045 proj=0.003 solve=4.580 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.044 proj=0.005 solve=5.472 sens=0.016
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (10.24s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.034 proj=0.025 solve=6.343 sens=0.014
+INFO:src.surrogate.fea_at_samples:eta=0.043 proj=0.004 solve=7.620 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (14.16s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.052 proj=0.004 solve=5.871 sens=0.029
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.025 solve=7.459 sens=0.026
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (13.60s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.016 solve=6.146 sens=0.035
+INFO:src.surrogate.fea_at_samples:eta=0.028 proj=0.000 solve=5.199 sens=0.014
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.70s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.026 solve=5.716 sens=0.020
+INFO:src.surrogate.fea_at_samples:eta=0.039 proj=0.001 solve=4.102 sens=0.012
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (10.04s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.011 solve=5.804 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.043 proj=0.004 solve=5.396 sens=0.020
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.47s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.043 proj=0.004 solve=6.445 sens=0.013
+INFO:src.surrogate.fea_at_samples:eta=0.031 proj=0.008 solve=6.133 sens=0.018
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (12.75s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.017 solve=6.300 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.044 solve=6.242 sens=0.030
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (12.77s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.018 solve=6.218 sens=0.014
+INFO:src.surrogate.fea_at_samples:eta=0.043 proj=0.012 solve=5.151 sens=0.014
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.57s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.035 solve=6.183 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.042 proj=0.003 solve=5.475 sens=0.024
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.95s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.050 proj=0.011 solve=4.454 sens=0.060
+INFO:src.surrogate.fea_at_samples:eta=0.032 proj=0.010 solve=5.789 sens=0.031
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (10.57s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.066 proj=0.008 solve=6.710 sens=0.023
+INFO:src.surrogate.fea_at_samples:eta=0.051 proj=0.001 solve=5.167 sens=0.019
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (12.15s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.038 solve=5.690 sens=0.030
+INFO:src.surrogate.fea_at_samples:eta=0.028 proj=0.024 solve=5.355 sens=0.034
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.32s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.059 proj=0.006 solve=4.903 sens=0.014
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.004 solve=4.079 sens=0.016
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (9.14s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.016 solve=7.402 sens=0.020
+INFO:src.surrogate.fea_at_samples:eta=0.061 proj=0.001 solve=5.825 sens=0.032
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (13.56s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.039 proj=0.012 solve=6.755 sens=0.032
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.000 solve=6.053 sens=0.029
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (13.05s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.042 proj=0.006 solve=5.747 sens=0.027
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.018 solve=6.947 sens=0.033
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (13.03s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.043 proj=0.012 solve=7.618 sens=0.022
+INFO:src.surrogate.fea_at_samples:eta=0.054 proj=0.000 solve=6.325 sens=0.018
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (14.28s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.006 solve=6.057 sens=0.013
+INFO:src.surrogate.fea_at_samples:eta=0.047 proj=0.008 solve=8.404 sens=0.019
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (14.63s for last batch)
+INFO:__main__:beta=64     seed=1  max=9.6510%  median=0.3756%  max|large-half=1.6812%  dEV=5.71e-05  worst-entry=1.79e-04  FAIL
+INFO:src.sampling.sampler:Generated 8 'monte_carlo' samples in 37-dimensional KL coefficient space (seed=2)
+INFO:src.surrogate.fea_at_samples:eta=0.054 proj=0.008 solve=10.024 sens=0.042
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.001 solve=8.276 sens=0.027
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (18.54s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.045 proj=0.014 solve=8.634 sens=0.017
+INFO:src.surrogate.fea_at_samples:eta=0.062 proj=0.013 solve=10.367 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (19.19s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.031 proj=0.020 solve=6.640 sens=0.029
+INFO:src.surrogate.fea_at_samples:eta=0.045 proj=0.011 solve=11.270 sens=0.016
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (18.11s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.041 proj=0.003 solve=10.244 sens=0.026
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.014 solve=7.622 sens=0.013
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (18.08s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.034 proj=0.020 solve=10.540 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.044 proj=0.004 solve=11.401 sens=0.021
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (22.12s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.043 proj=0.004 solve=7.086 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.069 proj=0.002 solve=11.263 sens=0.020
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (18.63s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.044 proj=0.005 solve=10.831 sens=0.051
+INFO:src.surrogate.fea_at_samples:eta=0.042 proj=0.012 solve=13.596 sens=0.056
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (24.89s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.018 solve=9.237 sens=0.040
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.026 solve=12.068 sens=0.016
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (21.57s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.045 proj=0.003 solve=10.490 sens=0.026
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.027 solve=10.328 sens=0.039
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (21.20s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.034 proj=0.028 solve=9.649 sens=0.019
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.009 solve=7.420 sens=0.011
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (17.30s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.053 solve=8.969 sens=0.018
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.024 solve=11.252 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (20.49s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.004 solve=7.258 sens=0.014
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.028 solve=10.464 sens=0.017
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (18.04s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.020 solve=6.628 sens=0.028
+INFO:src.surrogate.fea_at_samples:eta=0.045 proj=0.004 solve=10.079 sens=0.025
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (16.96s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.036 proj=0.004 solve=9.099 sens=0.017
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.009 solve=11.679 sens=0.012
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (20.92s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.040 proj=0.012 solve=8.619 sens=0.021
+INFO:src.surrogate.fea_at_samples:eta=0.040 proj=0.018 solve=9.994 sens=0.038
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (18.94s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.003 solve=9.266 sens=0.019
+INFO:src.surrogate.fea_at_samples:eta=0.055 proj=0.003 solve=11.519 sens=0.017
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (21.02s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.040 solve=7.618 sens=0.027
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.008 solve=4.379 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (12.24s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.004 solve=3.129 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.027 proj=0.000 solve=3.058 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (6.28s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.003 solve=3.160 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.001 solve=2.837 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (6.09s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.001 solve=3.044 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.001 solve=2.834 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (5.97s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.003 solve=3.252 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.028 proj=0.000 solve=2.646 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (5.99s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.000 solve=3.219 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.003 solve=2.884 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (6.19s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.005 solve=3.306 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.000 solve=2.918 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (6.32s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.028 proj=0.001 solve=3.176 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.001 solve=2.933 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (6.20s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.009 solve=3.406 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.008 solve=2.738 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (6.23s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.011 solve=3.104 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.006 solve=2.919 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (6.11s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.002 solve=3.093 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.008 solve=2.778 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (5.95s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.003 solve=2.837 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.014 solve=2.731 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (5.66s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.001 solve=2.869 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.001 solve=2.782 sens=0.006
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (5.72s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.008 solve=2.917 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.005 solve=2.793 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (5.79s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.008 solve=2.960 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.001 solve=2.904 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (5.95s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.009 solve=3.190 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.003 solve=2.863 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (6.14s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.000 solve=3.138 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.003 solve=2.711 sens=0.006
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (5.93s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.000 solve=2.799 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.004 solve=2.851 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (5.74s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.003 solve=2.953 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.008 solve=2.954 sens=0.006
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (5.98s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.005 solve=3.067 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.010 solve=3.118 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (6.27s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.010 solve=3.079 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.002 solve=2.777 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (5.95s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.027 proj=0.000 solve=2.850 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.001 solve=2.641 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (5.57s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.002 solve=2.904 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.009 solve=2.965 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (5.95s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.010 solve=3.069 sens=0.006
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.004 solve=2.778 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (5.92s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.007 solve=3.108 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.006 solve=2.779 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (5.97s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.007 solve=3.099 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.002 solve=3.050 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (6.24s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.002 solve=3.090 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.005 solve=3.052 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (6.24s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.007 solve=3.143 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.003 solve=2.894 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (6.12s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.004 solve=3.247 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.003 solve=2.954 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (6.29s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.001 solve=2.964 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.005 solve=2.951 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (6.00s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.003 solve=5.734 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.013 solve=5.667 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.51s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.012 solve=8.073 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.019 solve=5.494 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (13.68s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.009 solve=6.962 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.018 solve=6.145 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (13.22s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.012 solve=7.183 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.002 solve=6.452 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (13.73s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.007 solve=7.036 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.014 solve=5.716 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (12.84s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.016 solve=6.764 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.011 solve=5.692 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (12.55s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.029 solve=7.064 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.005 solve=5.208 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (12.38s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.018 solve=6.436 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.014 solve=4.983 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.54s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.011 solve=6.128 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.004 solve=4.703 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (10.92s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.012 solve=5.838 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.012 solve=5.201 sens=0.006
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.13s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.015 solve=5.591 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.010 solve=4.988 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (10.67s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.011 solve=5.350 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.013 solve=5.082 sens=0.006
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (10.52s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.014 solve=5.876 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.012 solve=4.958 sens=0.011
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (10.93s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.019 solve=6.026 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.030 solve=4.806 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (10.95s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.009 solve=6.104 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.010 solve=4.901 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.11s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.019 solve=6.194 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.017 solve=5.029 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.34s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.024 solve=6.734 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.019 solve=4.635 sens=0.013
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.50s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.012 solve=6.967 sens=0.013
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.013 solve=4.731 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.82s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.019 solve=6.601 sens=0.013
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.010 solve=4.588 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.32s for last batch)
+INFO:__main__:beta=64     seed=2  max=0.6269%  median=0.1454%  max|large-half=0.2863%  dEV=5.89e-05  worst-entry=7.44e-04  FAIL
+INFO:src.sampling.sampler:Generated 8 'monte_carlo' samples in 37-dimensional KL coefficient space (seed=0)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.014 solve=1.689 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.003 solve=1.863 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.65s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.017 solve=1.822 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.000 solve=1.986 sens=0.014
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.92s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.017 solve=1.726 sens=0.018
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.012 solve=1.926 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.77s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.013 solve=1.650 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.016 solve=2.066 sens=0.015
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.83s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.013 solve=1.878 sens=0.019
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.013 solve=2.034 sens=0.011
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.05s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.015 solve=1.682 sens=0.019
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.031 solve=2.032 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.86s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.011 solve=1.753 sens=0.022
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.034 solve=1.962 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.86s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.014 solve=1.585 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.011 solve=1.907 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.60s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.007 solve=1.700 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.012 solve=1.976 sens=0.011
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.77s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.020 solve=1.778 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.022 solve=1.968 sens=0.011
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.87s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.026 solve=1.773 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.019 solve=1.905 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.79s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.006 solve=1.860 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.013 solve=2.233 sens=0.011
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.19s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.018 solve=1.819 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.035 solve=2.100 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.05s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.018 solve=1.957 sens=0.014
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.017 solve=2.103 sens=0.012
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.18s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.013 solve=1.702 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.010 solve=1.859 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.67s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.008 solve=1.917 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.014 solve=2.260 sens=0.017
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.30s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.015 solve=1.808 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.025 solve=2.045 sens=0.020
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.99s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.023 solve=1.809 sens=0.026
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.038 solve=2.038 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.00s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.013 solve=1.723 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.032 solve=2.032 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.89s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.019 solve=1.834 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.026 solve=2.099 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (4.04s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.013 solve=1.446 sens=0.012
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.009 solve=1.658 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.19s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.017 solve=1.416 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.016 solve=1.594 sens=0.011
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.11s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.007 solve=1.356 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.016 solve=1.468 sens=0.012
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (2.93s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.018 solve=1.254 sens=0.005
+INFO:src.surrogate.fea_at_samples:eta=0.013 proj=0.004 solve=1.704 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.04s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.014 solve=1.484 sens=0.006
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.011 solve=1.726 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.31s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.020 solve=1.382 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.006 solve=1.708 sens=0.006
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.18s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.007 solve=1.383 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.003 solve=1.649 sens=0.012
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.11s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.016 solve=1.479 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.017 solve=1.735 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.32s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.014 solve=1.541 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.011 solve=1.728 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.38s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.018 solve=1.716 sens=0.014
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.025 solve=1.873 sens=0.016
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.73s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.017 solve=1.692 sens=0.006
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.022 solve=1.896 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.69s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.024 solve=1.743 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.005 solve=1.922 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.76s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.012 solve=1.667 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.004 solve=1.864 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.61s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.012 solve=1.662 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.007 solve=1.923 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.66s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.031 solve=1.589 sens=0.012
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.021 solve=1.957 sens=0.011
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.68s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.008 solve=1.659 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.015 solve=1.803 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.55s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.016 solve=1.656 sens=0.014
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.015 solve=1.779 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.55s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.009 solve=1.514 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.004 solve=1.691 sens=0.006
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.28s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.009 solve=1.467 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.011 solve=1.643 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.20s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.017 solve=1.666 sens=0.006
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.005 solve=1.905 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.65s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.025 solve=1.753 sens=0.012
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.019 solve=1.987 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.86s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.019 solve=1.775 sens=0.013
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.015 solve=1.934 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.84s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.006 solve=1.696 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.025 solve=2.031 sens=0.014
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.86s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.007 solve=1.877 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.017 solve=1.991 sens=0.012
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.98s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.020 solve=1.614 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.008 solve=1.829 sens=0.013
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.57s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.019 solve=1.557 sens=0.012
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.026 solve=1.977 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.66s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.011 solve=1.635 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.014 solve=1.993 sens=0.016
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.75s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.028 solve=1.770 sens=0.013
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.013 solve=1.971 sens=0.015
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.87s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.013 solve=1.812 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.010 solve=1.973 sens=0.013
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.90s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.012 solve=1.793 sens=0.012
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.019 solve=1.972 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.87s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.017 solve=1.505 sens=0.005
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.016 solve=1.849 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.45s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.011 solve=1.673 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.010 solve=1.878 sens=0.011
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.66s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.011 solve=1.700 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.016 solve=1.798 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.60s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.010 solve=1.593 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.022 solve=1.818 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.53s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.009 solve=1.583 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.001 solve=1.695 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.37s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.019 solve=1.633 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.022 solve=1.749 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.50s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.018 solve=1.479 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.015 solve=1.746 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.33s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.017 solve=1.732 sens=0.006
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.019 solve=1.882 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.71s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.017 solve=1.714 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.017 solve=2.160 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.99s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.025 solve=1.649 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.010 solve=1.773 sens=0.017
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.55s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.011 solve=1.577 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.013 solve=1.846 sens=0.016
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.54s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.013 solve=1.514 sens=0.005
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.010 solve=1.878 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.49s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.012 solve=1.537 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.009 solve=1.871 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.51s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.009 solve=1.481 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.011 solve=1.760 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.33s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.004 solve=1.359 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.004 solve=1.592 sens=0.006
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (3.03s for last batch)
+INFO:__main__:beta=128    seed=0  max=14.8110%  median=1.7641%  max|large-half=3.0362%  dEV=8.50e-05  worst-entry=2.51e-04  FAIL
+INFO:src.sampling.sampler:Generated 8 'monte_carlo' samples in 37-dimensional KL coefficient space (seed=1)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.006 solve=5.241 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.016 solve=4.603 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (9.96s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.013 solve=6.386 sens=0.013
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.020 solve=4.574 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.09s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.012 solve=6.753 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.007 solve=4.153 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.00s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.014 solve=6.558 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.014 solve=4.400 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.07s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.027 solve=6.435 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.008 solve=4.879 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (11.41s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.006 solve=5.575 sens=0.005
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.006 solve=3.923 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (9.57s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.013 solve=5.726 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.016 solve=4.167 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (10.01s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.023 solve=5.968 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.019 solve=4.140 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (10.22s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.017 solve=6.258 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.010 solve=4.068 sens=0.014
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (10.43s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.019 solve=6.034 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.013 solve=4.016 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (10.15s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.011 solve=6.305 sens=0.006
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.009 solve=4.135 sens=0.005
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (10.53s for last batch)
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.006 solve=5.625 sens=0.006
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.007 solve=3.817 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 2/2 solves (9.53s for last batch)

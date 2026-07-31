@@ -32,20 +32,23 @@ so that a ParaView Threshold of `occurrence_likelihood > 0.5` reads literally
 as "show me only the more-likely-than-median half of the deformation modes",
 and `occurrence_likelihood < 0.05` isolates the 5% rare/extreme tail.
 
-FADING THE UNLIKELY LAYERS OUT (`opacity`)
-------------------------------------------
-Every surface also carries a ready-to-render alpha,
+FADING THE STIFFNESS TAILS OUT (`opacity`)
+-------------------------------------------
+Every surface also carries a ready-to-render alpha, driven by compliance_z
+(the sample's compliance in standard-deviation units, so it is centered at 0
+and two-sided unlike occurrence_likelihood):
 
-    opacity = lo + (hi - lo) * occurrence_likelihood ** gamma
+    opacity = hi - (hi - lo) * min(|compliance_z| / z_cap, 1) ** gamma
 
-(defaults lo=0.02, hi=0.30, gamma=1). Because occurrence_likelihood is uniform
-on [0, 1] by construction, this spreads the ensemble evenly across the alpha
-band instead of piling it up at one end: the typical, near-nominal geometries
-render solid and the rare, far-out ones fade to nearly nothing, so the cloud
-reads as a dense core with a wispy envelope rather than 100 equal shells. Drive
-it in ParaView with the representation's **Use Separate Opacity Array** ->
-`opacity` (viz/make_paraview_state.py does this for you), with the colour map's
-"Enable opacity mapping for surfaces" ticked and an identity opacity ramp.
+(defaults lo=0.02, hi=0.30, gamma=1, z_cap=3). A sample with typical
+compliance (z near 0) renders solid; a sample in either tail -- unusually
+stiff (z <~ -3) or unusually soft (z >~ +3) -- fades toward `lo`, and
+anything beyond +/- z_cap is clamped at `lo`. The cloud reads as a dense
+core of typical-compliance geometries with both extremes fraying out
+symmetrically. Drive it in ParaView with the representation's **Use Separate
+Opacity Array** -> `opacity` (viz/make_paraview_state.py does this for you),
+with the colour map's "Enable opacity mapping for surfaces" ticked and an
+identity opacity ramp.
 
 This is NOT `opacity_weight`/`log10_opacity_weight`, which are the raw
 exp(-0.5||xi||^2) and are unusable as alpha for the reason given above; those
@@ -122,6 +125,7 @@ Run (plain python, needs numpy/scipy/pyvista -- no dolfinx, no MPI):
     python viz/build_cloud_index.py --deviation-scale 0.5  # damp them instead
     python viz/build_cloud_index.py -k 10 --opacity-gamma 2  # fade the tails harder
     python viz/build_cloud_index.py --opacity-range 0.01 0.5 # stronger contrast
+    python viz/build_cloud_index.py --opacity-z-cap 2        # fully faded by +/-2 sigma
 """
 from __future__ import annotations
 
@@ -148,10 +152,17 @@ _CLOUD_ARRAYS = (
     "is_tail_95",
 )
 
-# Default alpha for the rarest / most-deviated realization and for the most
-# typical one. 100 stacked layers at 0.3 read as a near-solid core that frays
-# outward, which is exactly the picture: the typical part is where the mass is.
+# Default alpha for the compliance-tail realizations and for typical-compliance
+# ones. 100 stacked layers at 0.3 read as a near-solid core that frays outward
+# in both directions, which is exactly the picture: the typical part is where
+# the mass is, and both the stiff and the soft tails should recede equally.
 _OPACITY_LO, _OPACITY_HI = 0.02, 0.30
+
+# |compliance_z| at and beyond which a sample is fully faded to _OPACITY_LO.
+# 3 sigma is "essentially the whole distribution" for a roughly normal
+# compliance_z, so this is where the ramp bottoms out rather than continuing
+# to fade arbitrarily far into the tail.
+_OPACITY_Z_CAP = 3.0
 
 # The nodal array every ensemble .vtu carries (written by
 # monte_carlo.run_monte_carlo_validation as point_data["density"]).
@@ -327,7 +338,8 @@ def build_surfaces(table: np.ndarray, ensemble_dir: Path, out_dir: Path,
                    deviation_scale: float = 1.0,
                    reference: str = "mean",
                    opacity_range: tuple[float, float] = (_OPACITY_LO, _OPACITY_HI),
-                   opacity_gamma: float = 1.0) -> None:
+                   opacity_gamma: float = 1.0,
+                   opacity_z_cap: float = _OPACITY_Z_CAP) -> None:
     """Contour each sample at rho = `iso` and tag it with its scalars.
 
     The rho = 0.5 level set IS the manufactured boundary of that realization,
@@ -341,10 +353,12 @@ def build_surfaces(table: np.ndarray, ensemble_dir: Path, out_dir: Path,
     tables and the likelihood ordering are untouched by it; only the geometry
     of the emitted surfaces changes.
 
-    `opacity_range` / `opacity_gamma` set the per-surface `opacity` array that
-    fades the rare, far-from-nominal layers out; also module docstring.
+    `opacity_range` / `opacity_gamma` / `opacity_z_cap` set the per-surface
+    `opacity` array that fades the compliance tails out symmetrically about
+    compliance_z = 0; also module docstring.
     """
     op_lo, op_hi = float(opacity_range[0]), float(opacity_range[1])
+    op_z_cap = float(opacity_z_cap)
     surf_dir = out_dir / "surfaces"
     surf_dir.mkdir(parents=True, exist_ok=True)
 
@@ -370,7 +384,8 @@ def build_surfaces(table: np.ndarray, ensemble_dir: Path, out_dir: Path,
             print(f"  reference surface: {out_dir / 'reference_surface.vtp'}")
         del probe
 
-    print(f"  opacity ramp: rare={op_lo:g} -> typical={op_hi:g} "
+    print(f"  opacity ramp: |compliance_z|=0 -> {op_hi:g}, "
+          f"|compliance_z|>={opacity_z_cap:g} -> {op_lo:g} "
           f"(gamma={opacity_gamma:g}), baked in as point array 'opacity'")
 
     max_dev = 0.0
@@ -405,9 +420,12 @@ def build_surfaces(table: np.ndarray, ensemble_dir: Path, out_dir: Path,
         # Travels with the geometry so an exaggerated figure can never be
         # mistaken for a true-scale one.
         surf.point_data["deviation_scale"] = np.full(n_pts, float(deviation_scale))
-        # Ready-to-render alpha: typical geometries solid, rare ones nearly
-        # invisible. row[3] is occurrence_likelihood, uniform on [0, 1].
-        alpha = op_lo + (op_hi - op_lo) * float(row[3]) ** opacity_gamma
+        # Ready-to-render alpha: typical-compliance geometries (z near 0)
+        # solid, both compliance tails (z <~ -z_cap or z >~ +z_cap) nearly
+        # invisible. row[9] is compliance_z, which is two-sided by
+        # construction -- unlike occurrence_likelihood this needs abs().
+        z_frac = min(abs(float(row[9])) / op_z_cap, 1.0)
+        alpha = op_hi - (op_hi - op_lo) * z_frac ** opacity_gamma
         surf.point_data["opacity"] = np.full(n_pts, alpha)
 
         path = surf_dir / f"sample_{i:05d}.vtp"
@@ -476,17 +494,24 @@ def main() -> None:
                          "realization), or a sample index. Only used when "
                          "--deviation-scale != 1.")
     ap.add_argument("--opacity-range", type=float, nargs=2,
-                    metavar=("RARE", "TYPICAL"),
+                    metavar=("TAIL", "TYPICAL"),
                     default=[_OPACITY_LO, _OPACITY_HI],
                     help="alpha baked into the per-surface 'opacity' array for "
-                         "the rarest and the most typical realization "
-                         f"(default {_OPACITY_LO} {_OPACITY_HI}). RARE < "
-                         "TYPICAL makes far-out deviations fade; swap them to "
-                         "highlight the tails instead.")
+                         "a compliance-tail realization (|compliance_z| >= "
+                         "opacity-z-cap) and for a typical one (compliance_z "
+                         f"~= 0) (default {_OPACITY_LO} {_OPACITY_HI}). TAIL < "
+                         "TYPICAL makes both stiffness tails fade; swap them "
+                         "to highlight the tails instead.")
     ap.add_argument("--opacity-gamma", type=float, default=1.0,
-                    help="exponent on occurrence_likelihood before the alpha "
-                         "ramp. >1 fades the unlikely layers out harder, <1 "
-                         "keeps them visible (default 1.0 = linear).")
+                    help="exponent on |compliance_z| / opacity-z-cap before "
+                         "the alpha ramp. >1 keeps samples near z=0 solid for "
+                         "longer and fades the tails out harder, <1 fades "
+                         "sooner (default 1.0 = linear).")
+    ap.add_argument("--opacity-z-cap", type=float, default=_OPACITY_Z_CAP,
+                    help="|compliance_z| at which opacity bottoms out at the "
+                         f"RARE value (default {_OPACITY_Z_CAP:g}, i.e. both "
+                         "the +z_cap and -z_cap compliance tails are fully "
+                         "faded).")
     ap.add_argument("--no-merge", dest="merge", action="store_false",
                     help="skip the merged probability_cloud_surfaces.vtp")
     args = ap.parse_args()
@@ -506,13 +531,16 @@ def main() -> None:
         raise SystemExit("--opacity-range values are alphas and must be in [0, 1]")
     if args.opacity_gamma <= 0.0:
         raise SystemExit("--opacity-gamma must be > 0")
+    if args.opacity_z_cap <= 0.0:
+        raise SystemExit("--opacity-z-cap must be > 0")
 
     build_surfaces(table, args.mc_dir / "ensemble", args.out_dir,
                    args.iso, args.merge, args.decimate,
                    deviation_scale=args.deviation_scale,
                    reference=str(args.reference),
                    opacity_range=tuple(args.opacity_range),
-                   opacity_gamma=args.opacity_gamma)
+                   opacity_gamma=args.opacity_gamma,
+                   opacity_z_cap=args.opacity_z_cap)
     print(f"done -> {args.out_dir}")
 
 

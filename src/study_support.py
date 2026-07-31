@@ -23,7 +23,10 @@ from src.random_fields.kl_expansion import KLExpansionResult, compute_kl_expansi
 logger = logging.getLogger(__name__)
 
 
-def build_stage3_kl(cfg, tagged_mesh, comm: MPI.Comm) -> KLExpansionResult:
+def build_stage3_kl(
+    cfg, tagged_mesh, comm: MPI.Comm, length_scale: float | None = None,
+    variance_threshold: float | None = None,
+) -> KLExpansionResult:
     """Stage 3 exactly as mainClean.py runs it: KL expansion of the underlying
     Gaussian field on this mesh.
 
@@ -33,10 +36,23 @@ def build_stage3_kl(cfg, tagged_mesh, comm: MPI.Comm) -> KLExpansionResult:
     The KL cache in kl_expansion.py is keyed on the node coordinates, so each
     mesh refinement level correctly gets its own expansion rather than a stale
     hit from another level.
+
+    Args:
+        length_scale: Overrides cfg.random_field.length_scale. Used by
+            scripts/correlation_length_study.py to sweep l_c without mutating
+            the config -- the sweep must run the SAME code path as production,
+            differing only in the one parameter under study.
+        variance_threshold: Overrides cfg.random_field.variance_threshold. Used
+            for the truncation-robustness spot check: n_kl swings from 183 at
+            l_c=1 to 4 at l_c=16 under the 95% rule, so "is 4 modes enough?" is
+            a fair reviewer question. Re-running the extremes at 99% answers it
+            with a number instead of an argument.
     """
     kernel_params = KernelParams(
         sigma=cfg.random_field.sigma,
-        length_scale=cfg.random_field.length_scale,
+        length_scale=(
+            cfg.random_field.length_scale if length_scale is None else float(length_scale)
+        ),
         spatial_dim=cfg.random_field.spatial_dim,
     )
     if comm.rank == 0:
@@ -47,7 +63,11 @@ def build_stage3_kl(cfg, tagged_mesh, comm: MPI.Comm) -> KLExpansionResult:
 
     return compute_kl_expansion(
         node_coordinates, simplices, kernel_params,
-        variance_threshold=cfg.random_field.variance_threshold, comm=comm,
+        variance_threshold=(
+            cfg.random_field.variance_threshold if variance_threshold is None
+            else float(variance_threshold)
+        ),
+        comm=comm,
     )
 
 

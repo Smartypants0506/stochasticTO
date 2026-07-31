@@ -107,3 +107,42 @@ def test_required_sample_size_scales_as_one_over_sqrt_n():
     """Halving the resolvable effect needs 4x the samples."""
     assert required_samples_for_std(0.07, 100, 0.035) == pytest.approx(400, rel=1e-9)
     assert required_samples_for_std(0.07, 100, 0.0175) == pytest.approx(1600, rel=1e-9)
+
+
+def test_cv_is_reported_with_a_confidence_interval():
+    """sigma_C/mu_C is the headline statistic (it is what the mesh study shows
+    to be converged), so it must carry its own interval rather than be a bare
+    float that a reader has to eyeball."""
+    x = np.random.default_rng(11).lognormal(0.0, 0.5, 800)
+    summary = summarize_samples(x, n_bootstrap=2000, seed=0)
+    cv = summary["cv"]
+    assert cv["ci_low"] < cv["value"] < cv["ci_high"]
+    assert cv["value"] == pytest.approx(np.std(x, ddof=1) / np.mean(x), rel=1e-12)
+
+
+def test_paired_cv_interval_is_narrower_than_naive_propagation():
+    """THE reason cv is bootstrapped as one statistic instead of propagated.
+
+    mu and sigma come from the SAME draws and are positively correlated across
+    resamples. Propagating their separate intervals ignores that and inflates
+    the result -- enough, on the real l_c sweep, to make neighbouring levels
+    look unresolvable when they are not.
+    """
+    x = np.random.default_rng(12).lognormal(0.0, 0.7, 800)
+    s = summarize_samples(x, n_bootstrap=3000, seed=0)
+
+    def half_width(est):
+        return (est["ci_high"] - est["ci_low"]) / 2 / est["value"]
+
+    naive = (half_width(s["mean"]) ** 2 + half_width(s["std"]) ** 2) ** 0.5
+    assert half_width(s["cv"]) < naive, (
+        f"paired cv half-width {half_width(s['cv']):.4f} should be below the "
+        f"naive propagation bound {naive:.4f}"
+    )
+
+
+def test_cv_is_nan_rather_than_infinite_for_a_zero_mean_sample():
+    """A zero-mean ensemble has no meaningful coefficient of variation. Return
+    NaN so it propagates visibly into JSON instead of an inf that plots."""
+    from src.validation.statistics import _coefficient_of_variation
+    assert np.isnan(_coefficient_of_variation(np.array([-1.0, 1.0])))

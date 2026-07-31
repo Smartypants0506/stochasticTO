@@ -41,6 +41,21 @@ FIELDS WRITTEN (all CG1 nodal, so they interpolate smoothly in ParaView)
   strain_energy_density  0.5 * sigma : eps -- where compliance is being spent.
                          Integrates to the compliance of that sample.
 
+SMOOTHED SURFACE (`surfaces/sample_XXXXX.vtp`)
+------------------------------------------------
+The raw .vtu above is the FULL bounding-box tet mesh -- rho ~ 0 void nodes and
+all -- so opened directly in ParaView it renders as the whole solid block
+(or, after a manual Threshold, a jagged tet-faceted blob) rather than the
+smooth part shape. That is the same problem viz/build_cloud_index.py solves
+for the density-only ensemble: contour at rho = iso to extract the actual
+manufactured boundary. We do the identical thing here, with one bonus --
+VTK's contour filter interpolates EVERY point-data array present on the
+input, not just the one being contoured, so the rho = iso surface comes out
+already carrying eta / von_mises / von_mises_solid / strain_energy_density /
+displacement / displacement_magnitude as point data. No re-solve, no extra
+pass. `--decimate` (0..0.95) thins the triangles exactly as in
+build_cloud_index.py.
+
 USAGE (in the dolfinx container, from the repo root)
 ---------------------------------------------------
     mpirun -n 8 python viz/enrich_ensemble_fea.py
@@ -53,8 +68,12 @@ USAGE (in the dolfinx container, from the repo root)
     # quick look at the 10 worst-compliance samples only:
     mpirun -n 8 python viz/enrich_ensemble_fea.py --samples 3,17,42,88
 
+    # lighter surfaces for a big ensemble
+    mpirun -n 8 python viz/enrich_ensemble_fea.py --decimate 0.7
+
 Cost: one linear elastic solve per sample, same as Stage 6 already paid
-(~100 solves on the 25x75x25 tet beam). The gathers add a few seconds total.
+(~100 solves on the 25x75x25 tet beam). The gathers add a few seconds total;
+the contour + decimate step (rank 0 only, pyvista) adds a similar amount.
 """
 from __future__ import annotations
 
@@ -163,6 +182,13 @@ def main() -> None:
                          "reproduce the ensemble already on disk")
     ap.add_argument("--beta", type=float, default=None,
                     help="defaults to cfg.mc_validation.beta")
+    ap.add_argument("--iso", type=float, default=0.5,
+                    help="density level set treated as the manufactured "
+                         "boundary for the smoothed surface (default 0.5, "
+                         "matches build_cloud_index.py)")
+    ap.add_argument("--decimate", type=float, default=0.0,
+                    help="fraction of triangles to remove per surface, "
+                         "0..0.95 (default 0.0 = no decimation)")
     args = ap.parse_args()
 
     logging.basicConfig(level=logging.INFO if comm.rank == 0 else logging.ERROR,
@@ -253,6 +279,8 @@ def main() -> None:
         args.out_dir.mkdir(parents=True, exist_ok=True)
         ens_dir = args.out_dir / "ensemble"
         ens_dir.mkdir(parents=True, exist_ok=True)
+        surf_dir = args.out_dir / "surfaces"
+        surf_dir.mkdir(parents=True, exist_ok=True)
 
     if args.samples:
         indices = [int(s) for s in args.samples.split(",")]
@@ -265,6 +293,7 @@ def main() -> None:
 
     compliances: list[float] = []
     pvd_entries: list[tuple[int, str]] = []
+    surf_pvd_entries: list[tuple[int, str]] = []
     for i in indices:
         rho_phys_field.x.petsc_vec.array[:] = rho_tilde_cached
         xi = np.random.default_rng(seed + i).standard_normal(kl_result.n_kl)
@@ -297,16 +326,39 @@ def main() -> None:
             path = ens_dir / f"sample_{i:05d}.vtu"
             grid.save(str(path))
             pvd_entries.append((i, os.path.relpath(path, start=args.out_dir)))
+
+            # The smoothed rho = iso boundary -- see the "SMOOTHED SURFACE"
+            # module docstring section. contour() interpolates every point
+            # array already on `grid` (eta, von_mises, ...), so the surface
+            # comes out fully enriched with no extra solve.
+            surf = grid.contour(isosurfaces=[args.iso], scalars="density")
+            if surf.n_points == 0:
+                logger.info("sample %d: empty iso-surface at rho=%g, "
+                            "surface skipped", i, args.iso)
+            else:
+                if args.decimate > 0.0:
+                    surf = surf.decimate_pro(args.decimate,
+                                             preserve_topology=True)
+                surf_path = surf_dir / f"sample_{i:05d}.vtp"
+                surf.save(str(surf_path))
+                surf_pvd_entries.append(
+                    (i, os.path.relpath(surf_path, start=args.out_dir)))
             logger.info("sample %d/%d: C=%.6g", i, len(indices), C)
 
     if comm.rank == 0:
-        lines = ['<?xml version="1.0"?>',
-                 '<VTKFile type="Collection" version="0.1" byte_order="LittleEndian">',
-                 "  <Collection>"]
-        for t, (idx, rel) in enumerate(pvd_entries):
-            lines.append(f'    <DataSet timestep="{idx}" group="" part="0" file="{rel}"/>')
-        lines += ["  </Collection>", "</VTKFile>"]
-        (args.out_dir / "ensemble.pvd").write_text("\n".join(lines) + "\n")
+        def _write_pvd(pvd_path: Path, entries: list[tuple[int, str]]) -> None:
+            lines = ['<?xml version="1.0"?>',
+                     '<VTKFile type="Collection" version="0.1" byte_order="LittleEndian">',
+                     "  <Collection>"]
+            for idx, rel in entries:
+                lines.append(f'    <DataSet timestep="{idx}" group="" part="0" file="{rel}"/>')
+            lines += ["  </Collection>", "</VTKFile>"]
+            pvd_path.write_text("\n".join(lines) + "\n")
+
+        _write_pvd(args.out_dir / "ensemble.pvd", pvd_entries)
+        _write_pvd(args.out_dir / "ensemble_surfaces.pvd", surf_pvd_entries)
+        logger.info("Wrote %d smoothed surfaces to %s (iso=%g, decimate=%g)",
+                    len(surf_pvd_entries), surf_dir, args.iso, args.decimate)
 
         C_arr = np.asarray(compliances)
         np.savetxt(args.out_dir / "compliance_samples.csv",

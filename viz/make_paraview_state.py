@@ -156,6 +156,31 @@ def paint(display, view, array, preset, value_range=None, log=False,
     return lut
 
 
+def paint_diverging_grey(display, view, array, cap, title=None,
+                         cool=(0.231, 0.298, 0.753), warm=(0.706, 0.016, 0.150),
+                         grey=(0.25, 0.25, 0.25)):
+    """Diverging colour map for a signed, symmetric-about-zero array (e.g.
+    compliance_z): dark grey at 0 (typical realizations), fading out to
+    `cool`/`warm` at -cap/+cap (default a blue/red pair) -- matches the
+    build_cloud_index.py --opacity-z-cap tails visually, since the same
+    samples that are nearly-transparent are also the ones furthest from grey.
+    """
+    ColorBy(display, ("POINTS", array))
+    lut = GetColorTransferFunction(array)
+    lut.RGBPoints = [-cap, *cool, 0.0, *grey, cap, *warm]
+    lut.RescaleTransferFunction(-cap, cap)
+    pwf = GetOpacityTransferFunction(array)
+    pwf.RescaleTransferFunction(-cap, cap)
+    lut.AutomaticRescaleRangeMode = "Never"
+    display.SetScalarBarVisibility(view, True)
+    bar = GetScalarBar(lut, view)
+    bar.Title = title or array
+    bar.ComponentTitle = ""
+    bar.TitleFontSize = 14
+    bar.LabelFontSize = 12
+    return lut
+
+
 def fade_by_array(display, opacity_array, color_array):
     """Alpha per point from `opacity_array` instead of one global opacity.
 
@@ -253,8 +278,8 @@ def tab_probability_cloud():
     d = Show(likelihood, view)
     d.SetRepresentationType("Surface")
     d.Opacity = 0.08
-    paint(d, view, "compliance_z", "Cool to Warm (Extended)", (-2.0, 3.5),
-          title="compliance z-score")
+    paint_diverging_grey(d, view, "compliance_z", cap=3.0,
+                         title="compliance z-score")
     # Per-layer alpha: the further a realization is from nominal, the rarer it
     # is and the more transparent it renders, so the cloud reads as a dense
     # typical core inside a faint envelope of what the process *could* do.
@@ -281,9 +306,10 @@ def tab_probability_cloud():
     annotate(view,
              "PROBABILITY CLOUD -- every geometry this process could produce\n"
              "Select 'likelihood_filter' and drag LowerThreshold 0 -> 0.75.\n"
-             "Colour = compliance z-score of that realization.\n"
+             "Colour = compliance z-score of that realization\n"
+             "(dark grey at z=0, blue/red toward the +/-3 sigma tails).\n"
              "Transparency = rarity: the further from nominal, the fainter.\n"
-             "Dark grey = ensemble-mean boundary (reference).")
+             "Solid dark grey = ensemble-mean boundary (reference).")
     ResetCamera(view)
     return view
 

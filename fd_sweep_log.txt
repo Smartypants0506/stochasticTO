@@ -1,0 +1,182 @@
+WARNING:src.config.loader:optimization.lambda_sweep has only 3 points. That is enough to compare designs but too few to present as a Pareto front.
+WARNING:src.fenitop.topopt:No 'solid' cell_tags/solid_tag found in fem dict -- bolt/mount regions will NOT be hard-pinned to solid density. This mirrors the exact bug that caused bolt bosses to be optimized away; check fenitop_adapter.py wires cell_tags + solid_tag through.
+opt_iter: 1, opt_time: 0.439 (s), beta: 1, C: 36.291, V: 0.071, U: 0.000, change: 0.020
+opt_iter: 2, opt_time: 0.21 (s), beta: 1, C: 21.199, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 3, opt_time: 0.377 (s), beta: 1, C: 14.756, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 4, opt_time: 0.383 (s), beta: 1, C: 11.195, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 5, opt_time: 0.144 (s), beta: 1, C: 8.992, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 6, opt_time: 0.146 (s), beta: 1, C: 7.495, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 7, opt_time: 0.21 (s), beta: 1, C: 6.387, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 8, opt_time: 0.274 (s), beta: 1, C: 5.515, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 9, opt_time: 0.141 (s), beta: 1, C: 4.801, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 10: max |u| over all load cases = 1.320315e+01 m (13203.146022 mm)
+opt_iter: 10, opt_time: 0.19 (s), beta: 1, C: 4.210, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 11, opt_time: 0.127 (s), beta: 1, C: 3.720, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 12, opt_time: 0.141 (s), beta: 1, C: 3.316, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 13, opt_time: 0.128 (s), beta: 1, C: 2.981, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 14, opt_time: 0.125 (s), beta: 1, C: 2.703, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 15, opt_time: 0.205 (s), beta: 1, C: 2.469, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 16, opt_time: 0.152 (s), beta: 1, C: 2.272, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 17, opt_time: 0.14 (s), beta: 1, C: 2.103, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 18, opt_time: 0.132 (s), beta: 1, C: 1.958, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 19, opt_time: 0.175 (s), beta: 1, C: 1.831, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 20: max |u| over all load cases = 5.385902e+00 m (5385.902037 mm)
+opt_iter: 20, opt_time: 0.154 (s), beta: 1, C: 1.720, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 21, opt_time: 0.144 (s), beta: 1, C: 1.622, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 22, opt_time: 0.44 (s), beta: 1, C: 1.535, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 23, opt_time: 0.142 (s), beta: 1, C: 1.457, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 24, opt_time: 0.156 (s), beta: 1, C: 1.387, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 25, opt_time: 0.154 (s), beta: 1, C: 1.323, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 26, opt_time: 0.187 (s), beta: 1, C: 1.265, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 27, opt_time: 0.18 (s), beta: 1, C: 1.212, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 28, opt_time: 0.148 (s), beta: 1, C: 1.163, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 29, opt_time: 0.142 (s), beta: 1, C: 1.118, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 30: max |u| over all load cases = 3.369765e+00 m (3369.765372 mm)
+opt_iter: 30, opt_time: 0.209 (s), beta: 1, C: 1.076, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 31, opt_time: 0.191 (s), beta: 1, C: 1.036, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 32, opt_time: 0.146 (s), beta: 1, C: 0.999, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 33, opt_time: 0.148 (s), beta: 1, C: 0.963, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 34, opt_time: 0.181 (s), beta: 1, C: 0.928, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 35, opt_time: 0.354 (s), beta: 1, C: 0.893, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 36, opt_time: 0.188 (s), beta: 1, C: 0.859, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 37, opt_time: 0.223 (s), beta: 1, C: 0.825, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 38, opt_time: 0.185 (s), beta: 1, C: 0.791, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 39, opt_time: 0.176 (s), beta: 1, C: 0.759, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 40: max |u| over all load cases = 2.380865e+00 m (2380.865482 mm)
+opt_iter: 40, opt_time: 0.181 (s), beta: 1, C: 0.727, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 41, opt_time: 0.172 (s), beta: 1, C: 0.697, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 42, opt_time: 0.216 (s), beta: 1, C: 0.669, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 43, opt_time: 0.226 (s), beta: 1, C: 0.643, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 44, opt_time: 0.19 (s), beta: 1, C: 0.618, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 45, opt_time: 0.244 (s), beta: 1, C: 0.594, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 46, opt_time: 0.168 (s), beta: 1, C: 0.573, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 47, opt_time: 0.157 (s), beta: 1, C: 0.552, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 48, opt_time: 0.164 (s), beta: 1, C: 0.540, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 49, opt_time: 0.174 (s), beta: 1, C: 0.530, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 50: max |u| over all load cases = 1.883953e+00 m (1883.952559 mm)
+opt_iter: 50, opt_time: 0.192 (s), beta: 2, C: 0.530, V: 0.073, U: 0.000, change: 0.020
+opt_iter: 51, opt_time: 0.185 (s), beta: 2, C: 0.493, V: 0.076, U: 0.000, change: 0.020
+opt_iter: 52, opt_time: 0.201 (s), beta: 2, C: 0.458, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 53, opt_time: 0.233 (s), beta: 2, C: 0.448, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 54, opt_time: 0.205 (s), beta: 2, C: 0.439, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 55, opt_time: 0.222 (s), beta: 2, C: 0.432, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 56, opt_time: 0.242 (s), beta: 2, C: 0.426, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 57, opt_time: 0.166 (s), beta: 2, C: 0.420, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 58, opt_time: 0.233 (s), beta: 2, C: 0.415, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 59, opt_time: 0.261 (s), beta: 2, C: 0.411, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 60: max |u| over all load cases = 1.536061e+00 m (1536.061316 mm)
+opt_iter: 60, opt_time: 0.254 (s), beta: 2, C: 0.407, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 61, opt_time: 0.227 (s), beta: 2, C: 0.403, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 62, opt_time: 0.262 (s), beta: 2, C: 0.400, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 63, opt_time: 0.181 (s), beta: 2, C: 0.397, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 64, opt_time: 0.18 (s), beta: 2, C: 0.394, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 65, opt_time: 0.236 (s), beta: 2, C: 0.391, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 66, opt_time: 0.202 (s), beta: 2, C: 0.389, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 67, opt_time: 0.15 (s), beta: 2, C: 0.387, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 68, opt_time: 0.145 (s), beta: 2, C: 0.385, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 69, opt_time: 0.142 (s), beta: 2, C: 0.383, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 70: max |u| over all load cases = 1.457917e+00 m (1457.916578 mm)
+opt_iter: 70, opt_time: 0.149 (s), beta: 2, C: 0.382, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 71, opt_time: 0.165 (s), beta: 2, C: 0.380, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 72, opt_time: 0.148 (s), beta: 2, C: 0.379, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 73, opt_time: 0.16 (s), beta: 2, C: 0.378, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 74, opt_time: 0.276 (s), beta: 2, C: 0.377, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 75, opt_time: 0.144 (s), beta: 2, C: 0.376, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 76, opt_time: 0.163 (s), beta: 2, C: 0.375, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 77, opt_time: 0.172 (s), beta: 2, C: 0.375, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 78, opt_time: 0.14 (s), beta: 2, C: 0.374, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 79, opt_time: 0.282 (s), beta: 2, C: 0.374, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 80: max |u| over all load cases = 1.426712e+00 m (1426.712209 mm)
+opt_iter: 80, opt_time: 0.169 (s), beta: 2, C: 0.373, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 81, opt_time: 0.155 (s), beta: 2, C: 0.373, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 82, opt_time: 0.212 (s), beta: 2, C: 0.372, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 83, opt_time: 0.143 (s), beta: 2, C: 0.372, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 84, opt_time: 0.175 (s), beta: 2, C: 0.371, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 85, opt_time: 0.133 (s), beta: 2, C: 0.371, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 86, opt_time: 0.135 (s), beta: 2, C: 0.371, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 87, opt_time: 0.148 (s), beta: 2, C: 0.370, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 88, opt_time: 0.156 (s), beta: 2, C: 0.370, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 89, opt_time: 0.133 (s), beta: 2, C: 0.370, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 90: max |u| over all load cases = 1.412259e+00 m (1412.258575 mm)
+opt_iter: 90, opt_time: 0.134 (s), beta: 2, C: 0.369, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 91, opt_time: 0.153 (s), beta: 2, C: 0.369, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 92, opt_time: 0.218 (s), beta: 2, C: 0.369, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 93, opt_time: 0.229 (s), beta: 2, C: 0.369, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 94, opt_time: 0.134 (s), beta: 2, C: 0.368, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 95, opt_time: 0.154 (s), beta: 2, C: 0.368, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 96, opt_time: 0.147 (s), beta: 2, C: 0.368, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 97, opt_time: 0.199 (s), beta: 2, C: 0.368, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 98, opt_time: 0.188 (s), beta: 2, C: 0.368, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 99, opt_time: 0.185 (s), beta: 2, C: 0.367, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 100: max |u| over all load cases = 1.283749e+00 m (1283.748710 mm)
+opt_iter: 100, opt_time: 0.223 (s), beta: 4, C: 0.336, V: 0.070, U: 0.000, change: 0.020
+opt_iter: 101, opt_time: 0.184 (s), beta: 4, C: 0.325, V: 0.072, U: 0.000, change: 0.020
+opt_iter: 102, opt_time: 0.178 (s), beta: 4, C: 0.312, V: 0.074, U: 0.000, change: 0.020
+opt_iter: 103, opt_time: 0.164 (s), beta: 4, C: 0.299, V: 0.076, U: 0.000, change: 0.020
+opt_iter: 104, opt_time: 0.183 (s), beta: 4, C: 0.286, V: 0.078, U: 0.000, change: 0.020
+opt_iter: 105, opt_time: 0.175 (s), beta: 4, C: 0.275, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 106, opt_time: 0.217 (s), beta: 4, C: 0.274, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 107, opt_time: 0.24 (s), beta: 4, C: 0.273, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 108, opt_time: 0.176 (s), beta: 4, C: 0.272, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 109, opt_time: 0.208 (s), beta: 4, C: 0.271, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 110: max |u| over all load cases = 1.074807e+00 m (1074.807276 mm)
+opt_iter: 110, opt_time: 0.175 (s), beta: 4, C: 0.270, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 111, opt_time: 0.205 (s), beta: 4, C: 0.270, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 112, opt_time: 0.149 (s), beta: 4, C: 0.269, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 113, opt_time: 0.285 (s), beta: 4, C: 0.269, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 114, opt_time: 0.327 (s), beta: 4, C: 0.268, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 115, opt_time: 0.147 (s), beta: 4, C: 0.268, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 116, opt_time: 0.176 (s), beta: 4, C: 0.267, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 117, opt_time: 0.238 (s), beta: 4, C: 0.267, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 118, opt_time: 0.397 (s), beta: 4, C: 0.266, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 119, opt_time: 0.172 (s), beta: 4, C: 0.266, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 120: max |u| over all load cases = 1.060550e+00 m (1060.549560 mm)
+opt_iter: 120, opt_time: 0.175 (s), beta: 4, C: 0.265, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 121, opt_time: 0.145 (s), beta: 4, C: 0.265, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 122, opt_time: 0.279 (s), beta: 4, C: 0.265, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 123, opt_time: 0.244 (s), beta: 4, C: 0.264, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 124, opt_time: 0.154 (s), beta: 4, C: 0.264, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 125, opt_time: 0.157 (s), beta: 4, C: 0.264, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 126, opt_time: 0.169 (s), beta: 4, C: 0.264, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 127, opt_time: 0.145 (s), beta: 4, C: 0.263, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 128, opt_time: 0.183 (s), beta: 4, C: 0.263, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 129, opt_time: 0.262 (s), beta: 4, C: 0.263, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 130: max |u| over all load cases = 1.048191e+00 m (1048.191145 mm)
+opt_iter: 130, opt_time: 0.142 (s), beta: 4, C: 0.263, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 131, opt_time: 0.159 (s), beta: 4, C: 0.262, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 132, opt_time: 0.154 (s), beta: 4, C: 0.262, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 133, opt_time: 0.142 (s), beta: 4, C: 0.262, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 134, opt_time: 0.216 (s), beta: 4, C: 0.262, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 135, opt_time: 0.171 (s), beta: 4, C: 0.261, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 136, opt_time: 0.157 (s), beta: 4, C: 0.261, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 137, opt_time: 0.145 (s), beta: 4, C: 0.261, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 138, opt_time: 0.156 (s), beta: 4, C: 0.261, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 139, opt_time: 0.144 (s), beta: 4, C: 0.261, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 140: max |u| over all load cases = 1.037181e+00 m (1037.181192 mm)
+opt_iter: 140, opt_time: 0.296 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 141, opt_time: 0.142 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 142, opt_time: 0.21 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 143, opt_time: 0.21 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 144, opt_time: 0.159 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 145, opt_time: 0.169 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 146, opt_time: 0.251 (s), beta: 4, C: 0.259, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 147, opt_time: 0.159 (s), beta: 4, C: 0.259, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 148, opt_time: 0.229 (s), beta: 4, C: 0.259, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 149, opt_time: 0.163 (s), beta: 4, C: 0.259, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 150: max |u| over all load cases = 8.687925e-01 m (868.792540 mm)
+opt_iter: 150, opt_time: 0.205 (s), beta: 8, C: 0.211, V: 0.074, U: 0.000, change: 0.020
+2026-07-30 16:08:34.807 (  31.974s) [    7F2A40AD4140]vtkXOpenGLRenderWindow.:1460  WARN| bad X server connection. DISPLAY=
+WARNING:__main__:beta=32     step=1.0e-03  max=5.0398%  median=0.5659%
+WARNING:__main__:beta=32     step=3.0e-04  max=25.8960%  median=3.6943%
+WARNING:__main__:beta=32     step=1.0e-04  max=71.2795%  median=10.3938%
+WARNING:__main__:beta=32     step=3.0e-05  max=182.0578%  median=71.9091%
+WARNING:__main__:beta=32     step=1.0e-05  max=121.9656%  median=47.5749%
+WARNING:__main__:beta=128    step=1.0e-03  max=35.0004%  median=1.1440%
+WARNING:__main__:beta=128    step=3.0e-04  max=134.2629%  median=37.5525%
+WARNING:__main__:beta=128    step=1.0e-04  max=137.7260%  median=56.1851%
+WARNING:__main__:beta=128    step=3.0e-05  max=198.5102%  median=70.6575%
+WARNING:__main__:beta=128    step=1.0e-05  max=162.8080%  median=98.7130%
+WARNING:__main__:=== verdict ===
+WARNING:__main__:beta=32.0   default step 1e-3 -> 5.0398% ; best step 1.0e-03 -> 5.0398% (1.0x better)
+WARNING:__main__:beta=128.0  default step 1e-3 -> 35.0004% ; best step 1.0e-03 -> 35.0004% (1.0x better)
+WARNING:__main__:If the error drops sharply with smaller steps, the ADJOINT is fine and fd_step must scale with beta. If it is flat, the gradient is genuinely wrong and production must not run.

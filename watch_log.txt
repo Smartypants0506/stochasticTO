@@ -1,0 +1,2 @@
+nohup: ignoring input
+2026-07-30 15:46:54 watcher started (poll 120s, state output/studies/_watch)

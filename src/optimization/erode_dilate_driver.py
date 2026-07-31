@@ -65,7 +65,15 @@ logger = logging.getLogger(__name__)
 # Epigraph variable t is appended to the design vector. It is unbounded above in
 # principle; this bound just keeps MMA's asymptote initialization well posed and
 # is checked against at exit.
-_T_UPPER_BOUND_FACTOR = 100.0
+_T_UPPER_BOUND_FACTOR = 2.0
+
+# Damping and cadence for the adaptive dilated-volume bound. The ratio between
+# the dilated and intermediate volumes drifts as beta sharpens, so the bound has
+# to follow it -- but feeding MMA a constraint bound that moves every iteration
+# destabilizes its asymptote update, which is the oscillation this mechanism
+# exists to remove. Update every few iterations, and damp when we do.
+_VOLUME_TARGET_DAMPING = 0.3
+_VOLUME_TARGET_EVERY = 5
 
 
 @dataclass
@@ -78,6 +86,63 @@ class ErodeDilateState:
     cached_rho: np.ndarray | None = None
     cached: dict | None = None
     history: list = field(default_factory=list)
+    # Adaptive bound on the DILATED realization's volume. Initialized per stage
+    # and rescaled by _update_volume_target; see that function for the rationale.
+    volume_target: float = 0.0
+    volume_target_history: list = field(default_factory=list)
+
+
+def _update_volume_target(state: "ErodeDilateState", data: dict, vol_frac: float) -> None:
+    """Rescale the dilated-volume bound so the INTERMEDIATE design meets vol_frac.
+
+    WHY THIS IS NEEDED (Wang, Lazarov & Sigmund, SMO 2011, sec. 3.2)
+    ----------------------------------------------------------------
+    The volume constraint belongs on the dilated realization -- constraining the
+    intermediate design would let the dilated one overrun the budget, which is
+    the failure mode the three-field formulation exists to prevent. But applying
+    `V_dilated <= vol_frac` LITERALLY is far more restrictive than intended: the
+    dilated design is systematically larger than the intermediate one, so at
+    eta_lo = 0.25 a design whose intermediate volume is the target 0.08 has a
+    dilated volume of roughly 0.20. Demanding V_dilated <= 0.08 therefore
+    implicitly demands an intermediate design of about 0.03 -- a structure less
+    than half the intended mass.
+
+    Measured consequence before this fix: V_dilated sat at 0.19-0.24 across every
+    beta stage against a 0.08 target (violation 1.52), never satisfied, with the
+    volume multiplier diverging (complementarity ~2e9).
+
+    The standard remedy is to make the bound adaptive. Track the ratio between
+    the intermediate and dilated volumes at the current design and set
+
+        V*_dilated = vol_frac * (V_dilated / V_intermediate)
+
+    so that satisfying the dilated constraint drives the INTERMEDIATE design to
+    vol_frac -- which is the quantity the volume budget actually refers to, and
+    the quantity the SAA path's E[V] constraint is comparable with.
+
+    The update is deliberately damped and applied only every few iterations: the
+    ratio moves as the design sharpens, and feeding a constraint bound that
+    jumps every iteration into MMA's asymptote update produces exactly the
+    oscillation this is meant to remove.
+    """
+    volumes = data["volumes"]
+    v_dilated = float(volumes[-1])
+    v_intermediate = float(volumes[1])
+    if v_intermediate <= 0.0:
+        return
+    proposed = vol_frac * (v_dilated / v_intermediate)
+    # Damped update; first call takes the proposal outright.
+    if state.volume_target <= 0.0:
+        state.volume_target = proposed
+    else:
+        state.volume_target = (
+            (1.0 - _VOLUME_TARGET_DAMPING) * state.volume_target
+            + _VOLUME_TARGET_DAMPING * proposed
+        )
+    state.volume_target_history.append(
+        {"iteration": state.outer_iteration, "target": state.volume_target,
+         "v_dilated": v_dilated, "v_intermediate": v_intermediate}
+    )
 
 
 def _evaluate_three_fields(
@@ -167,8 +232,8 @@ def _run_stage(
         return design, comm.bcast(t_value, root=0)
 
     def objective_gradient(tao, x, g) -> float:
-        """min t -- the objective is the epigraph variable itself, so its
-        gradient is zero in every design direction and one in t. All the
+        """min t~ -- the objective is the (normalized) epigraph variable itself,
+        so its gradient is zero in every design direction and one in t~. All the
         physics is in the constraints."""
         _, t_value = split(x)
         grad = np.zeros(n_local + t_local_size)
@@ -179,11 +244,16 @@ def _run_stage(
         return t_value
 
     def constraints(tao, x, c) -> None:
-        """h >= 0 form (mma.py sign-flips): t - C_k >= 0, vol_frac - V_dilated >= 0."""
+        """h >= 0 form (mma.py sign-flips): t~ - C_k/C_ref >= 0,
+        V*_dilated - V_dilated >= 0. Compliances are divided by C_ref so the
+        epigraph rows are O(1) and commensurate with the volume row.
+
+        V*_dilated is the ADAPTIVE target (state.volume_target), not vol_frac --
+        see _update_volume_target for why."""
         design, t_value = split(x)
         data = _get(state, ctx, opt, design, thresholds, beta)
-        values = [t_value - C for C in data["compliances"]]
-        values.append(opt["vol_frac"] - data["volumes"][-1])   # dilated realization
+        values = [t_value - C / c_ref for C in data["compliances"]]
+        values.append(state.volume_target - data["volumes"][-1])  # dilated
         if comm.rank == 0:
             for i, value in enumerate(values):
                 c.setValue(i, value)
@@ -196,8 +266,9 @@ def _run_stage(
         t_col = np.array([n_global], dtype=PETSc.IntType)
 
         for i in range(len(thresholds)):
-            # d/d_design (t - C_i) = -dC_i ; d/dt (t - C_i) = 1
-            J.setValues([i], design_cols, (-data["dC_drho"][i]).reshape(1, -1))
+            # d/d_design (t~ - C_i/C_ref) = -dC_i/C_ref ; d/dt~ = 1
+            J.setValues([i], design_cols,
+                        (-data["dC_drho"][i] / c_ref).reshape(1, -1))
             if t_local_size:
                 J.setValues([i], t_col, np.array([[1.0]]))
         volume_row = len(thresholds)
@@ -207,14 +278,25 @@ def _run_stage(
         J.assemble()
 
     def monitor(tao) -> None:
+        # Refresh the adaptive dilated-volume bound. Done here, in the monitor,
+        # because it must happen between MMA outer iterations -- never inside a
+        # constraint or Jacobian callback, which MMA may call several times at
+        # the same design while building its subproblem. Moving the bound
+        # mid-subproblem would make the constraint inconsistent with its own
+        # Jacobian. Every rank runs this: state.cached is world-consistent and
+        # the target must stay identical across ranks.
+        iteration = tao.getIterationNumber()
+        if state.cached is not None and iteration % _VOLUME_TARGET_EVERY == 0:
+            _update_volume_target(state, state.cached, opt["vol_frac"])
+
         if comm.rank == 0 and state.cached is not None:
             C = state.cached["compliances"]
             V = state.cached["volumes"]
             logger.info(
                 "[erode/dilate] iter=%d C=[%s] (worst=%.6g) V_dilated=%.6g "
-                "(%d FEA solves so far)",
-                tao.getIterationNumber(), ", ".join(f"{c:.6g}" for c in C),
-                C.max(), V[-1], state.n_fea_solves,
+                "(target %.6g, V_mid=%.6g) (%d FEA solves so far)",
+                iteration, ", ".join(f"{c:.6g}" for c in C),
+                C.max(), V[-1], state.volume_target, V[1], state.n_fea_solves,
             )
             state.history.append({
                 "iteration": int(tao.getIterationNumber()),
@@ -242,12 +324,39 @@ def _run_stage(
     state.n_fea_solves += len(thresholds)
     t_init = float(initial_data["compliances"].max())
 
-    # Design vector extended by the epigraph variable t (rank 0 owns it).
+    # Seed the adaptive dilated-volume bound from the starting design, so the
+    # very first subproblem already sees a reachable constraint. Without this
+    # the bound would be 0.0 on iteration 0 and every design would look grossly
+    # infeasible, which is what drove the multiplier blow-up.
+    _update_volume_target(state, initial_data, opt["vol_frac"])
+
+    # WHY THE EPIGRAPH VARIABLE IS NORMALIZED.
+    #
+    # MMA applies its move limit as a fraction of each variable's RANGE
+    # (mma.py: alpha = max(alpha, x - move_limit * x_range)). The design
+    # variables live in [0,1], so move=0.02 lets them move 0.02 per iteration.
+    # An un-normalized t bounded by [0, 100*t_init] has a range of 100*t_init,
+    # so the SAME move limit lets it jump 0.02 * 100 * t_init = 2 * t_init per
+    # iteration -- on the smoke mesh, 322 compliance units per step while the
+    # compliance being minimized is only ~161. Measured dx was 322.8, matching
+    # that arithmetic exactly. t then oscillates wildly, the epigraph rows
+    # t - C_k >= 0 are alternately trivially slack or grossly violated, the
+    # design receives no usable gradient signal, and the worst-case compliance
+    # never decreases.
+    #
+    # Dividing t and every compliance by C_ref makes t~ = t/C_ref an O(1)
+    # quantity on the same scale as the design variables, so one shared move
+    # limit is meaningful for both. This is a change of variables, not of the
+    # problem: the optimum is identical, and t is converted back to physical
+    # units before it is reported.
+    c_ref = max(t_init, 1e-30)
+
+    # Design vector extended by the NORMALIZED epigraph variable t~ (rank 0).
     x0 = PETSc.Vec().createMPI((n_local + t_local_size, n_global + 1), comm=comm)
     initial = np.empty(n_local + t_local_size)
     initial[:n_local] = x0_local
     if t_local_size:
-        initial[n_local] = t_init
+        initial[n_local] = t_init / c_ref          # = 1.0 by construction
     x0.setArray(initial)
     tao.setSolution(x0)
 
@@ -256,17 +365,32 @@ def _run_stage(
     ub_array = np.ones(n_local + t_local_size)
     if t_local_size:
         lb_array[n_local] = 0.0
-        ub_array[n_local] = _T_UPPER_BOUND_FACTOR * max(t_init, 1e-30)
+        # t~ starts at 1.0 and should only ever decrease, so a modest headroom
+        # factor is enough. Keeping the range O(1) is the whole point -- a large
+        # factor here silently restores the runaway-step behaviour above.
+        ub_array[n_local] = _T_UPPER_BOUND_FACTOR
     lb.setArray(lb_array); ub.setArray(ub_array)
     tao.setVariableBounds((lb, ub))
 
     grad_vec = x0.copy()
     tao.setObjectiveGradient(objective_gradient, grad_vec)
 
-    constraint_vec = PETSc.Vec().createMPI(n_constraints, comm=comm)
+    # local_rows MUST be computed once and reused for both the constraint
+    # vector and the Jacobian's row layout. createMPI(n_constraints, comm)
+    # (a bare global size) lets PETSc auto-partition across every rank -- for
+    # n_constraints=1 (the SAA path) that trivially lands on rank 0 and
+    # happens to match the Jacobian's hardcoded "all rows on rank 0" layout,
+    # but for n_constraints=4 (this driver's 3 epigraph rows + 1 volume row)
+    # PETSc spreads the 4 entries across every rank, producing a LOCAL size
+    # that disagrees with the Jacobian's local_rows -- e.g. rank 0 sees
+    # multipliers with local dim 1 against a Jacobian with local dim 4, and
+    # Mat.multTranspose in optimality.py aborts with "Nonconforming object
+    # sizes". Forcing the SAME explicit (local_rows, n_constraints) layout on
+    # both objects makes them agree by construction instead of by coincidence.
+    local_rows = n_constraints if comm.rank == 0 else 0
+    constraint_vec = PETSc.Vec().createMPI((local_rows, n_constraints), comm=comm)
     tao.setInequalityConstraints(constraints, constraint_vec)
 
-    local_rows = n_constraints if comm.rank == 0 else 0
     jacobian_mat = PETSc.Mat().createDense(
         ((local_rows, n_constraints), (n_local + t_local_size, n_global + 1)), comm=comm
     )
@@ -315,13 +439,28 @@ def _run_stage(
     return {
         "rho_robust": rho_global,
         "rho_robust_local": design_local,
-        "epigraph_t": t_value,
+        # t is solved for in normalized units (t~ = t/C_ref); convert back so
+        # the artifact is directly comparable with `compliances` and with the
+        # SAA driver's objective, neither of which is normalized.
+        "epigraph_t": t_value * c_ref,
+        "epigraph_t_normalized": t_value,
+        "epigraph_c_ref": c_ref,
         "compliances": final["compliances"].tolist(),
         "worst_compliance": float(final["compliances"].max()),
         "volumes": final["volumes"].tolist(),
         "volume_dilated": float(final["volumes"][-1]),
+        "volume_intermediate": float(final["volumes"][1]),
+        "volume_target_dilated": float(state.volume_target),
+        "volume_target_history": state.volume_target_history,
+        # Violation is measured against the ADAPTIVE bound the solver was
+        # actually given. The physically meaningful budget check is the
+        # INTERMEDIATE volume against vol_frac -- reported separately, and it is
+        # the number comparable with the SAA path's E[V].
         "volume_violation": max(
-            0.0, float(final["volumes"][-1]) - opt["vol_frac"]
+            0.0, float(final["volumes"][-1]) - state.volume_target
+        ) / max(state.volume_target, 1e-30),
+        "volume_violation_intermediate_vs_vol_frac": max(
+            0.0, float(final["volumes"][1]) - opt["vol_frac"]
         ) / opt["vol_frac"],
         "beta": float(beta),
         "M_nd_percent": m_nd,

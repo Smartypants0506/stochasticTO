@@ -273,6 +273,7 @@ def _run_saa_stage(
     beta: float,
     x0_local: np.ndarray,
     max_iter: int,
+    move_limit: float | None = None,
 ) -> dict:
     """One TAO MMA solve for ONE lambda at ONE fixed Heaviside sharpness beta,
     against the EXACT sample-average robust objective (no surrogate).
@@ -416,7 +417,9 @@ def _run_saa_stage(
 
     prefix = tao.getOptionsPrefix() or ""
     opts = PETSc.Options()
-    opts[f"{prefix}tao_mma_move_limit"] = opt["move"]
+    opts[f"{prefix}tao_mma_move_limit"] = (
+        opt["move"] if move_limit is None else float(move_limit)
+    )
     opts[f"{prefix}tao_mma_asymptote_init"] = opt.get("asymptote_init", 0.5)
     opts[f"{prefix}tao_mma_asymptote_min"] = opt.get("asymptote_min", 0.01)
     opts[f"{prefix}tao_mma_asymptote_max"] = opt.get("asymptote_max", 10.0)
@@ -574,6 +577,40 @@ def run_saa_robust_topopt(
         )
 
     n_stages = len(schedule)
+
+    # MOVE-LIMIT CONTINUATION.
+    #
+    # Measured problem this exists to fix: with a FIXED move limit the design
+    # change dx sits at exactly the move limit on every single iteration of
+    # every stage, i.e. the MMA subproblem solution is permanently on the
+    # trust-region boundary. The relative stationarity residual then falls for
+    # ~6 iterations and plateaus, oscillating (0.080 -> 0.134 -> 0.124 in the
+    # beta=128 stage of a study-mesh run) instead of decaying. It never
+    # approaches robust_opt_tol = 1e-3; the gap study's seven field designs land
+    # at 0.038-0.106. More iterations do not help -- the iterate is not
+    # converging, it is stepping the maximum distance forever.
+    #
+    # Shrinking the move limit as beta sharpens lets the iterate come off that
+    # boundary. Tying the reduction to the beta schedule is the principled
+    # choice: the projection's responsive band is ~19/beta wide, so it halves
+    # every time beta doubles, and a step that was appropriate at beta=8 is
+    # far too large at beta=128.
+    #
+    # DEFAULT IS 1.0 = INERT. Enabling this changes the designs every run
+    # produces, so it stays off until a controlled comparison justifies it.
+    move_reduction = float(opt.get("move_reduction", 1.0))
+    if not 0.0 < move_reduction <= 1.0:
+        raise ValueError(
+            f"move_reduction must be in (0, 1], got {move_reduction}. Values "
+            "above 1 would GROW the move limit as beta sharpens, which is the "
+            "wrong direction."
+        )
+    base_move = float(opt["move"])
+    move_floor = float(opt.get("move_min", 1.0e-3))
+    move_schedule = [
+        max(base_move * (move_reduction ** k), move_floor) for k in range(n_stages)
+    ]
+
     total_iter = int(opt["max_iter"])
     # Split the budget evenly; the final stage absorbs the remainder because it
     # is the one whose converged design is reported.
@@ -590,14 +627,18 @@ def run_saa_robust_topopt(
 
     stage_results = []
     current_x0 = np.asarray(x0_local, dtype=float).copy()
-    for stage_index, (stage_beta, stage_budget) in enumerate(zip(schedule, budgets)):
+    for stage_index, (stage_beta, stage_budget, stage_move) in enumerate(
+        zip(schedule, budgets, move_schedule)
+    ):
         if comm.rank == 0:
             logger.info(
-                "SAA lambda=%.3g stage %d/%d: beta=%.4g, max_iter=%d",
+                "SAA lambda=%.3g stage %d/%d: beta=%.4g, max_iter=%d, move=%.4g",
                 lambda_tradeoff, stage_index + 1, n_stages, stage_beta, stage_budget,
+                stage_move,
             )
         result = _run_saa_stage(
             ctx, opt, lambda_tradeoff, xi_saa, stage_beta, current_x0, stage_budget,
+            move_limit=stage_move,
         )
         stage_results.append(
             {
@@ -609,6 +650,7 @@ def run_saa_robust_topopt(
                 "mean_volume": result["mean_volume"],
                 "volume_violation": result["volume_violation"],
                 "M_nd_percent": result["M_nd_percent"],
+                "move_limit": stage_move,
                 "converged": result["converged"],
                 "optimality": result["optimality"],
                 "n_fea_batches": result["n_fea_batches"],
@@ -619,6 +661,8 @@ def run_saa_robust_topopt(
     # `result` is the final stage's -- the only one solved at beta_max.
     final = dict(result)
     final["beta_schedule"] = schedule
+    final["move_schedule"] = move_schedule
+    final["move_reduction"] = move_reduction
     final["stage_results"] = stage_results
     final["n_fea_batches_total"] = int(sum(s["n_fea_batches"] for s in stage_results))
     return final

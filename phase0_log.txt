@@ -1,0 +1,1727 @@
+########## P0-A uniform_eta optimize uniform ##########
+WARNING:src.config.loader:optimization.lambda_sweep has only 3 points. That is enough to compare designs but too few to present as a Pareto front.
+INFO:src.meshing.box_source:Traction patch: half-width 0.9375 (auto max(0.5, 1.5h)), area 1.5625, traction_z -0.2048 (total force 0.32 held fixed across refinement levels)
+INFO:src.meshing.box_source:Built box-mesh fenitop dicts (beam_3d.py reference): cell_type=tetrahedron, domain=[[0, 0, 0], [10, 30, 10]], refinement=0.64 -> elements=[16, 48, 16], h=0.625, R=0.6 (R/h=0.96, FIXED across levels), E=100, nu=0.25, vol_frac=0.08
+WARNING:src.fenitop.topopt:No 'solid' cell_tags/solid_tag found in fem dict -- bolt/mount regions will NOT be hard-pinned to solid density. This mirrors the exact bug that caused bolt bosses to be optimized away; check fenitop_adapter.py wires cell_tags + solid_tag through.
+opt_iter: 1, opt_time: 0.667 (s), beta: 1, C: 36.291, V: 0.071, U: 0.000, change: 0.020
+opt_iter: 2, opt_time: 0.282 (s), beta: 1, C: 21.199, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 3, opt_time: 0.186 (s), beta: 1, C: 14.756, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 4, opt_time: 0.222 (s), beta: 1, C: 11.195, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 5, opt_time: 0.321 (s), beta: 1, C: 8.992, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 6, opt_time: 0.269 (s), beta: 1, C: 7.495, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 7, opt_time: 0.278 (s), beta: 1, C: 6.387, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 8, opt_time: 0.233 (s), beta: 1, C: 5.515, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 9, opt_time: 0.203 (s), beta: 1, C: 4.801, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 10: max |u| over all load cases = 1.320315e+01 m (13203.146022 mm)
+opt_iter: 10, opt_time: 0.317 (s), beta: 1, C: 4.210, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 11, opt_time: 0.372 (s), beta: 1, C: 3.720, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 12, opt_time: 0.336 (s), beta: 1, C: 3.316, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 13, opt_time: 0.2 (s), beta: 1, C: 2.981, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 14, opt_time: 0.276 (s), beta: 1, C: 2.703, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 15, opt_time: 0.361 (s), beta: 1, C: 2.469, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 16, opt_time: 0.336 (s), beta: 1, C: 2.272, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 17, opt_time: 0.328 (s), beta: 1, C: 2.103, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 18, opt_time: 0.195 (s), beta: 1, C: 1.958, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 19, opt_time: 0.235 (s), beta: 1, C: 1.831, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 20: max |u| over all load cases = 5.385902e+00 m (5385.902037 mm)
+opt_iter: 20, opt_time: 0.277 (s), beta: 1, C: 1.720, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 21, opt_time: 0.235 (s), beta: 1, C: 1.622, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 22, opt_time: 0.179 (s), beta: 1, C: 1.535, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 23, opt_time: 0.262 (s), beta: 1, C: 1.457, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 24, opt_time: 0.207 (s), beta: 1, C: 1.387, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 25, opt_time: 0.255 (s), beta: 1, C: 1.323, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 26, opt_time: 0.176 (s), beta: 1, C: 1.265, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 27, opt_time: 0.25 (s), beta: 1, C: 1.212, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 28, opt_time: 0.287 (s), beta: 1, C: 1.163, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 29, opt_time: 0.263 (s), beta: 1, C: 1.118, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 30: max |u| over all load cases = 3.369765e+00 m (3369.765372 mm)
+opt_iter: 30, opt_time: 0.18 (s), beta: 1, C: 1.076, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 31, opt_time: 0.196 (s), beta: 1, C: 1.036, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 32, opt_time: 0.222 (s), beta: 1, C: 0.999, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 33, opt_time: 0.208 (s), beta: 1, C: 0.963, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 34, opt_time: 0.167 (s), beta: 1, C: 0.928, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 35, opt_time: 0.2 (s), beta: 1, C: 0.893, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 36, opt_time: 0.208 (s), beta: 1, C: 0.859, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 37, opt_time: 0.198 (s), beta: 1, C: 0.825, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 38, opt_time: 0.22 (s), beta: 1, C: 0.791, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 39, opt_time: 0.249 (s), beta: 1, C: 0.759, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 40: max |u| over all load cases = 2.380865e+00 m (2380.865482 mm)
+opt_iter: 40, opt_time: 0.214 (s), beta: 1, C: 0.727, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 41, opt_time: 0.197 (s), beta: 1, C: 0.697, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 42, opt_time: 0.252 (s), beta: 1, C: 0.669, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 43, opt_time: 0.256 (s), beta: 1, C: 0.643, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 44, opt_time: 0.195 (s), beta: 1, C: 0.618, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 45, opt_time: 0.253 (s), beta: 1, C: 0.594, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 46, opt_time: 0.221 (s), beta: 1, C: 0.573, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 47, opt_time: 0.206 (s), beta: 1, C: 0.552, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 48, opt_time: 0.205 (s), beta: 1, C: 0.540, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 49, opt_time: 0.241 (s), beta: 1, C: 0.530, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 50: max |u| over all load cases = 1.883953e+00 m (1883.952559 mm)
+opt_iter: 50, opt_time: 0.282 (s), beta: 2, C: 0.530, V: 0.073, U: 0.000, change: 0.020
+opt_iter: 51, opt_time: 0.259 (s), beta: 2, C: 0.493, V: 0.076, U: 0.000, change: 0.020
+opt_iter: 52, opt_time: 0.22 (s), beta: 2, C: 0.458, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 53, opt_time: 0.242 (s), beta: 2, C: 0.448, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 54, opt_time: 0.241 (s), beta: 2, C: 0.439, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 55, opt_time: 0.191 (s), beta: 2, C: 0.432, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 56, opt_time: 0.225 (s), beta: 2, C: 0.426, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 57, opt_time: 0.196 (s), beta: 2, C: 0.420, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 58, opt_time: 0.194 (s), beta: 2, C: 0.415, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 59, opt_time: 0.248 (s), beta: 2, C: 0.411, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 60: max |u| over all load cases = 1.536061e+00 m (1536.061316 mm)
+opt_iter: 60, opt_time: 0.251 (s), beta: 2, C: 0.407, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 61, opt_time: 0.175 (s), beta: 2, C: 0.403, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 62, opt_time: 0.198 (s), beta: 2, C: 0.400, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 63, opt_time: 0.204 (s), beta: 2, C: 0.397, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 64, opt_time: 0.232 (s), beta: 2, C: 0.394, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 65, opt_time: 0.193 (s), beta: 2, C: 0.391, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 66, opt_time: 0.389 (s), beta: 2, C: 0.389, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 67, opt_time: 0.416 (s), beta: 2, C: 0.387, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 68, opt_time: 0.431 (s), beta: 2, C: 0.385, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 69, opt_time: 0.295 (s), beta: 2, C: 0.383, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 70: max |u| over all load cases = 1.457917e+00 m (1457.916578 mm)
+opt_iter: 70, opt_time: 0.304 (s), beta: 2, C: 0.382, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 71, opt_time: 0.417 (s), beta: 2, C: 0.380, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 72, opt_time: 0.382 (s), beta: 2, C: 0.379, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 73, opt_time: 0.347 (s), beta: 2, C: 0.378, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 74, opt_time: 0.335 (s), beta: 2, C: 0.377, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 75, opt_time: 0.354 (s), beta: 2, C: 0.376, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 76, opt_time: 0.317 (s), beta: 2, C: 0.375, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 77, opt_time: 0.359 (s), beta: 2, C: 0.375, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 78, opt_time: 0.364 (s), beta: 2, C: 0.374, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 79, opt_time: 0.293 (s), beta: 2, C: 0.374, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 80: max |u| over all load cases = 1.426712e+00 m (1426.712209 mm)
+opt_iter: 80, opt_time: 0.276 (s), beta: 2, C: 0.373, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 81, opt_time: 0.398 (s), beta: 2, C: 0.373, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 82, opt_time: 0.41 (s), beta: 2, C: 0.372, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 83, opt_time: 0.249 (s), beta: 2, C: 0.372, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 84, opt_time: 0.282 (s), beta: 2, C: 0.371, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 85, opt_time: 0.393 (s), beta: 2, C: 0.371, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 86, opt_time: 0.339 (s), beta: 2, C: 0.371, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 87, opt_time: 0.323 (s), beta: 2, C: 0.370, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 88, opt_time: 0.266 (s), beta: 2, C: 0.370, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 89, opt_time: 0.228 (s), beta: 2, C: 0.370, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 90: max |u| over all load cases = 1.412259e+00 m (1412.258575 mm)
+opt_iter: 90, opt_time: 0.3 (s), beta: 2, C: 0.369, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 91, opt_time: 0.31 (s), beta: 2, C: 0.369, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 92, opt_time: 0.316 (s), beta: 2, C: 0.369, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 93, opt_time: 0.23 (s), beta: 2, C: 0.369, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 94, opt_time: 0.257 (s), beta: 2, C: 0.368, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 95, opt_time: 0.311 (s), beta: 2, C: 0.368, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 96, opt_time: 0.315 (s), beta: 2, C: 0.368, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 97, opt_time: 0.383 (s), beta: 2, C: 0.368, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 98, opt_time: 0.255 (s), beta: 2, C: 0.368, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 99, opt_time: 0.221 (s), beta: 2, C: 0.367, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 100: max |u| over all load cases = 1.283749e+00 m (1283.748710 mm)
+opt_iter: 100, opt_time: 0.422 (s), beta: 4, C: 0.336, V: 0.070, U: 0.000, change: 0.020
+opt_iter: 101, opt_time: 0.433 (s), beta: 4, C: 0.325, V: 0.072, U: 0.000, change: 0.020
+opt_iter: 102, opt_time: 0.343 (s), beta: 4, C: 0.312, V: 0.074, U: 0.000, change: 0.020
+opt_iter: 103, opt_time: 0.344 (s), beta: 4, C: 0.299, V: 0.076, U: 0.000, change: 0.020
+opt_iter: 104, opt_time: 0.337 (s), beta: 4, C: 0.286, V: 0.078, U: 0.000, change: 0.020
+opt_iter: 105, opt_time: 0.355 (s), beta: 4, C: 0.275, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 106, opt_time: 0.36 (s), beta: 4, C: 0.274, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 107, opt_time: 0.311 (s), beta: 4, C: 0.273, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 108, opt_time: 0.344 (s), beta: 4, C: 0.272, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 109, opt_time: 0.249 (s), beta: 4, C: 0.271, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 110: max |u| over all load cases = 1.074807e+00 m (1074.807276 mm)
+opt_iter: 110, opt_time: 0.332 (s), beta: 4, C: 0.270, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 111, opt_time: 0.316 (s), beta: 4, C: 0.270, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 112, opt_time: 0.325 (s), beta: 4, C: 0.269, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 113, opt_time: 0.301 (s), beta: 4, C: 0.269, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 114, opt_time: 0.313 (s), beta: 4, C: 0.268, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 115, opt_time: 0.259 (s), beta: 4, C: 0.268, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 116, opt_time: 0.297 (s), beta: 4, C: 0.267, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 117, opt_time: 0.299 (s), beta: 4, C: 0.267, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 118, opt_time: 0.295 (s), beta: 4, C: 0.266, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 119, opt_time: 0.337 (s), beta: 4, C: 0.266, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 120: max |u| over all load cases = 1.060550e+00 m (1060.549560 mm)
+opt_iter: 120, opt_time: 0.228 (s), beta: 4, C: 0.265, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 121, opt_time: 0.334 (s), beta: 4, C: 0.265, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 122, opt_time: 0.306 (s), beta: 4, C: 0.265, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 123, opt_time: 0.331 (s), beta: 4, C: 0.264, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 124, opt_time: 0.34 (s), beta: 4, C: 0.264, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 125, opt_time: 0.308 (s), beta: 4, C: 0.264, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 126, opt_time: 0.341 (s), beta: 4, C: 0.264, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 127, opt_time: 0.401 (s), beta: 4, C: 0.263, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 128, opt_time: 0.349 (s), beta: 4, C: 0.263, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 129, opt_time: 0.302 (s), beta: 4, C: 0.263, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 130: max |u| over all load cases = 1.048191e+00 m (1048.191145 mm)
+opt_iter: 130, opt_time: 0.339 (s), beta: 4, C: 0.263, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 131, opt_time: 0.336 (s), beta: 4, C: 0.262, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 132, opt_time: 0.315 (s), beta: 4, C: 0.262, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 133, opt_time: 0.423 (s), beta: 4, C: 0.262, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 134, opt_time: 0.4 (s), beta: 4, C: 0.262, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 135, opt_time: 0.223 (s), beta: 4, C: 0.261, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 136, opt_time: 0.399 (s), beta: 4, C: 0.261, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 137, opt_time: 0.435 (s), beta: 4, C: 0.261, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 138, opt_time: 0.318 (s), beta: 4, C: 0.261, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 139, opt_time: 0.262 (s), beta: 4, C: 0.261, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 140: max |u| over all load cases = 1.037181e+00 m (1037.181192 mm)
+opt_iter: 140, opt_time: 0.405 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 141, opt_time: 0.377 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 142, opt_time: 0.36 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 143, opt_time: 0.237 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 144, opt_time: 0.317 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 145, opt_time: 0.355 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 146, opt_time: 0.346 (s), beta: 4, C: 0.259, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 147, opt_time: 0.299 (s), beta: 4, C: 0.259, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 148, opt_time: 0.328 (s), beta: 4, C: 0.259, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 149, opt_time: 0.301 (s), beta: 4, C: 0.259, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 150: max |u| over all load cases = 8.687925e-01 m (868.792540 mm)
+opt_iter: 150, opt_time: 0.464 (s), beta: 8, C: 0.211, V: 0.074, U: 0.000, change: 0.020
+2026-07-29 15:43:12.191 (  52.965s) [    7F5859EB2140]vtkXOpenGLRenderWindow.:1460  WARN| bad X server connection. DISPLAY=
+INFO:src.random_fields.kl_expansion:KL expansion cache hit: loading output/cache/kl_expansion/kl_7b7f32d923c29f6ec2ef5ea2.npz
+INFO:src.random_fields.kl_expansion:KL expansion loaded from cache: N_kl=37 modes (95.10% variance explained, threshold=95%)
+INFO:src.random_fields.threshold_transform:Initialized threshold marginal transform: eta in [0.250, 0.750], Beta(alpha=2.00, beta=2.00)
+INFO:src.topology.heaviside_projection_glue:RandomFieldHeaviside ready: N_kl=1, variance_explained=1.0000, n_local_dofs=417 matched to global KL nodes
+INFO:src.random_fields.threshold_transform:Initialized threshold marginal transform: eta in [0.250, 0.750], Beta(alpha=2.00, beta=2.00)
+INFO:src.topology.heaviside_projection_glue:RandomFieldHeaviside ready: N_kl=1, variance_explained=1.0000, n_local_dofs=1728 matched to global KL nodes
+INFO:src.optimization.dolfiny_mma_driver:Sample-parallelism enabled: 4 group(s) x 8 rank(s); each PCE/MC sample batch is split across groups and solved concurrently.
+WARNING:src.provenance:2 config value(s) are OVERRIDDEN in code and did not affect this run as written in config.yaml: filter_radius, vol_frac. The effective values are recorded in the manifest; cite those, not the YAML.
+INFO:src.sampling.sampler:Generated 64 'monte_carlo' samples in 1-dimensional KL coefficient space (seed=7)
+INFO:__main__:=== arm=uniform: n_kl=1, N=64, lambda=4 ===
+INFO:src.optimization.saa_robust_driver:SAA lambda=4: beta continuation over 5 stage(s) [8.0, 16.0, 32.0, 64.0, 128.0] with iteration budgets [30, 30, 30, 30, 30] (total 150)
+INFO:src.optimization.saa_robust_driver:SAA lambda=4 stage 1/5: beta=8, max_iter=30
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.005 solve=1.598 sens=0.023
+INFO:src.surrogate.fea_at_samples:eta=0.039 proj=0.001 solve=1.274 sens=0.022
+INFO:src.surrogate.fea_at_samples:eta=0.043 proj=0.001 solve=1.090 sens=0.021
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (19.44s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=1: mu_C=0.524551 sigma_C=0.873731 E[V]=0.0776932 J=4.01947 (fea_batches=1)
+INFO:src.fenitop.mma:[MMA diag] it=1 raw objective f=4.019475e+00, |grad|=9.9281e-01, max|grad|=1.1058e-02
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0776932 h_value=0.00230681
+INFO:src.fenitop.mma:[MMA opt] it=1 stat_rel=0.4931 (abs=0.02115) feas=0 comp=0 dx=nan [|grad f|=0.9928, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.002 solve=0.917 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.001 solve=1.089 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.000 solve=1.075 sens=0.012
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (18.28s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=2: mu_C=0.468538 sigma_C=0.746102 E[V]=0.0801173 J=3.45294 (fea_batches=2)
+INFO:src.fenitop.mma:[MMA diag] it=2 raw objective f=3.452945e+00, |grad|=8.3304e-01, max|grad|=9.2408e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0801173 h_value=-0.000117288
+INFO:src.fenitop.mma:[MMA opt] it=2 stat_rel=0.47 (abs=0.01623) feas=0.001466 comp=0.08546 dx=0.02 [|grad f|=0.833, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.000 solve=0.665 sens=0.012
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.000 solve=0.494 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.000 solve=0.502 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (10.70s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=3: mu_C=0.449818 sigma_C=0.690315 E[V]=0.0800102 J=3.21108 (fea_batches=3)
+INFO:src.fenitop.mma:[MMA diag] it=3 raw objective f=3.211076e+00, |grad|=7.2910e-01, max|grad|=9.2575e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0800102 h_value=-1.02025e-05
+INFO:src.fenitop.mma:[MMA opt] it=3 stat_rel=0.3962 (abs=0.01132) feas=0.0001275 comp=0.01879 dx=0.02 [|grad f|=0.7291, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.004 solve=1.632 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.014 solve=1.214 sens=0.017
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.019 solve=1.401 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (24.77s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=4: mu_C=0.43946 sigma_C=0.656129 E[V]=0.0798755 J=3.06398 (fea_batches=4)
+INFO:src.fenitop.mma:[MMA diag] it=4 raw objective f=3.063975e+00, |grad|=6.6511e-01, max|grad|=9.2192e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0798755 h_value=0.000124468
+INFO:src.fenitop.mma:[MMA opt] it=4 stat_rel=0.347 (abs=0.008505) feas=0 comp=0.2635 dx=0.02 [|grad f|=0.6651, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.010 solve=1.540 sens=0.020
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.014 solve=1.358 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.001 solve=1.236 sens=0.019
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (27.28s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=5: mu_C=0.431609 sigma_C=0.630939 E[V]=0.0797765 J=2.95537 (fea_batches=5)
+INFO:src.fenitop.mma:[MMA diag] it=5 raw objective f=2.955366e+00, |grad|=6.2767e-01, max|grad|=8.9256e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0797765 h_value=0.000223527
+INFO:src.fenitop.mma:[MMA opt] it=5 stat_rel=0.3111 (abs=0.006969) feas=0 comp=0.4732 dx=0.02 [|grad f|=0.6277, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.033 proj=0.001 solve=1.783 sens=0.023
+INFO:src.surrogate.fea_at_samples:eta=0.036 proj=0.001 solve=1.392 sens=0.026
+INFO:src.surrogate.fea_at_samples:eta=0.037 proj=0.002 solve=1.291 sens=0.023
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (29.95s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=6: mu_C=0.421259 sigma_C=0.601342 E[V]=0.0799431 J=2.82663 (fea_batches=6)
+INFO:src.fenitop.mma:[MMA diag] it=6 raw objective f=2.826628e+00, |grad|=5.9171e-01, max|grad|=8.4866e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799431 h_value=5.68742e-05
+INFO:src.fenitop.mma:[MMA opt] it=6 stat_rel=0.2655 (abs=0.005941) feas=0 comp=0.1129 dx=0.02 [|grad f|=0.5917, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.030 proj=0.001 solve=1.737 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.000 solve=0.969 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.009 solve=0.797 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (13.59s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=7: mu_C=0.416771 sigma_C=0.585804 E[V]=0.0797876 J=2.75999 (fea_batches=7)
+INFO:src.fenitop.mma:[MMA diag] it=7 raw objective f=2.759986e+00, |grad|=5.7575e-01, max|grad|=8.1340e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0797876 h_value=0.000212376
+INFO:src.fenitop.mma:[MMA opt] it=7 stat_rel=0.2669 (abs=0.005886) feas=0 comp=0.4214 dx=0.02 [|grad f|=0.5758, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.005 solve=0.607 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.004 solve=0.658 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.001 solve=0.600 sens=0.012
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (12.07s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=8: mu_C=0.408117 sigma_C=0.560675 E[V]=0.0799727 J=2.65082 (fea_batches=8)
+INFO:src.fenitop.mma:[MMA diag] it=8 raw objective f=2.650817e+00, |grad|=5.4816e-01, max|grad|=7.6983e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799727 h_value=2.72876e-05
+INFO:src.fenitop.mma:[MMA opt] it=8 stat_rel=0.2795 (abs=0.005913) feas=0 comp=0.05083 dx=0.02 [|grad f|=0.5482, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.032 proj=0.002 solve=1.935 sens=0.022
+INFO:src.surrogate.fea_at_samples:eta=0.032 proj=0.001 solve=1.498 sens=0.018
+INFO:src.surrogate.fea_at_samples:eta=0.042 proj=0.002 solve=1.544 sens=0.026
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (27.98s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=9: mu_C=0.404259 sigma_C=0.546663 E[V]=0.0798698 J=2.59091 (fea_batches=9)
+INFO:src.fenitop.mma:[MMA diag] it=9 raw objective f=2.590910e+00, |grad|=5.3367e-01, max|grad|=7.3662e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0798698 h_value=0.000130176
+INFO:src.fenitop.mma:[MMA opt] it=9 stat_rel=0.2848 (abs=0.005744) feas=0 comp=0.2425 dx=0.02 [|grad f|=0.5337, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.038 proj=0.001 solve=1.900 sens=0.022
+INFO:src.surrogate.fea_at_samples:eta=0.039 proj=0.002 solve=1.570 sens=0.025
+INFO:src.surrogate.fea_at_samples:eta=0.036 proj=0.002 solve=1.564 sens=0.022
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (28.62s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=10: mu_C=0.398317 sigma_C=0.52774 E[V]=0.0799665 J=2.50928 (fea_batches=10)
+INFO:src.fenitop.mma:[MMA diag] it=10 raw objective f=2.509275e+00, |grad|=5.1216e-01, max|grad|=7.0263e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799665 h_value=3.35378e-05
+INFO:src.fenitop.mma:[MMA opt] it=10 stat_rel=0.2921 (abs=0.005525) feas=0 comp=0.05989 dx=0.02 [|grad f|=0.5122, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.012 solve=2.012 sens=0.022
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.004 solve=1.680 sens=0.012
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.007 solve=1.656 sens=0.016
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (26.16s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=11: mu_C=0.395914 sigma_C=0.516851 E[V]=0.0798484 J=2.46332 (fea_batches=11)
+INFO:src.fenitop.mma:[MMA diag] it=11 raw objective f=2.463317e+00, |grad|=4.9937e-01, max|grad|=6.7813e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0798484 h_value=0.000151623
+INFO:src.fenitop.mma:[MMA opt] it=11 stat_rel=0.2894 (abs=0.005205) feas=0 comp=0.2707 dx=0.02 [|grad f|=0.4994, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.002 solve=1.336 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.001 solve=1.128 sens=0.017
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.011 solve=1.049 sens=0.017
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (16.04s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=12: mu_C=0.390808 sigma_C=0.499945 E[V]=0.0799668 J=2.39059 (fea_batches=12)
+INFO:src.fenitop.mma:[MMA diag] it=12 raw objective f=2.390587e+00, |grad|=4.7911e-01, max|grad|=6.5035e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799668 h_value=3.3222e-05
+INFO:src.fenitop.mma:[MMA opt] it=12 stat_rel=0.2921 (abs=0.004952) feas=0 comp=0.05621 dx=0.02 [|grad f|=0.4791, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.004 solve=0.631 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.013 proj=0.004 solve=0.512 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.005 solve=0.421 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (16.99s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=13: mu_C=0.389027 sigma_C=0.490661 E[V]=0.079867 J=2.35167 (fea_batches=13)
+INFO:src.fenitop.mma:[MMA diag] it=13 raw objective f=2.351672e+00, |grad|=4.6748e-01, max|grad|=6.3071e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.079867 h_value=0.000133006
+INFO:src.fenitop.mma:[MMA opt] it=13 stat_rel=0.2872 (abs=0.004617) feas=0 comp=0.225 dx=0.02 [|grad f|=0.4675, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.030 proj=0.005 solve=1.738 sens=0.020
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.005 solve=1.577 sens=0.020
+INFO:src.surrogate.fea_at_samples:eta=0.033 proj=0.000 solve=1.271 sens=0.022
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (28.89s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=14: mu_C=0.385045 sigma_C=0.476594 E[V]=0.0799653 J=2.29142 (fea_batches=14)
+INFO:src.fenitop.mma:[MMA diag] it=14 raw objective f=2.291419e+00, |grad|=4.5009e-01, max|grad|=6.0808e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799653 h_value=3.47325e-05
+INFO:src.fenitop.mma:[MMA opt] it=14 stat_rel=0.2879 (abs=0.004354) feas=0 comp=0.05572 dx=0.02 [|grad f|=0.4501, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.038 proj=0.002 solve=1.811 sens=0.022
+INFO:src.surrogate.fea_at_samples:eta=0.032 proj=0.001 solve=1.487 sens=0.014
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.004 solve=1.432 sens=0.022
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (27.45s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=15: mu_C=0.383892 sigma_C=0.468951 E[V]=0.0798651 J=2.2597 (fea_batches=15)
+INFO:src.fenitop.mma:[MMA diag] it=15 raw objective f=2.259695e+00, |grad|=4.4014e-01, max|grad|=5.9257e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0798651 h_value=0.000134882
+INFO:src.fenitop.mma:[MMA opt] it=15 stat_rel=0.2791 (abs=0.004026) feas=0 comp=0.2164 dx=0.02 [|grad f|=0.4401, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.027 proj=0.001 solve=1.682 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.028 proj=0.002 solve=1.575 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.031 proj=0.001 solve=1.371 sens=0.020
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (25.86s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=16: mu_C=0.380342 sigma_C=0.456197 E[V]=0.0799806 J=2.20513 (fea_batches=16)
+INFO:src.fenitop.mma:[MMA diag] it=16 raw objective f=2.205131e+00, |grad|=4.2416e-01, max|grad|=5.7257e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799806 h_value=1.93965e-05
+INFO:src.fenitop.mma:[MMA opt] it=16 stat_rel=0.2686 (abs=0.003657) feas=0 comp=0.02942 dx=0.02 [|grad f|=0.4242, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.000 solve=0.916 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.000 solve=0.754 sens=0.013
+INFO:src.surrogate.fea_at_samples:eta=0.027 proj=0.001 solve=0.629 sens=0.012
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (12.08s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=17: mu_C=0.379 sigma_C=0.448442 E[V]=0.0799364 J=2.17277 (fea_batches=17)
+INFO:src.fenitop.mma:[MMA diag] it=17 raw objective f=2.172770e+00, |grad|=4.1396e-01, max|grad|=5.5851e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799364 h_value=6.36455e-05
+INFO:src.fenitop.mma:[MMA opt] it=17 stat_rel=0.2569 (abs=0.003373) feas=0 comp=0.09653 dx=0.02 [|grad f|=0.414, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.000 solve=0.706 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.001 solve=1.280 sens=0.024
+INFO:src.surrogate.fea_at_samples:eta=0.041 proj=0.004 solve=1.576 sens=0.020
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (26.32s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=18: mu_C=0.378982 sigma_C=0.443655 E[V]=0.0798024 J=2.1536 (fea_batches=18)
+INFO:src.fenitop.mma:[MMA diag] it=18 raw objective f=2.153602e+00, |grad|=4.0732e-01, max|grad|=5.4704e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0798024 h_value=0.000197551
+INFO:src.fenitop.mma:[MMA opt] it=18 stat_rel=0.2475 (abs=0.003151) feas=0 comp=0.2996 dx=0.02 [|grad f|=0.4073, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.032 proj=0.001 solve=1.548 sens=0.022
+INFO:src.surrogate.fea_at_samples:eta=0.032 proj=0.001 solve=1.471 sens=0.023
+INFO:src.surrogate.fea_at_samples:eta=0.037 proj=0.002 solve=1.353 sens=0.019
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (27.81s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=19: mu_C=0.37534 sigma_C=0.431215 E[V]=0.0799898 J=2.1002 (fea_batches=19)
+INFO:src.fenitop.mma:[MMA diag] it=19 raw objective f=2.100199e+00, |grad|=3.9178e-01, max|grad|=5.2792e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799898 h_value=1.02244e-05
+INFO:src.fenitop.mma:[MMA opt] it=19 stat_rel=0.2493 (abs=0.002989) feas=0 comp=0.01432 dx=0.02 [|grad f|=0.3918, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.032 proj=0.006 solve=1.618 sens=0.018
+INFO:src.surrogate.fea_at_samples:eta=0.032 proj=0.001 solve=1.474 sens=0.022
+INFO:src.surrogate.fea_at_samples:eta=0.038 proj=0.001 solve=1.656 sens=0.017
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (28.52s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=20: mu_C=0.373822 sigma_C=0.423556 E[V]=0.080009 J=2.06805 (fea_batches=20)
+INFO:src.fenitop.mma:[MMA diag] it=20 raw objective f=2.068047e+00, |grad|=3.8196e-01, max|grad|=5.1389e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.080009 h_value=-8.9554e-06
+INFO:src.fenitop.mma:[MMA opt] it=20 stat_rel=0.2396 (abs=0.002758) feas=0.0001119 comp=0.01255 dx=0.02 [|grad f|=0.382, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.011 solve=1.469 sens=0.019
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.010 solve=1.182 sens=0.019
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.016 solve=1.363 sens=0.023
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (16.29s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=21: mu_C=0.373666 sigma_C=0.41892 E[V]=0.0799221 J=2.04935 (fea_batches=21)
+INFO:src.fenitop.mma:[MMA diag] it=21 raw objective f=2.049347e+00, |grad|=3.7583e-01, max|grad|=5.0238e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799221 h_value=7.79222e-05
+INFO:src.fenitop.mma:[MMA opt] it=21 stat_rel=0.2293 (abs=0.002575) feas=0 comp=0.1092 dx=0.02 [|grad f|=0.3758, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.000 solve=0.781 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.000 solve=0.499 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.000 solve=0.623 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (16.87s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=22: mu_C=0.3718 sigma_C=0.410889 E[V]=0.0799907 J=2.01536 (fea_batches=22)
+INFO:src.fenitop.mma:[MMA diag] it=22 raw objective f=2.015356e+00, |grad|=3.6581e-01, max|grad|=4.8786e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799907 h_value=9.29727e-06
+INFO:src.fenitop.mma:[MMA opt] it=22 stat_rel=0.2267 (abs=0.002441) feas=0 comp=0.01245 dx=0.02 [|grad f|=0.3658, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.004 solve=1.578 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.001 solve=1.397 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.001 solve=1.452 sens=0.012
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (28.55s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=23: mu_C=0.371494 sigma_C=0.406365 E[V]=0.079925 J=1.99695 (fea_batches=23)
+INFO:src.fenitop.mma:[MMA diag] it=23 raw objective f=1.996955e+00, |grad|=3.6011e-01, max|grad|=4.7585e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.079925 h_value=7.49693e-05
+INFO:src.fenitop.mma:[MMA opt] it=23 stat_rel=0.2171 (abs=0.002281) feas=0 comp=0.1004 dx=0.02 [|grad f|=0.3601, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.010 solve=1.818 sens=0.021
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.012 solve=1.763 sens=0.017
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.008 solve=1.453 sens=0.022
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (28.41s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=24: mu_C=0.370025 sigma_C=0.399471 E[V]=0.079975 J=1.96791 (fea_batches=24)
+INFO:src.fenitop.mma:[MMA diag] it=24 raw objective f=1.967909e+00, |grad|=3.5167e-01, max|grad|=4.6239e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.079975 h_value=2.49722e-05
+INFO:src.fenitop.mma:[MMA opt] it=24 stat_rel=0.2163 (abs=0.002176) feas=0 comp=0.03216 dx=0.02 [|grad f|=0.3517, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.010 solve=1.820 sens=0.019
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.011 solve=1.632 sens=0.021
+INFO:src.surrogate.fea_at_samples:eta=0.027 proj=0.017 solve=1.552 sens=0.012
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (23.52s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=25: mu_C=0.369714 sigma_C=0.395128 E[V]=0.0799247 J=1.95023 (fea_batches=25)
+INFO:src.fenitop.mma:[MMA diag] it=25 raw objective f=1.950227e+00, |grad|=3.4627e-01, max|grad|=4.5166e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799247 h_value=7.53104e-05
+INFO:src.fenitop.mma:[MMA opt] it=25 stat_rel=0.2072 (abs=0.002037) feas=0 comp=0.09699 dx=0.02 [|grad f|=0.3463, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.008 solve=1.262 sens=0.014
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.003 solve=1.126 sens=0.017
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.011 solve=0.853 sens=0.011
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (14.61s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=26: mu_C=0.370165 sigma_C=0.392446 E[V]=0.0798093 J=1.93995 (fea_batches=26)
+INFO:src.fenitop.mma:[MMA diag] it=26 raw objective f=1.939948e+00, |grad|=3.4287e-01, max|grad|=4.4353e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0798093 h_value=0.000190724
+INFO:src.fenitop.mma:[MMA opt] it=26 stat_rel=0.2117 (abs=0.002061) feas=0 comp=0.2456 dx=0.02 [|grad f|=0.3429, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.000 solve=0.751 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.000 solve=0.638 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.000 solve=0.474 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (18.48s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=27: mu_C=0.367674 sigma_C=0.384073 E[V]=0.0799642 J=1.90396 (fea_batches=27)
+INFO:src.fenitop.mma:[MMA diag] it=27 raw objective f=1.903965e+00, |grad|=3.3300e-01, max|grad|=4.3163e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799642 h_value=3.58234e-05
+INFO:src.fenitop.mma:[MMA opt] it=27 stat_rel=0.2288 (abs=0.002168) feas=0 comp=0.04302 dx=0.02 [|grad f|=0.333, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.007 solve=1.779 sens=0.019
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.016 solve=1.461 sens=0.023
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.021 solve=1.476 sens=0.019
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (26.61s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=28: mu_C=0.366501 sigma_C=0.378513 E[V]=0.0799986 J=1.88055 (fea_batches=28)
+INFO:src.fenitop.mma:[MMA diag] it=28 raw objective f=1.880554e+00, |grad|=3.2651e-01, max|grad|=4.2232e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799986 h_value=1.36253e-06
+INFO:src.fenitop.mma:[MMA opt] it=28 stat_rel=0.2289 (abs=0.002167) feas=0 comp=0.001636 dx=0.02 [|grad f|=0.3265, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.006 solve=1.692 sens=0.014
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.008 solve=1.487 sens=0.023
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.024 solve=1.327 sens=0.013
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (26.84s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=29: mu_C=0.36625 sigma_C=0.374847 E[V]=0.079952 J=1.86564 (fea_batches=29)
+INFO:src.fenitop.mma:[MMA diag] it=29 raw objective f=1.865637e+00, |grad|=3.2222e-01, max|grad|=4.1483e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.079952 h_value=4.79574e-05
+INFO:src.fenitop.mma:[MMA opt] it=29 stat_rel=0.2304 (abs=0.002186) feas=0 comp=0.05759 dx=0.02 [|grad f|=0.3222, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.018 solve=1.568 sens=0.024
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.016 solve=1.354 sens=0.023
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.026 solve=1.482 sens=0.023
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (26.38s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=30: mu_C=0.366599 sigma_C=0.372404 E[V]=0.0798517 J=1.85621 (fea_batches=30)
+INFO:src.fenitop.mma:[MMA diag] it=30 raw objective f=1.856214e+00, |grad|=3.1935e-01, max|grad|=4.0895e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0798517 h_value=0.000148327
+INFO:src.fenitop.mma:[MMA opt] it=30 stat_rel=0.2329 (abs=0.002217) feas=0 comp=0.1781 dx=0.02 [|grad f|=0.3194, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.017 solve=1.489 sens=0.023
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.019 solve=1.392 sens=0.020
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.023 solve=1.352 sens=0.013
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (15.56s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=31: mu_C=0.364519 sigma_C=0.365122 E[V]=0.0799956 J=1.82501 (fea_batches=31)
+WARNING:src.fenitop.mma:[MMA opt] iteration budget (30) exhausted WITHOUT meeting the first-order conditions: stat_rel=0.2329 (abs=0.002217) feas=0 comp=0.1781 dx=0.02 [|grad f|=0.3194, diagnostic only]. Reporting DIVERGED_MAXITS -- the returned design is the best iterate reached, not a converged optimum.
+WARNING:src.optimization.saa_robust_driver:TAO MMA did NOT reach first-order optimality for lambda=4 (reason=-2). Returning the best feasible design evaluated; it is NOT a converged optimum and must not be reported as one. Final optimality: stat_rel=0.2329 (abs=0.002217) feas=0 comp=0.1781 dx=0.02 [|grad f|=0.3194, diagnostic only]
+INFO:src.optimization.saa_robust_driver:SAA lambda=4 beta=8 done: mu_C=0.364519 sigma_C=0.365122 E[V]=0.0799956 (violation 0%) M_nd=6.05% converged=False reason=-2 (31 FEA batches of N=64) | stat_rel=0.2329 (abs=0.002217) feas=0 comp=0.1781 dx=0.02 [|grad f|=0.3194, diagnostic only]
+INFO:src.optimization.saa_robust_driver:SAA lambda=4 stage 2/5: beta=16, max_iter=30
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.006 solve=0.602 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.013 proj=0.005 solve=0.436 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.006 solve=0.549 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (17.69s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=1: mu_C=0.354162 sigma_C=0.461798 E[V]=0.0782131 J=2.20135 (fea_batches=1)
+INFO:src.fenitop.mma:[MMA diag] it=1 raw objective f=2.201353e+00, |grad|=7.5462e-01, max|grad|=6.5205e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0782131 h_value=0.00178686
+INFO:src.fenitop.mma:[MMA opt] it=1 stat_rel=0.2704 (abs=0.01191) feas=0 comp=0 dx=nan [|grad f|=0.7546, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.016 solve=1.740 sens=0.018
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.018 solve=1.606 sens=0.021
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.028 solve=1.438 sens=0.021
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (27.99s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=2: mu_C=0.332206 sigma_C=0.383142 E[V]=0.0800152 J=1.86477 (fea_batches=2)
+INFO:src.fenitop.mma:[MMA diag] it=2 raw objective f=1.864774e+00, |grad|=5.7883e-01, max|grad|=5.4434e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0800152 h_value=-1.52276e-05
+INFO:src.fenitop.mma:[MMA opt] it=2 stat_rel=0.2247 (abs=0.008228) feas=0.0001903 comp=0.01767 dx=0.02 [|grad f|=0.5788, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.012 solve=1.572 sens=0.021
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.022 solve=1.504 sens=0.022
+INFO:src.surrogate.fea_at_samples:eta=0.027 proj=0.016 solve=1.290 sens=0.022
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (26.46s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=3: mu_C=0.332544 sigma_C=0.367257 E[V]=0.0798112 J=1.80157 (fea_batches=3)
+INFO:src.fenitop.mma:[MMA diag] it=3 raw objective f=1.801573e+00, |grad|=5.2623e-01, max|grad|=5.1568e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0798112 h_value=0.000188762
+INFO:src.fenitop.mma:[MMA opt] it=3 stat_rel=0.194 (abs=0.005777) feas=0 comp=0.299 dx=0.02 [|grad f|=0.5262, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.016 solve=1.499 sens=0.018
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.015 solve=1.446 sens=0.018
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.020 solve=1.503 sens=0.023
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (26.55s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=4: mu_C=0.331041 sigma_C=0.349054 E[V]=0.0799578 J=1.72726 (fea_batches=4)
+INFO:src.fenitop.mma:[MMA diag] it=4 raw objective f=1.727256e+00, |grad|=4.7587e-01, max|grad|=4.8366e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799578 h_value=4.22073e-05
+INFO:src.fenitop.mma:[MMA opt] it=4 stat_rel=0.191 (abs=0.004376) feas=0 comp=0.06416 dx=0.02 [|grad f|=0.4759, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.016 solve=1.176 sens=0.019
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.017 solve=0.908 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.005 solve=0.899 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (15.50s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=5: mu_C=0.331461 sigma_C=0.33785 E[V]=0.0799673 J=1.68286 (fea_batches=5)
+INFO:src.fenitop.mma:[MMA diag] it=5 raw objective f=1.682861e+00, |grad|=4.4237e-01, max|grad|=4.7040e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799673 h_value=3.27163e-05
+INFO:src.fenitop.mma:[MMA opt] it=5 stat_rel=0.211 (abs=0.003862) feas=0 comp=0.04757 dx=0.02 [|grad f|=0.4424, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.005 solve=0.548 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.013 proj=0.005 solve=0.573 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.006 solve=0.621 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (22.17s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=6: mu_C=0.331494 sigma_C=0.327843 E[V]=0.0800005 J=1.64287 (fea_batches=6)
+INFO:src.fenitop.mma:[MMA diag] it=6 raw objective f=1.642865e+00, |grad|=4.1572e-01, max|grad|=4.5904e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0800005 h_value=-5.20925e-07
+INFO:src.fenitop.mma:[MMA opt] it=6 stat_rel=0.2162 (abs=0.003536) feas=6.512e-06 comp=0.0007017 dx=0.02 [|grad f|=0.4157, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.016 solve=1.549 sens=0.021
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.018 solve=1.532 sens=0.021
+INFO:src.surrogate.fea_at_samples:eta=0.041 proj=0.002 solve=1.465 sens=0.022
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (28.46s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=7: mu_C=0.33177 sigma_C=0.31996 E[V]=0.0799905 J=1.61161 (fea_batches=7)
+INFO:src.fenitop.mma:[MMA diag] it=7 raw objective f=1.611609e+00, |grad|=3.9591e-01, max|grad|=4.4830e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799905 h_value=9.4677e-06
+INFO:src.fenitop.mma:[MMA opt] it=7 stat_rel=0.217 (abs=0.003245) feas=0 comp=0.01208 dx=0.02 [|grad f|=0.3959, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.032 proj=0.001 solve=1.698 sens=0.020
+INFO:src.surrogate.fea_at_samples:eta=0.037 proj=0.001 solve=1.615 sens=0.023
+INFO:src.surrogate.fea_at_samples:eta=0.041 proj=0.001 solve=1.544 sens=0.015
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (28.77s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=8: mu_C=0.331788 sigma_C=0.312499 E[V]=0.0799964 J=1.58178 (fea_batches=8)
+INFO:src.fenitop.mma:[MMA diag] it=8 raw objective f=1.581782e+00, |grad|=3.7831e-01, max|grad|=4.3764e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799964 h_value=3.61182e-06
+INFO:src.fenitop.mma:[MMA opt] it=8 stat_rel=0.2172 (abs=0.003064) feas=0 comp=0.004394 dx=0.02 [|grad f|=0.3783, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.035 proj=0.001 solve=1.801 sens=0.020
+INFO:src.surrogate.fea_at_samples:eta=0.032 proj=0.001 solve=1.599 sens=0.020
+INFO:src.surrogate.fea_at_samples:eta=0.037 proj=0.001 solve=1.567 sens=0.017
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (23.32s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=9: mu_C=0.33172 sigma_C=0.305898 E[V]=0.0799929 J=1.55531 (fea_batches=9)
+INFO:src.fenitop.mma:[MMA diag] it=9 raw objective f=1.555314e+00, |grad|=3.6366e-01, max|grad|=4.2718e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799929 h_value=7.05157e-06
+INFO:src.fenitop.mma:[MMA opt] it=9 stat_rel=0.2252 (abs=0.002991) feas=0 comp=0.008284 dx=0.02 [|grad f|=0.3637, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.001 solve=1.118 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.001 solve=0.912 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.001 solve=0.795 sens=0.013
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (15.95s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=10: mu_C=0.332893 sigma_C=0.303091 E[V]=0.0798322 J=1.54526 (fea_batches=10)
+INFO:src.fenitop.mma:[MMA diag] it=10 raw objective f=1.545258e+00, |grad|=3.5772e-01, max|grad|=4.2210e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0798322 h_value=0.000167836
+INFO:src.fenitop.mma:[MMA opt] it=10 stat_rel=0.2226 (abs=0.002923) feas=0 comp=0.1971 dx=0.02 [|grad f|=0.3577, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.001 solve=1.451 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.031 proj=0.001 solve=1.227 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.036 proj=0.001 solve=1.073 sens=0.017
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (24.36s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=11: mu_C=0.331256 sigma_C=0.293764 E[V]=0.0800212 J=1.50631 (fea_batches=11)
+INFO:src.fenitop.mma:[MMA diag] it=11 raw objective f=1.506312e+00, |grad|=3.3803e-01, max|grad|=4.0660e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0800212 h_value=-2.12227e-05
+INFO:src.fenitop.mma:[MMA opt] it=11 stat_rel=0.25 (abs=0.002901) feas=0.0002653 comp=0.0233 dx=0.02 [|grad f|=0.338, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.001 solve=1.541 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.001 solve=1.389 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.001 solve=1.210 sens=0.012
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (26.64s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=12: mu_C=0.331484 sigma_C=0.289971 E[V]=0.0799499 J=1.49137 (fea_batches=12)
+INFO:src.fenitop.mma:[MMA diag] it=12 raw objective f=1.491367e+00, |grad|=3.3100e-01, max|grad|=3.9859e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799499 h_value=5.01432e-05
+INFO:src.fenitop.mma:[MMA opt] it=12 stat_rel=0.2491 (abs=0.002829) feas=0 comp=0.05505 dx=0.02 [|grad f|=0.331, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.031 proj=0.001 solve=1.569 sens=0.017
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.003 solve=1.618 sens=0.019
+INFO:src.surrogate.fea_at_samples:eta=0.029 proj=0.005 solve=1.490 sens=0.021
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (26.41s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=13: mu_C=0.33178 sigma_C=0.286462 E[V]=0.0798827 J=1.47763 (fea_batches=13)
+INFO:src.fenitop.mma:[MMA diag] it=13 raw objective f=1.477627e+00, |grad|=3.2430e-01, max|grad|=3.9105e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0798827 h_value=0.000117281
+INFO:src.fenitop.mma:[MMA opt] it=13 stat_rel=0.2546 (abs=0.00277) feas=0 comp=0.1287 dx=0.02 [|grad f|=0.3243, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.005 solve=1.488 sens=0.018
+INFO:src.surrogate.fea_at_samples:eta=0.030 proj=0.001 solve=1.208 sens=0.019
+INFO:src.surrogate.fea_at_samples:eta=0.031 proj=0.003 solve=1.187 sens=0.017
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (17.17s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=14: mu_C=0.330694 sigma_C=0.280556 E[V]=0.079964 J=1.45292 (fea_batches=14)
+INFO:src.fenitop.mma:[MMA diag] it=14 raw objective f=1.452918e+00, |grad|=3.1303e-01, max|grad|=3.8067e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.079964 h_value=3.59704e-05
+INFO:src.fenitop.mma:[MMA opt] it=14 stat_rel=0.2543 (abs=0.002577) feas=0 comp=0.0376 dx=0.02 [|grad f|=0.313, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.001 solve=0.653 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.001 solve=0.521 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.000 solve=0.622 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (17.99s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=15: mu_C=0.330488 sigma_C=0.277276 E[V]=0.0799215 J=1.43959 (fea_batches=15)
+INFO:src.fenitop.mma:[MMA diag] it=15 raw objective f=1.439590e+00, |grad|=3.0751e-01, max|grad|=3.7330e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799215 h_value=7.84993e-05
+INFO:src.fenitop.mma:[MMA opt] it=15 stat_rel=0.2553 (abs=0.002552) feas=0 comp=0.08206 dx=0.02 [|grad f|=0.3075, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.009 solve=1.677 sens=0.021
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.007 solve=1.577 sens=0.031
+INFO:src.surrogate.fea_at_samples:eta=0.034 proj=0.003 solve=1.515 sens=0.021
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (30.22s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=16: mu_C=0.329382 sigma_C=0.272636 E[V]=0.0799709 J=1.41993 (fea_batches=16)
+INFO:src.fenitop.mma:[MMA diag] it=16 raw objective f=1.419926e+00, |grad|=2.9943e-01, max|grad|=3.6452e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799709 h_value=2.91337e-05
+INFO:src.fenitop.mma:[MMA opt] it=16 stat_rel=0.2683 (abs=0.00257) feas=0 comp=0.02933 dx=0.02 [|grad f|=0.2994, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.012 solve=1.786 sens=0.023
+INFO:src.surrogate.fea_at_samples:eta=0.031 proj=0.001 solve=1.622 sens=0.024
+INFO:src.surrogate.fea_at_samples:eta=0.034 proj=0.002 solve=1.470 sens=0.024
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (29.54s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=17: mu_C=0.32901 sigma_C=0.269923 E[V]=0.0799271 J=1.4087 (fea_batches=17)
+INFO:src.fenitop.mma:[MMA diag] it=17 raw objective f=1.408700e+00, |grad|=2.9527e-01, max|grad|=3.5795e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799271 h_value=7.28582e-05
+INFO:src.fenitop.mma:[MMA opt] it=17 stat_rel=0.2711 (abs=0.002567) feas=0 comp=0.07335 dx=0.02 [|grad f|=0.2953, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.031 proj=0.007 solve=1.668 sens=0.017
+INFO:src.surrogate.fea_at_samples:eta=0.033 proj=0.002 solve=1.367 sens=0.019
+INFO:src.surrogate.fea_at_samples:eta=0.030 proj=0.001 solve=1.370 sens=0.018
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (25.81s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=18: mu_C=0.327906 sigma_C=0.266024 E[V]=0.0799665 J=1.392 (fea_batches=18)
+INFO:src.fenitop.mma:[MMA diag] it=18 raw objective f=1.392003e+00, |grad|=2.8888e-01, max|grad|=3.5005e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799665 h_value=3.35184e-05
+INFO:src.fenitop.mma:[MMA opt] it=18 stat_rel=0.2135 (abs=0.001965) feas=0 comp=0.03244 dx=0.02 [|grad f|=0.2889, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.027 proj=0.000 solve=0.856 sens=0.013
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.000 solve=0.758 sens=0.012
+INFO:src.surrogate.fea_at_samples:eta=0.029 proj=0.001 solve=0.638 sens=0.013
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (12.45s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=19: mu_C=0.327421 sigma_C=0.263728 E[V]=0.0799276 J=1.38233 (fea_batches=19)
+INFO:src.fenitop.mma:[MMA diag] it=19 raw objective f=1.382333e+00, |grad|=2.8567e-01, max|grad|=3.4412e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799276 h_value=7.24e-05
+INFO:src.fenitop.mma:[MMA opt] it=19 stat_rel=0.2103 (abs=0.00193) feas=0 comp=0.07007 dx=0.02 [|grad f|=0.2857, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.001 solve=0.680 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.000 solve=0.790 sens=0.012
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.008 solve=1.765 sens=0.026
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (25.58s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=20: mu_C=0.326038 sigma_C=0.260164 E[V]=0.0799891 J=1.36669 (fea_batches=20)
+INFO:src.fenitop.mma:[MMA diag] it=20 raw objective f=1.366692e+00, |grad|=2.8022e-01, max|grad|=3.3716e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799891 h_value=1.0937e-05
+INFO:src.fenitop.mma:[MMA opt] it=20 stat_rel=0.1621 (abs=0.001455) feas=0 comp=0.01005 dx=0.02 [|grad f|=0.2802, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.034 proj=0.004 solve=1.713 sens=0.023
+INFO:src.surrogate.fea_at_samples:eta=0.029 proj=0.003 solve=1.635 sens=0.022
+INFO:src.surrogate.fea_at_samples:eta=0.036 proj=0.004 solve=1.456 sens=0.018
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (28.30s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=21: mu_C=0.325679 sigma_C=0.259033 E[V]=0.0799269 J=1.36181 (fea_batches=21)
+INFO:src.fenitop.mma:[MMA diag] it=21 raw objective f=1.361810e+00, |grad|=2.7962e-01, max|grad|=3.3287e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799269 h_value=7.31273e-05
+INFO:src.fenitop.mma:[MMA opt] it=21 stat_rel=0.1592 (abs=0.001454) feas=0 comp=0.06719 dx=0.02 [|grad f|=0.2796, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.005 solve=1.263 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.002 solve=1.097 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.006 solve=1.379 sens=0.019
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (24.13s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=22: mu_C=0.324811 sigma_C=0.257704 E[V]=0.0798957 J=1.35563 (fea_batches=22)
+INFO:src.fenitop.mma:[MMA diag] it=22 raw objective f=1.355627e+00, |grad|=2.7882e-01, max|grad|=3.2972e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0798957 h_value=0.000104294
+INFO:src.fenitop.mma:[MMA opt] it=22 stat_rel=0.1585 (abs=0.001461) feas=0 comp=0.09583 dx=0.02 [|grad f|=0.2788, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.007 solve=1.634 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.016 solve=1.752 sens=0.022
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.026 solve=1.323 sens=0.019
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (20.41s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=23: mu_C=0.323656 sigma_C=0.25624 E[V]=0.0798908 J=1.34862 (fea_batches=23)
+INFO:src.fenitop.mma:[MMA diag] it=23 raw objective f=1.348617e+00, |grad|=2.7773e-01, max|grad|=3.2721e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0798908 h_value=0.000109246
+INFO:src.fenitop.mma:[MMA opt] it=23 stat_rel=0.1584 (abs=0.001466) feas=0 comp=0.1004 dx=0.02 [|grad f|=0.2777, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.006 solve=0.820 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.013 proj=0.004 solve=0.673 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.005 solve=0.504 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (12.30s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=24: mu_C=0.322716 sigma_C=0.254945 E[V]=0.0798801 J=1.3425 (fea_batches=24)
+INFO:src.fenitop.mma:[MMA diag] it=24 raw objective f=1.342498e+00, |grad|=2.7677e-01, max|grad|=3.2469e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0798801 h_value=0.000119909
+INFO:src.fenitop.mma:[MMA opt] it=24 stat_rel=0.1437 (abs=0.001328) feas=0 comp=0.1102 dx=0.02 [|grad f|=0.2768, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.006 solve=1.609 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.006 solve=1.293 sens=0.020
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.018 solve=1.204 sens=0.018
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (26.57s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=25: mu_C=0.320766 sigma_C=0.251532 E[V]=0.0800089 J=1.32689 (fea_batches=25)
+INFO:src.fenitop.mma:[MMA diag] it=25 raw objective f=1.326894e+00, |grad|=2.7150e-01, max|grad|=3.1973e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0800089 h_value=-8.93398e-06
+INFO:src.fenitop.mma:[MMA opt] it=25 stat_rel=0.1529 (abs=0.001375) feas=0.0001117 comp=0.0079 dx=0.02 [|grad f|=0.2715, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.007 solve=1.631 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.013 solve=1.463 sens=0.017
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.016 solve=1.488 sens=0.017
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (28.00s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=26: mu_C=0.319455 sigma_C=0.249394 E[V]=0.0800644 J=1.31703 (fea_batches=26)
+INFO:src.fenitop.mma:[MMA diag] it=26 raw objective f=1.317032e+00, |grad|=2.6870e-01, max|grad|=3.1591e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0800644 h_value=-6.43865e-05
+INFO:src.fenitop.mma:[MMA opt] it=26 stat_rel=0.1317 (abs=0.001165) feas=0.0008048 comp=0.05693 dx=0.02 [|grad f|=0.2687, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.032 proj=0.001 solve=1.550 sens=0.027
+INFO:src.surrogate.fea_at_samples:eta=0.040 proj=0.002 solve=1.334 sens=0.013
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.001 solve=1.441 sens=0.013
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (28.19s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=27: mu_C=0.318525 sigma_C=0.247843 E[V]=0.0800877 J=1.3099 (fea_batches=27)
+INFO:src.fenitop.mma:[MMA diag] it=27 raw objective f=1.309895e+00, |grad|=2.6682e-01, max|grad|=3.1291e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0800877 h_value=-8.77339e-05
+INFO:src.fenitop.mma:[MMA opt] it=27 stat_rel=0.1365 (abs=0.001199) feas=0.001097 comp=0.07758 dx=0.02 [|grad f|=0.2668, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.027 proj=0.000 solve=1.282 sens=0.020
+INFO:src.surrogate.fea_at_samples:eta=0.029 proj=0.001 solve=1.250 sens=0.012
+INFO:src.surrogate.fea_at_samples:eta=0.035 proj=0.001 solve=1.135 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (19.28s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=28: mu_C=0.317841 sigma_C=0.246685 E[V]=0.0800895 J=1.30458 (fea_batches=28)
+INFO:src.fenitop.mma:[MMA diag] it=28 raw objective f=1.304579e+00, |grad|=2.6558e-01, max|grad|=3.1017e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0800895 h_value=-8.94614e-05
+INFO:src.fenitop.mma:[MMA opt] it=28 stat_rel=0.1412 (abs=0.001232) feas=0.001118 comp=0.0791 dx=0.02 [|grad f|=0.2656, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.002 solve=0.644 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.000 solve=0.483 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.000 solve=0.553 sens=0.011
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (17.20s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=29: mu_C=0.317403 sigma_C=0.245858 E[V]=0.0800726 J=1.30084 (fea_batches=29)
+INFO:src.fenitop.mma:[MMA diag] it=29 raw objective f=1.300836e+00, |grad|=2.6486e-01, max|grad|=3.0764e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0800726 h_value=-7.26424e-05
+INFO:src.fenitop.mma:[MMA opt] it=29 stat_rel=0.1453 (abs=0.001264) feas=0.000908 comp=0.06423 dx=0.02 [|grad f|=0.2649, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.009 solve=1.803 sens=0.020
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.008 solve=1.512 sens=0.017
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.011 solve=1.432 sens=0.021
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (27.67s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=30: mu_C=0.317067 sigma_C=0.245171 E[V]=0.0800497 J=1.29775 (fea_batches=30)
+INFO:src.fenitop.mma:[MMA diag] it=30 raw objective f=1.297750e+00, |grad|=2.6431e-01, max|grad|=3.0516e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0800497 h_value=-4.96955e-05
+INFO:src.fenitop.mma:[MMA opt] it=30 stat_rel=0.1493 (abs=0.001296) feas=0.0006212 comp=0.04394 dx=0.02 [|grad f|=0.2643, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.001 solve=1.649 sens=0.013
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.001 solve=1.647 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.030 proj=0.001 solve=1.499 sens=0.021
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (28.07s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=31: mu_C=0.316774 sigma_C=0.244535 E[V]=0.0800259 J=1.29492 (fea_batches=31)
+WARNING:src.fenitop.mma:[MMA opt] iteration budget (30) exhausted WITHOUT meeting the first-order conditions: stat_rel=0.1493 (abs=0.001296) feas=0.0006212 comp=0.04394 dx=0.02 [|grad f|=0.2643, diagnostic only]. Reporting DIVERGED_MAXITS -- the returned design is the best iterate reached, not a converged optimum.
+WARNING:src.optimization.saa_robust_driver:TAO MMA did NOT reach first-order optimality for lambda=4 (reason=-2). Returning the best feasible design evaluated; it is NOT a converged optimum and must not be reported as one. Final optimality: stat_rel=0.1493 (abs=0.001296) feas=0.0006212 comp=0.04394 dx=0.02 [|grad f|=0.2643, diagnostic only]
+INFO:src.optimization.saa_robust_driver:SAA lambda=4 beta=16 done: mu_C=0.316774 sigma_C=0.244535 E[V]=0.0800259 (violation 0.0324%) M_nd=2.57% converged=False reason=-2 (31 FEA batches of N=64) | stat_rel=0.1493 (abs=0.001296) feas=0.0006212 comp=0.04394 dx=0.02 [|grad f|=0.2643, diagnostic only]
+INFO:src.optimization.saa_robust_driver:SAA lambda=4 stage 3/5: beta=32, max_iter=30
+INFO:src.surrogate.fea_at_samples:eta=0.038 proj=0.001 solve=1.636 sens=0.014
+INFO:src.surrogate.fea_at_samples:eta=0.027 proj=0.001 solve=1.435 sens=0.017
+INFO:src.surrogate.fea_at_samples:eta=0.035 proj=0.001 solve=1.294 sens=0.012
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (27.49s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=1: mu_C=0.297965 sigma_C=0.22063 E[V]=0.0797179 J=1.18048 (fea_batches=1)
+INFO:src.fenitop.mma:[MMA diag] it=1 raw objective f=1.180485e+00, |grad|=3.7250e-01, max|grad|=3.1406e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0797179 h_value=0.000282085
+INFO:src.fenitop.mma:[MMA opt] it=1 stat_rel=0.1544 (abs=0.004683) feas=0 comp=0 dx=nan [|grad f|=0.3725, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.000 solve=0.729 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.000 solve=0.653 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.000 solve=0.569 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (10.59s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=2: mu_C=0.297283 sigma_C=0.211258 E[V]=0.0799551 J=1.14231 (fea_batches=2)
+INFO:src.fenitop.mma:[MMA diag] it=2 raw objective f=1.142314e+00, |grad|=2.9839e-01, max|grad|=2.9653e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799551 h_value=4.4859e-05
+INFO:src.fenitop.mma:[MMA opt] it=2 stat_rel=0.07938 (abs=0.001439) feas=0 comp=0.04363 dx=0.02 [|grad f|=0.2984, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.033 proj=0.001 solve=1.839 sens=0.022
+INFO:src.surrogate.fea_at_samples:eta=0.034 proj=0.001 solve=1.704 sens=0.018
+INFO:src.surrogate.fea_at_samples:eta=0.038 proj=0.001 solve=1.625 sens=0.028
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (28.71s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=3: mu_C=0.297833 sigma_C=0.208487 E[V]=0.0799822 J=1.13178 (fea_batches=3)
+INFO:src.fenitop.mma:[MMA diag] it=3 raw objective f=1.131779e+00, |grad|=2.7385e-01, max|grad|=2.9336e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799822 h_value=1.77612e-05
+INFO:src.fenitop.mma:[MMA opt] it=3 stat_rel=0.07153 (abs=0.0008898) feas=0 comp=0.01646 dx=0.02 [|grad f|=0.2738, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.001 solve=1.871 sens=0.024
+INFO:src.surrogate.fea_at_samples:eta=0.034 proj=0.001 solve=1.846 sens=0.021
+INFO:src.surrogate.fea_at_samples:eta=0.033 proj=0.005 solve=1.560 sens=0.033
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (28.10s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=4: mu_C=0.29758 sigma_C=0.20614 E[V]=0.0800327 J=1.12214 (fea_batches=4)
+INFO:src.fenitop.mma:[MMA diag] it=4 raw objective f=1.122140e+00, |grad|=2.6325e-01, max|grad|=2.9013e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0800327 h_value=-3.26676e-05
+INFO:src.fenitop.mma:[MMA opt] it=4 stat_rel=0.09121 (abs=0.00105) feas=0.0004083 comp=0.02742 dx=0.02 [|grad f|=0.2632, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.001 solve=1.419 sens=0.012
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.001 solve=1.384 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.000 solve=1.388 sens=0.011
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (26.91s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=5: mu_C=0.298125 sigma_C=0.206178 E[V]=0.0799421 J=1.12284 (fea_batches=5)
+INFO:src.fenitop.mma:[MMA diag] it=5 raw objective f=1.122839e+00, |grad|=2.6266e-01, max|grad|=2.9030e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799421 h_value=5.79448e-05
+INFO:src.fenitop.mma:[MMA opt] it=5 stat_rel=0.09309 (abs=0.001076) feas=0 comp=0.04864 dx=0.02 [|grad f|=0.2627, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.028 proj=0.005 solve=1.316 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.027 proj=0.001 solve=1.290 sens=0.020
+INFO:src.surrogate.fea_at_samples:eta=0.032 proj=0.005 solve=0.997 sens=0.012
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (16.90s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=6: mu_C=0.298484 sigma_C=0.205676 E[V]=0.0798928 J=1.12119 (fea_batches=6)
+INFO:src.fenitop.mma:[MMA diag] it=6 raw objective f=1.121186e+00, |grad|=2.5960e-01, max|grad|=2.8909e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0798928 h_value=0.000107224
+INFO:src.fenitop.mma:[MMA opt] it=6 stat_rel=0.09879 (abs=0.001091) feas=0 comp=0.09 dx=0.02 [|grad f|=0.2596, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.002 solve=0.627 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.001 solve=0.455 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.001 solve=0.535 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (18.19s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=7: mu_C=0.297761 sigma_C=0.203015 E[V]=0.0799973 J=1.10982 (fea_batches=7)
+INFO:src.fenitop.mma:[MMA diag] it=7 raw objective f=1.109820e+00, |grad|=2.5040e-01, max|grad|=2.8319e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799973 h_value=2.65214e-06
+INFO:src.fenitop.mma:[MMA opt] it=7 stat_rel=0.1131 (abs=0.001132) feas=0 comp=0.002115 dx=0.02 [|grad f|=0.2504, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.030 proj=0.003 solve=1.577 sens=0.019
+INFO:src.surrogate.fea_at_samples:eta=0.032 proj=0.001 solve=1.494 sens=0.020
+INFO:src.surrogate.fea_at_samples:eta=0.036 proj=0.001 solve=1.419 sens=0.024
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (27.46s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=8: mu_C=0.29784 sigma_C=0.202836 E[V]=0.0799352 J=1.10919 (fea_batches=8)
+INFO:src.fenitop.mma:[MMA diag] it=8 raw objective f=1.109186e+00, |grad|=2.5186e-01, max|grad|=2.8143e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799352 h_value=6.4827e-05
+INFO:src.fenitop.mma:[MMA opt] it=8 stat_rel=0.103 (abs=0.001128) feas=0 comp=0.0517 dx=0.02 [|grad f|=0.2519, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.007 solve=1.570 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.028 proj=0.001 solve=1.607 sens=0.022
+INFO:src.surrogate.fea_at_samples:eta=0.041 proj=0.001 solve=1.475 sens=0.019
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (29.25s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=9: mu_C=0.29759 sigma_C=0.201349 E[V]=0.0799661 J=1.10298 (fea_batches=9)
+INFO:src.fenitop.mma:[MMA diag] it=9 raw objective f=1.102984e+00, |grad|=2.4657e-01, max|grad|=2.7764e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799661 h_value=3.39384e-05
+INFO:src.fenitop.mma:[MMA opt] it=9 stat_rel=0.1041 (abs=0.001035) feas=0 comp=0.02706 dx=0.02 [|grad f|=0.2466, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.009 solve=1.631 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.007 solve=1.557 sens=0.012
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.011 solve=1.617 sens=0.016
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (24.69s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=10: mu_C=0.297673 sigma_C=0.200936 E[V]=0.0799267 J=1.10142 (fea_batches=10)
+INFO:src.fenitop.mma:[MMA diag] it=10 raw objective f=1.101415e+00, |grad|=2.4602e-01, max|grad|=2.7512e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799267 h_value=7.33019e-05
+INFO:src.fenitop.mma:[MMA opt] it=10 stat_rel=0.1014 (abs=0.001023) feas=0 comp=0.05845 dx=0.02 [|grad f|=0.246, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.002 solve=0.944 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.001 solve=0.735 sens=0.012
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.006 solve=0.662 sens=0.014
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (18.15s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=11: mu_C=0.297711 sigma_C=0.20032 E[V]=0.0799053 J=1.09899 (fea_batches=11)
+INFO:src.fenitop.mma:[MMA diag] it=11 raw objective f=1.098991e+00, |grad|=2.4414e-01, max|grad|=2.7281e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799053 h_value=9.47264e-05
+INFO:src.fenitop.mma:[MMA opt] it=11 stat_rel=0.1038 (abs=0.001003) feas=0 comp=0.07554 dx=0.02 [|grad f|=0.2441, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.009 solve=1.601 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.001 solve=1.596 sens=0.018
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.012 solve=1.342 sens=0.017
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (28.10s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=12: mu_C=0.296986 sigma_C=0.198266 E[V]=0.0799918 J=1.09005 (fea_batches=12)
+INFO:src.fenitop.mma:[MMA diag] it=12 raw objective f=1.090050e+00, |grad|=2.3843e-01, max|grad|=2.6765e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799918 h_value=8.2081e-06
+INFO:src.fenitop.mma:[MMA opt] it=12 stat_rel=0.1106 (abs=0.001011) feas=0 comp=0.006279 dx=0.02 [|grad f|=0.2384, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.039 proj=0.002 solve=1.576 sens=0.020
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.007 solve=1.523 sens=0.021
+INFO:src.surrogate.fea_at_samples:eta=0.027 proj=0.001 solve=1.416 sens=0.020
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (28.21s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=13: mu_C=0.296653 sigma_C=0.197281 E[V]=0.0800046 J=1.08578 (fea_batches=13)
+INFO:src.fenitop.mma:[MMA diag] it=13 raw objective f=1.085777e+00, |grad|=2.3655e-01, max|grad|=2.6451e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0800046 h_value=-4.59159e-06
+INFO:src.fenitop.mma:[MMA opt] it=13 stat_rel=0.1099 (abs=0.001004) feas=5.739e-05 comp=0.003513 dx=0.02 [|grad f|=0.2365, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.032 proj=0.002 solve=1.505 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.004 solve=1.550 sens=0.012
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.008 solve=1.460 sens=0.013
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (29.08s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=14: mu_C=0.296465 sigma_C=0.19655 E[V]=0.0800017 J=1.08266 (fea_batches=14)
+INFO:src.fenitop.mma:[MMA diag] it=14 raw objective f=1.082664e+00, |grad|=2.3510e-01, max|grad|=2.6177e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0800017 h_value=-1.70012e-06
+INFO:src.fenitop.mma:[MMA opt] it=14 stat_rel=0.1103 (abs=0.001005) feas=2.125e-05 comp=0.001301 dx=0.02 [|grad f|=0.2351, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.028 proj=0.003 solve=1.340 sens=0.014
+INFO:src.surrogate.fea_at_samples:eta=0.030 proj=0.001 solve=1.262 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.008 solve=1.187 sens=0.018
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (17.04s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=15: mu_C=0.296389 sigma_C=0.196082 E[V]=0.0799825 J=1.08072 (fea_batches=15)
+INFO:src.fenitop.mma:[MMA diag] it=15 raw objective f=1.080717e+00, |grad|=2.3433e-01, max|grad|=2.6006e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799825 h_value=1.75483e-05
+INFO:src.fenitop.mma:[MMA opt] it=15 stat_rel=0.1098 (abs=0.001005) feas=0 comp=0.01342 dx=0.02 [|grad f|=0.2343, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.029 proj=0.004 solve=1.678 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.008 solve=1.624 sens=0.021
+INFO:src.surrogate.fea_at_samples:eta=0.041 proj=0.002 solve=1.213 sens=0.018
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (26.33s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=16: mu_C=0.296343 sigma_C=0.195724 E[V]=0.0799574 J=1.07924 (fea_batches=16)
+INFO:src.fenitop.mma:[MMA diag] it=16 raw objective f=1.079239e+00, |grad|=2.3383e-01, max|grad|=2.5880e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799574 h_value=4.25981e-05
+INFO:src.fenitop.mma:[MMA opt] it=16 stat_rel=0.1097 (abs=0.001005) feas=0 comp=0.03259 dx=0.02 [|grad f|=0.2338, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.007 solve=1.747 sens=0.019
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.003 solve=1.454 sens=0.021
+INFO:src.surrogate.fea_at_samples:eta=0.038 proj=0.001 solve=1.222 sens=0.020
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (28.11s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=17: mu_C=0.296329 sigma_C=0.195453 E[V]=0.0799277 J=1.07814 (fea_batches=17)
+INFO:src.fenitop.mma:[MMA diag] it=17 raw objective f=1.078142e+00, |grad|=2.3355e-01, max|grad|=2.5747e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799277 h_value=7.23284e-05
+INFO:src.fenitop.mma:[MMA opt] it=17 stat_rel=0.1095 (abs=0.001005) feas=0 comp=0.05533 dx=0.02 [|grad f|=0.2335, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.033 proj=0.001 solve=1.536 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.033 proj=0.001 solve=1.395 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.033 proj=0.001 solve=1.299 sens=0.016
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (26.91s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=18: mu_C=0.2963 sigma_C=0.195189 E[V]=0.0798999 J=1.07706 (fea_batches=18)
+INFO:src.fenitop.mma:[MMA diag] it=18 raw objective f=1.077056e+00, |grad|=2.3320e-01, max|grad|=2.5609e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0798999 h_value=0.000100071
+INFO:src.fenitop.mma:[MMA opt] it=18 stat_rel=0.09693 (abs=0.0008862) feas=0 comp=0.07656 dx=0.02 [|grad f|=0.2332, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.030 proj=0.002 solve=1.225 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.001 solve=1.000 sens=0.012
+INFO:src.surrogate.fea_at_samples:eta=0.030 proj=0.000 solve=0.915 sens=0.011
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (13.28s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=19: mu_C=0.295631 sigma_C=0.193605 E[V]=0.0799731 J=1.07005 (fea_batches=19)
+INFO:src.fenitop.mma:[MMA diag] it=19 raw objective f=1.070051e+00, |grad|=2.2899e-01, max|grad|=2.5296e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799731 h_value=2.68702e-05
+INFO:src.fenitop.mma:[MMA opt] it=19 stat_rel=0.1032 (abs=0.0008995) feas=0 comp=0.01985 dx=0.02 [|grad f|=0.229, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.000 solve=0.587 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.000 solve=0.637 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.000 solve=0.712 sens=0.011
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (23.46s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=20: mu_C=0.295243 sigma_C=0.192764 E[V]=0.079993 J=1.0663 (fea_batches=20)
+INFO:src.fenitop.mma:[MMA diag] it=20 raw objective f=1.066298e+00, |grad|=2.2729e-01, max|grad|=2.5055e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.079993 h_value=6.96266e-06
+INFO:src.fenitop.mma:[MMA opt] it=20 stat_rel=0.103 (abs=0.0008886) feas=0 comp=0.005143 dx=0.02 [|grad f|=0.2273, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.031 proj=0.000 solve=1.650 sens=0.018
+INFO:src.surrogate.fea_at_samples:eta=0.030 proj=0.001 solve=1.523 sens=0.014
+INFO:src.surrogate.fea_at_samples:eta=0.035 proj=0.001 solve=1.525 sens=0.015
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (28.66s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=21: mu_C=0.294935 sigma_C=0.192123 E[V]=0.0800002 J=1.06343 (fea_batches=21)
+INFO:src.fenitop.mma:[MMA diag] it=21 raw objective f=1.063426e+00, |grad|=2.2617e-01, max|grad|=2.4837e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0800002 h_value=-2.47766e-07
+INFO:src.fenitop.mma:[MMA opt] it=21 stat_rel=0.08053 (abs=0.0006892) feas=3.097e-06 comp=0.000183 dx=0.02 [|grad f|=0.2262, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.033 proj=0.002 solve=1.607 sens=0.021
+INFO:src.surrogate.fea_at_samples:eta=0.028 proj=0.001 solve=1.508 sens=0.020
+INFO:src.surrogate.fea_at_samples:eta=0.035 proj=0.001 solve=1.251 sens=0.016
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (26.99s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=22: mu_C=0.294662 sigma_C=0.191692 E[V]=0.0799967 J=1.06143 (fea_batches=22)
+INFO:src.fenitop.mma:[MMA diag] it=22 raw objective f=1.061430e+00, |grad|=2.2565e-01, max|grad|=2.4649e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799967 h_value=3.25138e-06
+INFO:src.fenitop.mma:[MMA opt] it=22 stat_rel=0.07862 (abs=0.0006707) feas=0 comp=0.002402 dx=0.02 [|grad f|=0.2256, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.007 solve=1.582 sens=0.020
+INFO:src.surrogate.fea_at_samples:eta=0.031 proj=0.002 solve=1.399 sens=0.022
+INFO:src.surrogate.fea_at_samples:eta=0.037 proj=0.001 solve=1.376 sens=0.021
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (23.04s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=23: mu_C=0.294423 sigma_C=0.191332 E[V]=0.0799909 J=1.05975 (fea_batches=23)
+INFO:src.fenitop.mma:[MMA diag] it=23 raw objective f=1.059752e+00, |grad|=2.2527e-01, max|grad|=2.4433e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799909 h_value=9.10522e-06
+INFO:src.fenitop.mma:[MMA opt] it=23 stat_rel=0.08433 (abs=0.0007181) feas=0 comp=0.006725 dx=0.02 [|grad f|=0.2253, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.001 solve=1.083 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.000 solve=0.834 sens=0.013
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.001 solve=0.608 sens=0.013
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (15.82s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=24: mu_C=0.294239 sigma_C=0.191029 E[V]=0.0799814 J=1.05836 (fea_batches=24)
+INFO:src.fenitop.mma:[MMA diag] it=24 raw objective f=1.058357e+00, |grad|=2.2498e-01, max|grad|=2.4223e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799814 h_value=1.86072e-05
+INFO:src.fenitop.mma:[MMA opt] it=24 stat_rel=0.09113 (abs=0.000775) feas=0 comp=0.01374 dx=0.02 [|grad f|=0.225, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.033 proj=0.002 solve=1.575 sens=0.022
+INFO:src.surrogate.fea_at_samples:eta=0.032 proj=0.003 solve=1.520 sens=0.021
+INFO:src.surrogate.fea_at_samples:eta=0.036 proj=0.001 solve=1.357 sens=0.019
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (27.72s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=25: mu_C=0.294086 sigma_C=0.190773 E[V]=0.0799689 J=1.05718 (fea_batches=25)
+INFO:src.fenitop.mma:[MMA diag] it=25 raw objective f=1.057178e+00, |grad|=2.2481e-01, max|grad|=2.4022e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799689 h_value=3.10909e-05
+INFO:src.fenitop.mma:[MMA opt] it=25 stat_rel=0.09904 (abs=0.0008412) feas=0 comp=0.02296 dx=0.02 [|grad f|=0.2248, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.030 proj=0.003 solve=1.632 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.003 solve=1.659 sens=0.019
+INFO:src.surrogate.fea_at_samples:eta=0.038 proj=0.001 solve=1.370 sens=0.023
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (26.95s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=26: mu_C=0.29395 sigma_C=0.190547 E[V]=0.0799548 J=1.05614 (fea_batches=26)
+INFO:src.fenitop.mma:[MMA diag] it=26 raw objective f=1.056138e+00, |grad|=2.2471e-01, max|grad|=2.3858e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799548 h_value=4.51556e-05
+INFO:src.fenitop.mma:[MMA opt] it=26 stat_rel=0.1083 (abs=0.0009197) feas=0 comp=0.03335 dx=0.02 [|grad f|=0.2247, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.005 solve=1.588 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.013 proj=0.007 solve=1.595 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.004 solve=1.307 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (25.62s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=27: mu_C=0.293813 sigma_C=0.190307 E[V]=0.0799421 J=1.05504 (fea_batches=27)
+INFO:src.fenitop.mma:[MMA diag] it=27 raw objective f=1.055042e+00, |grad|=2.2457e-01, max|grad|=2.3735e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799421 h_value=5.79349e-05
+INFO:src.fenitop.mma:[MMA opt] it=27 stat_rel=0.1193 (abs=0.001012) feas=0 comp=0.04279 dx=0.02 [|grad f|=0.2246, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.015 solve=1.487 sens=0.019
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.013 solve=1.579 sens=0.020
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.020 solve=1.505 sens=0.011
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (19.34s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=28: mu_C=0.293689 sigma_C=0.190068 E[V]=0.0799294 J=1.05396 (fea_batches=28)
+INFO:src.fenitop.mma:[MMA diag] it=28 raw objective f=1.053960e+00, |grad|=2.2441e-01, max|grad|=2.3607e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799294 h_value=7.0551e-05
+INFO:src.fenitop.mma:[MMA opt] it=28 stat_rel=0.1319 (abs=0.001119) feas=0 comp=0.05211 dx=0.02 [|grad f|=0.2244, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.008 solve=0.749 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.012 proj=0.007 solve=0.784 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.008 solve=0.698 sens=0.011
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (16.60s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=29: mu_C=0.293572 sigma_C=0.189831 E[V]=0.0799169 J=1.0529 (fea_batches=29)
+INFO:src.fenitop.mma:[MMA diag] it=29 raw objective f=1.052897e+00, |grad|=2.2425e-01, max|grad|=2.3483e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799169 h_value=8.30685e-05
+INFO:src.fenitop.mma:[MMA opt] it=29 stat_rel=0.1462 (abs=0.001239) feas=0 comp=0.06136 dx=0.02 [|grad f|=0.2243, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.016 solve=1.688 sens=0.021
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.012 solve=1.529 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.008 solve=1.506 sens=0.014
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (28.91s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=30: mu_C=0.293478 sigma_C=0.189619 E[V]=0.0799031 J=1.05196 (fea_batches=30)
+INFO:src.fenitop.mma:[MMA diag] it=30 raw objective f=1.051956e+00, |grad|=2.2413e-01, max|grad|=2.3373e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799031 h_value=9.6917e-05
+INFO:src.fenitop.mma:[MMA opt] it=30 stat_rel=0.1284 (abs=0.00109) feas=0 comp=0.07158 dx=0.02 [|grad f|=0.2241, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.003 solve=1.649 sens=0.023
+INFO:src.surrogate.fea_at_samples:eta=0.031 proj=0.001 solve=1.805 sens=0.018
+INFO:src.surrogate.fea_at_samples:eta=0.033 proj=0.001 solve=1.624 sens=0.022
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (28.62s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=31: mu_C=0.292768 sigma_C=0.188196 E[V]=0.0799844 J=1.04555 (fea_batches=31)
+WARNING:src.fenitop.mma:[MMA opt] iteration budget (30) exhausted WITHOUT meeting the first-order conditions: stat_rel=0.1284 (abs=0.00109) feas=0 comp=0.07158 dx=0.02 [|grad f|=0.2241, diagnostic only]. Reporting DIVERGED_MAXITS -- the returned design is the best iterate reached, not a converged optimum.
+WARNING:src.optimization.saa_robust_driver:TAO MMA did NOT reach first-order optimality for lambda=4 (reason=-2). Returning the best feasible design evaluated; it is NOT a converged optimum and must not be reported as one. Final optimality: stat_rel=0.1284 (abs=0.00109) feas=0 comp=0.07158 dx=0.02 [|grad f|=0.2241, diagnostic only]
+INFO:src.optimization.saa_robust_driver:SAA lambda=4 beta=32 done: mu_C=0.292768 sigma_C=0.188196 E[V]=0.0799844 (violation 0%) M_nd=1.15% converged=False reason=-2 (31 FEA batches of N=64) | stat_rel=0.1284 (abs=0.00109) feas=0 comp=0.07158 dx=0.02 [|grad f|=0.2241, diagnostic only]
+INFO:src.optimization.saa_robust_driver:SAA lambda=4 stage 4/5: beta=64, max_iter=30
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.009 solve=1.484 sens=0.018
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.018 solve=1.535 sens=0.018
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.020 solve=1.364 sens=0.014
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (24.58s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=1: mu_C=0.284493 sigma_C=0.169512 E[V]=0.0799093 J=0.962539 (fea_batches=1)
+INFO:src.fenitop.mma:[MMA diag] it=1 raw objective f=9.625392e-01, |grad|=2.1047e-01, max|grad|=2.4556e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799093 h_value=9.06901e-05
+INFO:src.fenitop.mma:[MMA opt] it=1 stat_rel=0.1755 (abs=0.00235) feas=0 comp=0 dx=nan [|grad f|=0.2105, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.015 solve=1.264 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.013 solve=1.119 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.013 solve=1.154 sens=0.016
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (15.44s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=2: mu_C=0.28403 sigma_C=0.167007 E[V]=0.0800373 J=0.952058 (fea_batches=2)
+INFO:src.fenitop.mma:[MMA diag] it=2 raw objective f=9.520585e-01, |grad|=1.9136e-01, max|grad|=2.3746e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0800373 h_value=-3.72941e-05
+INFO:src.fenitop.mma:[MMA opt] it=2 stat_rel=0.1283 (abs=0.001027) feas=0.0004662 comp=0.02488 dx=0.02 [|grad f|=0.1914, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.005 solve=0.576 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.013 proj=0.005 solve=0.545 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.008 solve=0.562 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (19.93s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=3: mu_C=0.28379 sigma_C=0.166756 E[V]=0.0800031 J=0.950815 (fea_batches=3)
+INFO:src.fenitop.mma:[MMA diag] it=3 raw objective f=9.508148e-01, |grad|=1.9612e-01, max|grad|=2.3455e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0800031 h_value=-3.10284e-06
+INFO:src.fenitop.mma:[MMA opt] it=3 stat_rel=0.1173 (abs=0.001175) feas=3.879e-05 comp=0.001951 dx=0.02 [|grad f|=0.1961, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.012 solve=1.533 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.013 solve=1.469 sens=0.018
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.020 solve=1.308 sens=0.018
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (25.66s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=4: mu_C=0.283765 sigma_C=0.166222 E[V]=0.0799974 J=0.948651 (fea_batches=4)
+INFO:src.fenitop.mma:[MMA diag] it=4 raw objective f=9.486512e-01, |grad|=1.9383e-01, max|grad|=2.3118e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799974 h_value=2.56609e-06
+INFO:src.fenitop.mma:[MMA opt] it=4 stat_rel=0.1446 (abs=0.001248) feas=0 comp=0.00168 dx=0.02 [|grad f|=0.1938, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.014 solve=1.526 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.015 solve=1.486 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.017 solve=1.450 sens=0.012
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (26.30s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=5: mu_C=0.283739 sigma_C=0.165992 E[V]=0.0799732 J=0.947705 (fea_batches=5)
+INFO:src.fenitop.mma:[MMA diag] it=5 raw objective f=9.477053e-01, |grad|=1.9452e-01, max|grad|=2.2845e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799732 h_value=2.68196e-05
+INFO:src.fenitop.mma:[MMA opt] it=5 stat_rel=0.159 (abs=0.001368) feas=0 comp=0.01756 dx=0.02 [|grad f|=0.1945, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.017 solve=1.344 sens=0.014
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.016 solve=1.471 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.012 solve=1.328 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (22.73s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=6: mu_C=0.283647 sigma_C=0.165593 E[V]=0.0799661 J=0.94602 (fea_batches=6)
+INFO:src.fenitop.mma:[MMA diag] it=6 raw objective f=9.460196e-01, |grad|=1.9412e-01, max|grad|=2.2588e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799661 h_value=3.39131e-05
+INFO:src.fenitop.mma:[MMA opt] it=6 stat_rel=0.1822 (abs=0.001514) feas=0 comp=0.0222 dx=0.02 [|grad f|=0.1941, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.009 solve=1.006 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.011 solve=0.896 sens=0.014
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.016 solve=0.578 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (15.55s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=7: mu_C=0.283546 sigma_C=0.165221 E[V]=0.0799584 J=0.944431 (fea_batches=7)
+INFO:src.fenitop.mma:[MMA diag] it=7 raw objective f=9.444311e-01, |grad|=1.9390e-01, max|grad|=2.2391e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799584 h_value=4.15518e-05
+INFO:src.fenitop.mma:[MMA opt] it=7 stat_rel=0.1961 (abs=0.001594) feas=0 comp=0.0272 dx=0.02 [|grad f|=0.1939, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.007 solve=1.657 sens=0.019
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.014 solve=1.449 sens=0.013
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.019 solve=1.210 sens=0.020
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (25.46s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=8: mu_C=0.28345 sigma_C=0.164873 E[V]=0.0799497 J=0.942942 (fea_batches=8)
+INFO:src.fenitop.mma:[MMA diag] it=8 raw objective f=9.429424e-01, |grad|=1.9381e-01, max|grad|=2.2224e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799497 h_value=5.02596e-05
+INFO:src.fenitop.mma:[MMA opt] it=8 stat_rel=0.2259 (abs=0.001807) feas=0 comp=0.0329 dx=0.02 [|grad f|=0.1938, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.005 solve=1.490 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.006 solve=1.654 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.006 solve=1.372 sens=0.020
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (27.61s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=9: mu_C=0.283369 sigma_C=0.164576 E[V]=0.0799368 J=0.941674 (fea_batches=9)
+INFO:src.fenitop.mma:[MMA diag] it=9 raw objective f=9.416739e-01, |grad|=1.9394e-01, max|grad|=2.2102e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799368 h_value=6.3239e-05
+INFO:src.fenitop.mma:[MMA opt] it=9 stat_rel=0.2475 (abs=0.00196) feas=0 comp=0.0414 dx=0.02 [|grad f|=0.1939, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.006 solve=1.450 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.004 solve=1.573 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.007 solve=1.555 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (28.17s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=10: mu_C=0.283284 sigma_C=0.164296 E[V]=0.0799234 J=0.940469 (fea_batches=10)
+INFO:src.fenitop.mma:[MMA diag] it=10 raw objective f=9.404694e-01, |grad|=1.9401e-01, max|grad|=2.2000e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799234 h_value=7.66343e-05
+INFO:src.fenitop.mma:[MMA opt] it=10 stat_rel=0.2535 (abs=0.001986) feas=0 comp=0.05016 dx=0.02 [|grad f|=0.194, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.010 solve=1.156 sens=0.019
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.014 solve=1.102 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.018 solve=0.935 sens=0.016
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (13.81s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=11: mu_C=0.28322 sigma_C=0.164041 E[V]=0.0799088 J=0.939383 (fea_batches=11)
+INFO:src.fenitop.mma:[MMA diag] it=11 raw objective f=9.393832e-01, |grad|=1.9386e-01, max|grad|=2.1896e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799088 h_value=9.12132e-05
+INFO:src.fenitop.mma:[MMA opt] it=11 stat_rel=0.2425 (abs=0.001875) feas=0 comp=0.05971 dx=0.02 [|grad f|=0.1939, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.006 solve=0.652 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.013 proj=0.005 solve=0.689 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.007 solve=0.670 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (24.54s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=12: mu_C=0.282585 sigma_C=0.162636 E[V]=0.0799967 J=0.933128 (fea_batches=12)
+INFO:src.fenitop.mma:[MMA diag] it=12 raw objective f=9.331280e-01, |grad|=1.8920e-01, max|grad|=2.1702e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799967 h_value=3.32722e-06
+INFO:src.fenitop.mma:[MMA opt] it=12 stat_rel=0.23 (abs=0.001686) feas=0 comp=0.002112 dx=0.02 [|grad f|=0.1892, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.001 solve=1.544 sens=0.017
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.014 solve=1.402 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.018 solve=1.350 sens=0.012
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (26.49s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=13: mu_C=0.282442 sigma_C=0.162336 E[V]=0.0799894 J=0.931785 (fea_batches=13)
+INFO:src.fenitop.mma:[MMA diag] it=13 raw objective f=9.317846e-01, |grad|=1.8906e-01, max|grad|=2.1589e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799894 h_value=1.05554e-05
+INFO:src.fenitop.mma:[MMA opt] it=13 stat_rel=0.2064 (abs=0.00152) feas=0 comp=0.006701 dx=0.02 [|grad f|=0.1891, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.008 solve=1.708 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.013 proj=0.017 solve=1.780 sens=0.017
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.022 solve=1.628 sens=0.021
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (30.44s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=14: mu_C=0.282337 sigma_C=0.162041 E[V]=0.0799822 J=0.9305 (fea_batches=14)
+INFO:src.fenitop.mma:[MMA diag] it=14 raw objective f=9.305000e-01, |grad|=1.8856e-01, max|grad|=2.1499e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799822 h_value=1.78014e-05
+INFO:src.fenitop.mma:[MMA opt] it=14 stat_rel=0.1975 (abs=0.001442) feas=0 comp=0.0113 dx=0.02 [|grad f|=0.1886, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.009 solve=1.410 sens=0.017
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.012 solve=1.215 sens=0.014
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.019 solve=1.176 sens=0.016
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (20.94s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=15: mu_C=0.282293 sigma_C=0.161889 E[V]=0.0799629 J=0.929851 (fea_batches=15)
+INFO:src.fenitop.mma:[MMA diag] it=15 raw objective f=9.298507e-01, |grad|=1.8867e-01, max|grad|=2.1426e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799629 h_value=3.7109e-05
+INFO:src.fenitop.mma:[MMA opt] it=15 stat_rel=0.197 (abs=0.001455) feas=0 comp=0.02356 dx=0.02 [|grad f|=0.1887, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.002 solve=0.993 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.012 solve=0.664 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.007 solve=0.548 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (18.03s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=16: mu_C=0.282267 sigma_C=0.161758 E[V]=0.0799418 J=0.929301 (fea_batches=16)
+INFO:src.fenitop.mma:[MMA diag] it=16 raw objective f=9.293013e-01, |grad|=1.8883e-01, max|grad|=2.1347e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799418 h_value=5.82375e-05
+INFO:src.fenitop.mma:[MMA opt] it=16 stat_rel=0.2102 (abs=0.001565) feas=0 comp=0.03697 dx=0.02 [|grad f|=0.1888, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.030 proj=0.001 solve=1.846 sens=0.024
+INFO:src.surrogate.fea_at_samples:eta=0.028 proj=0.001 solve=1.762 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.001 solve=1.749 sens=0.023
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (30.89s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=17: mu_C=0.282242 sigma_C=0.16163 E[V]=0.0799204 J=0.928763 (fea_batches=17)
+INFO:src.fenitop.mma:[MMA diag] it=17 raw objective f=9.287632e-01, |grad|=1.8912e-01, max|grad|=2.1262e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799204 h_value=7.95598e-05
+INFO:src.fenitop.mma:[MMA opt] it=17 stat_rel=0.238 (abs=0.001787) feas=0 comp=0.05051 dx=0.02 [|grad f|=0.1891, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.032 proj=0.002 solve=1.750 sens=0.018
+INFO:src.surrogate.fea_at_samples:eta=0.033 proj=0.001 solve=1.708 sens=0.017
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.013 solve=1.652 sens=0.016
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (30.78s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=18: mu_C=0.282209 sigma_C=0.161492 E[V]=0.0798997 J=0.928176 (fea_batches=18)
+INFO:src.fenitop.mma:[MMA diag] it=18 raw objective f=9.281755e-01, |grad|=1.8946e-01, max|grad|=2.1181e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0798997 h_value=0.000100318
+INFO:src.fenitop.mma:[MMA opt] it=18 stat_rel=0.2777 (abs=0.002102) feas=0 comp=0.06369 dx=0.02 [|grad f|=0.1895, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.033 proj=0.002 solve=1.791 sens=0.021
+INFO:src.surrogate.fea_at_samples:eta=0.031 proj=0.001 solve=1.648 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.032 proj=0.001 solve=1.469 sens=0.016
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (26.09s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=19: mu_C=0.281616 sigma_C=0.160259 E[V]=0.0799769 J=0.92265 (fea_batches=19)
+INFO:src.fenitop.mma:[MMA diag] it=19 raw objective f=9.226503e-01, |grad|=1.8579e-01, max|grad|=2.0924e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799769 h_value=2.31265e-05
+INFO:src.fenitop.mma:[MMA opt] it=19 stat_rel=0.3337 (abs=0.002447) feas=0 comp=0.01431 dx=0.02 [|grad f|=0.1858, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.001 solve=1.078 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.000 solve=1.040 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.000 solve=0.955 sens=0.019
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (14.85s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=20: mu_C=0.281466 sigma_C=0.159977 E[V]=0.0799669 J=0.921373 (fea_batches=20)
+INFO:src.fenitop.mma:[MMA diag] it=20 raw objective f=9.213725e-01, |grad|=1.8618e-01, max|grad|=2.0771e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799669 h_value=3.31233e-05
+INFO:src.fenitop.mma:[MMA opt] it=20 stat_rel=0.3473 (abs=0.002611) feas=0 comp=0.0205 dx=0.02 [|grad f|=0.1862, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.005 solve=0.702 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.004 solve=1.192 sens=0.020
+INFO:src.surrogate.fea_at_samples:eta=0.037 proj=0.001 solve=1.767 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (28.94s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=21: mu_C=0.281294 sigma_C=0.159561 E[V]=0.0799679 J=0.91954 (fea_batches=21)
+INFO:src.fenitop.mma:[MMA diag] it=21 raw objective f=9.195403e-01, |grad|=1.8543e-01, max|grad|=2.0645e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799679 h_value=3.21234e-05
+INFO:src.fenitop.mma:[MMA opt] it=21 stat_rel=0.33 (abs=0.002469) feas=0 comp=0.01988 dx=0.02 [|grad f|=0.1854, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.033 proj=0.001 solve=1.789 sens=0.019
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.012 solve=1.795 sens=0.021
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.012 solve=1.583 sens=0.016
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (31.65s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=22: mu_C=0.28122 sigma_C=0.159455 E[V]=0.0799446 J=0.919039 (fea_batches=22)
+INFO:src.fenitop.mma:[MMA diag] it=22 raw objective f=9.190390e-01, |grad|=1.8589e-01, max|grad|=2.0563e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799446 h_value=5.54117e-05
+INFO:src.fenitop.mma:[MMA opt] it=22 stat_rel=0.2793 (abs=0.002134) feas=0 comp=0.03429 dx=0.02 [|grad f|=0.1859, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.031 proj=0.001 solve=1.703 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.003 solve=1.726 sens=0.020
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.014 solve=1.602 sens=0.020
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (27.23s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=23: mu_C=0.281106 sigma_C=0.15925 E[V]=0.0799332 J=0.918107 (fea_batches=23)
+INFO:src.fenitop.mma:[MMA diag] it=23 raw objective f=9.181066e-01, |grad|=1.8563e-01, max|grad|=2.0498e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799332 h_value=6.68402e-05
+INFO:src.fenitop.mma:[MMA opt] it=23 stat_rel=0.1931 (abs=0.001479) feas=0 comp=0.04136 dx=0.02 [|grad f|=0.1856, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.027 proj=0.004 solve=1.107 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.028 proj=0.001 solve=1.044 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.033 proj=0.001 solve=0.963 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (17.57s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=24: mu_C=0.28107 sigma_C=0.159171 E[V]=0.0799115 J=0.917755 (fea_batches=24)
+INFO:src.fenitop.mma:[MMA diag] it=24 raw objective f=9.177547e-01, |grad|=1.8585e-01, max|grad|=2.0440e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799115 h_value=8.85255e-05
+INFO:src.fenitop.mma:[MMA opt] it=24 stat_rel=0.1645 (abs=0.001271) feas=0 comp=0.05478 dx=0.02 [|grad f|=0.1859, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.002 solve=0.709 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.001 solve=0.780 sens=0.012
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.004 solve=0.661 sens=0.012
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (20.31s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=25: mu_C=0.280442 sigma_C=0.15809 E[V]=0.0799852 J=0.912802 (fea_batches=25)
+INFO:src.fenitop.mma:[MMA diag] it=25 raw objective f=9.128016e-01, |grad|=1.8196e-01, max|grad|=2.0187e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799852 h_value=1.48431e-05
+INFO:src.fenitop.mma:[MMA opt] it=25 stat_rel=0.1606 (abs=0.001196) feas=0 comp=0.00897 dx=0.02 [|grad f|=0.182, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.031 proj=0.001 solve=1.928 sens=0.020
+INFO:src.surrogate.fea_at_samples:eta=0.034 proj=0.001 solve=1.595 sens=0.019
+INFO:src.surrogate.fea_at_samples:eta=0.037 proj=0.001 solve=1.746 sens=0.014
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (30.18s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=26: mu_C=0.280393 sigma_C=0.158005 E[V]=0.0799653 J=0.912412 (fea_batches=26)
+INFO:src.fenitop.mma:[MMA diag] it=26 raw objective f=9.124122e-01, |grad|=1.8242e-01, max|grad|=2.0080e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799653 h_value=3.47036e-05
+INFO:src.fenitop.mma:[MMA opt] it=26 stat_rel=0.1579 (abs=0.001205) feas=0 comp=0.02097 dx=0.02 [|grad f|=0.1824, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.001 solve=1.610 sens=0.020
+INFO:src.surrogate.fea_at_samples:eta=0.033 proj=0.002 solve=1.498 sens=0.019
+INFO:src.surrogate.fea_at_samples:eta=0.038 proj=0.001 solve=1.343 sens=0.020
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (27.92s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=27: mu_C=0.280237 sigma_C=0.15772 E[V]=0.0799654 J=0.911118 (fea_batches=27)
+INFO:src.fenitop.mma:[MMA diag] it=27 raw objective f=9.111182e-01, |grad|=1.8165e-01, max|grad|=1.9960e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799654 h_value=3.45745e-05
+INFO:src.fenitop.mma:[MMA opt] it=27 stat_rel=0.1549 (abs=0.001175) feas=0 comp=0.02089 dx=0.02 [|grad f|=0.1817, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.032 proj=0.001 solve=1.414 sens=0.021
+INFO:src.surrogate.fea_at_samples:eta=0.033 proj=0.001 solve=1.417 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.008 solve=1.250 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (19.99s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=28: mu_C=0.280155 sigma_C=0.15762 E[V]=0.0799494 J=0.910636 (fea_batches=28)
+INFO:src.fenitop.mma:[MMA diag] it=28 raw objective f=9.106360e-01, |grad|=1.8170e-01, max|grad|=1.9863e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799494 h_value=5.06142e-05
+INFO:src.fenitop.mma:[MMA opt] it=28 stat_rel=0.1485 (abs=0.001133) feas=0 comp=0.03059 dx=0.02 [|grad f|=0.1817, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.007 solve=0.821 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.006 solve=0.633 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.008 solve=0.583 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (12.05s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=29: mu_C=0.280072 sigma_C=0.15748 E[V]=0.0799371 J=0.909994 (fea_batches=29)
+INFO:src.fenitop.mma:[MMA diag] it=29 raw objective f=9.099938e-01, |grad|=1.8151e-01, max|grad|=1.9773e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799371 h_value=6.28517e-05
+INFO:src.fenitop.mma:[MMA opt] it=29 stat_rel=0.1433 (abs=0.001094) feas=0 comp=0.03798 dx=0.02 [|grad f|=0.1815, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.006 solve=0.608 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.013 proj=0.007 solve=0.669 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.005 solve=0.672 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (22.99s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=30: mu_C=0.280022 sigma_C=0.157404 E[V]=0.0799195 J=0.909638 (fea_batches=30)
+INFO:src.fenitop.mma:[MMA diag] it=30 raw objective f=9.096383e-01, |grad|=1.8148e-01, max|grad|=1.9710e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799195 h_value=8.04657e-05
+INFO:src.fenitop.mma:[MMA opt] it=30 stat_rel=0.1398 (abs=0.001067) feas=0 comp=0.04863 dx=0.02 [|grad f|=0.1815, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.010 solve=1.670 sens=0.018
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.013 solve=1.586 sens=0.018
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.022 solve=1.409 sens=0.018
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (27.83s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=31: mu_C=0.279981 sigma_C=0.157317 E[V]=0.0799033 J=0.909247 (fea_batches=31)
+WARNING:src.fenitop.mma:[MMA opt] iteration budget (30) exhausted WITHOUT meeting the first-order conditions: stat_rel=0.1398 (abs=0.001067) feas=0 comp=0.04863 dx=0.02 [|grad f|=0.1815, diagnostic only]. Reporting DIVERGED_MAXITS -- the returned design is the best iterate reached, not a converged optimum.
+WARNING:src.optimization.saa_robust_driver:TAO MMA did NOT reach first-order optimality for lambda=4 (reason=-2). Returning the best feasible design evaluated; it is NOT a converged optimum and must not be reported as one. Final optimality: stat_rel=0.1398 (abs=0.001067) feas=0 comp=0.04863 dx=0.02 [|grad f|=0.1815, diagnostic only]
+INFO:src.optimization.saa_robust_driver:SAA lambda=4 beta=64 done: mu_C=0.279981 sigma_C=0.157317 E[V]=0.0799033 (violation 0%) M_nd=0.511% converged=False reason=-2 (31 FEA batches of N=64) | stat_rel=0.1398 (abs=0.001067) feas=0 comp=0.04863 dx=0.02 [|grad f|=0.1815, diagnostic only]
+INFO:src.optimization.saa_robust_driver:SAA lambda=4 stage 5/5: beta=128, max_iter=30
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.011 solve=1.657 sens=0.017
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.018 solve=1.488 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.014 solve=1.414 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (23.12s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=1: mu_C=0.276325 sigma_C=0.146574 E[V]=0.0798545 J=0.862619 (fea_batches=1)
+INFO:src.fenitop.mma:[MMA diag] it=1 raw objective f=8.626193e-01, |grad|=1.5267e-01, max|grad|=2.5506e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0798545 h_value=0.000145461
+INFO:src.fenitop.mma:[MMA opt] it=1 stat_rel=0.2311 (abs=0.001476) feas=0 comp=0 dx=nan [|grad f|=0.1527, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.000 solve=1.338 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.001 solve=1.239 sens=0.018
+INFO:src.surrogate.fea_at_samples:eta=0.041 proj=0.001 solve=1.137 sens=0.016
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (20.99s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=2: mu_C=0.275738 sigma_C=0.14524 E[V]=0.0799321 J=0.856699 (fea_batches=2)
+INFO:src.fenitop.mma:[MMA diag] it=2 raw objective f=8.566989e-01, |grad|=1.5006e-01, max|grad|=2.1784e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799321 h_value=6.79148e-05
+INFO:src.fenitop.mma:[MMA opt] it=2 stat_rel=0.2303 (abs=0.001407) feas=0 comp=0.0339 dx=0.02 [|grad f|=0.1501, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.000 solve=0.859 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.000 solve=0.819 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.000 solve=0.806 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (14.87s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=3: mu_C=0.275427 sigma_C=0.145047 E[V]=0.0799024 J=0.855616 (fea_batches=3)
+INFO:src.fenitop.mma:[MMA diag] it=3 raw objective f=8.556161e-01, |grad|=1.5096e-01, max|grad|=2.0361e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799024 h_value=9.75809e-05
+INFO:src.fenitop.mma:[MMA opt] it=3 stat_rel=0.1185 (abs=0.0007639) feas=0 comp=0.04871 dx=0.02 [|grad f|=0.151, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.001 solve=1.469 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.029 proj=0.001 solve=1.279 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.033 proj=0.001 solve=1.402 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (24.21s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=4: mu_C=0.27492 sigma_C=0.143757 E[V]=0.079997 J=0.849949 (fea_batches=4)
+INFO:src.fenitop.mma:[MMA diag] it=4 raw objective f=8.499495e-01, |grad|=1.4550e-01, max|grad|=1.8308e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.079997 h_value=3.00865e-06
+INFO:src.fenitop.mma:[MMA opt] it=4 stat_rel=0.1528 (abs=0.0008516) feas=0 comp=0.001447 dx=0.02 [|grad f|=0.1455, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.001 solve=1.549 sens=0.019
+INFO:src.surrogate.fea_at_samples:eta=0.033 proj=0.002 solve=1.322 sens=0.014
+INFO:src.surrogate.fea_at_samples:eta=0.035 proj=0.001 solve=1.170 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (24.70s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=5: mu_C=0.274877 sigma_C=0.143863 E[V]=0.0799396 J=0.850328 (fea_batches=5)
+INFO:src.fenitop.mma:[MMA diag] it=5 raw objective f=8.503281e-01, |grad|=1.4917e-01, max|grad|=1.8573e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799396 h_value=6.04261e-05
+INFO:src.fenitop.mma:[MMA opt] it=5 stat_rel=0.0765 (abs=0.0005211) feas=0 comp=0.02906 dx=0.02 [|grad f|=0.1492, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.001 solve=1.414 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.001 solve=1.441 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.001 solve=1.367 sens=0.011
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (23.66s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=6: mu_C=0.274605 sigma_C=0.143139 E[V]=0.0799806 J=0.847163 (fea_batches=6)
+INFO:src.fenitop.mma:[MMA diag] it=6 raw objective f=8.471630e-01, |grad|=1.4595e-01, max|grad|=1.7785e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799806 h_value=1.93954e-05
+INFO:src.fenitop.mma:[MMA opt] it=6 stat_rel=0.08318 (abs=0.0004851) feas=0 comp=0.009327 dx=0.02 [|grad f|=0.146, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.000 solve=1.274 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.000 solve=1.030 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.000 solve=1.031 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (16.30s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=7: mu_C=0.274531 sigma_C=0.143073 E[V]=0.0799504 J=0.846823 (fea_batches=7)
+INFO:src.fenitop.mma:[MMA diag] it=7 raw objective f=8.468230e-01, |grad|=1.4853e-01, max|grad|=1.7606e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799504 h_value=4.96296e-05
+INFO:src.fenitop.mma:[MMA opt] it=7 stat_rel=0.0905 (abs=0.0005929) feas=0 comp=0.02387 dx=0.02 [|grad f|=0.1485, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.000 solve=0.658 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.000 solve=0.687 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.000 solve=0.731 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (23.86s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=8: mu_C=0.274315 sigma_C=0.142585 E[V]=0.0799696 J=0.844656 (fea_batches=8)
+INFO:src.fenitop.mma:[MMA diag] it=8 raw objective f=8.446562e-01, |grad|=1.4731e-01, max|grad|=1.7336e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799696 h_value=3.04359e-05
+INFO:src.fenitop.mma:[MMA opt] it=8 stat_rel=0.1204 (abs=0.0007528) feas=0 comp=0.01464 dx=0.02 [|grad f|=0.1473, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.008 solve=1.608 sens=0.012
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.002 solve=1.688 sens=0.018
+INFO:src.surrogate.fea_at_samples:eta=0.035 proj=0.001 solve=1.382 sens=0.019
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (27.31s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=9: mu_C=0.274164 sigma_C=0.14235 E[V]=0.0799627 J=0.843566 (fea_batches=9)
+INFO:src.fenitop.mma:[MMA diag] it=9 raw objective f=8.435656e-01, |grad|=1.4801e-01, max|grad|=1.7288e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799627 h_value=3.73298e-05
+INFO:src.fenitop.mma:[MMA opt] it=9 stat_rel=0.1141 (abs=0.0007272) feas=0 comp=0.01795 dx=0.02 [|grad f|=0.148, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.005 solve=1.688 sens=0.020
+INFO:src.surrogate.fea_at_samples:eta=0.032 proj=0.001 solve=1.464 sens=0.018
+INFO:src.surrogate.fea_at_samples:eta=0.038 proj=0.001 solve=1.312 sens=0.022
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (25.76s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=10: mu_C=0.273966 sigma_C=0.141951 E[V]=0.0799762 J=0.841769 (fea_batches=10)
+INFO:src.fenitop.mma:[MMA diag] it=10 raw objective f=8.417690e-01, |grad|=1.4711e-01, max|grad|=1.7202e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799762 h_value=2.38449e-05
+INFO:src.fenitop.mma:[MMA opt] it=10 stat_rel=0.08823 (abs=0.0005601) feas=0 comp=0.01147 dx=0.02 [|grad f|=0.1471, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.007 solve=1.412 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.000 solve=1.397 sens=0.014
+INFO:src.surrogate.fea_at_samples:eta=0.030 proj=0.001 solve=1.248 sens=0.015
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (18.56s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=11: mu_C=0.273858 sigma_C=0.141788 E[V]=0.0799648 J=0.841011 (fea_batches=11)
+INFO:src.fenitop.mma:[MMA diag] it=11 raw objective f=8.410111e-01, |grad|=1.4750e-01, max|grad|=1.7243e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799648 h_value=3.51944e-05
+INFO:src.fenitop.mma:[MMA opt] it=11 stat_rel=0.09207 (abs=0.0005831) feas=0 comp=0.01693 dx=0.02 [|grad f|=0.1475, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.000 solve=0.718 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.000 solve=0.710 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.000 solve=0.684 sens=0.011
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (17.36s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=12: mu_C=0.273669 sigma_C=0.141437 E[V]=0.0799774 J=0.839416 (fea_batches=12)
+INFO:src.fenitop.mma:[MMA diag] it=12 raw objective f=8.394159e-01, |grad|=1.4613e-01, max|grad|=1.7399e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799774 h_value=2.2599e-05
+INFO:src.fenitop.mma:[MMA opt] it=12 stat_rel=0.09379 (abs=0.0005903) feas=0 comp=0.01087 dx=0.02 [|grad f|=0.1461, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.012 solve=1.583 sens=0.012
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.001 solve=1.508 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.039 proj=0.001 solve=1.328 sens=0.013
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (27.28s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=13: mu_C=0.273611 sigma_C=0.141471 E[V]=0.0799482 J=0.839495 (fea_batches=13)
+INFO:src.fenitop.mma:[MMA diag] it=13 raw objective f=8.394949e-01, |grad|=1.4732e-01, max|grad|=1.7344e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799482 h_value=5.17718e-05
+INFO:src.fenitop.mma:[MMA opt] it=13 stat_rel=0.08567 (abs=0.0005374) feas=0 comp=0.0249 dx=0.02 [|grad f|=0.1473, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.009 solve=1.747 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.029 proj=0.001 solve=1.631 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.032 proj=0.006 solve=1.615 sens=0.014
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (27.50s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=14: mu_C=0.273432 sigma_C=0.141092 E[V]=0.0799668 J=0.837801 (fea_batches=14)
+INFO:src.fenitop.mma:[MMA diag] it=14 raw objective f=8.378007e-01, |grad|=1.4552e-01, max|grad|=1.7231e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799668 h_value=3.31516e-05
+INFO:src.fenitop.mma:[MMA opt] it=14 stat_rel=0.07998 (abs=0.0004984) feas=0 comp=0.01594 dx=0.02 [|grad f|=0.1455, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.004 solve=1.698 sens=0.012
+INFO:src.surrogate.fea_at_samples:eta=0.024 proj=0.001 solve=1.640 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.029 proj=0.001 solve=1.523 sens=0.017
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (21.99s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=15: mu_C=0.273405 sigma_C=0.141233 E[V]=0.0799295 J=0.838336 (fea_batches=15)
+INFO:src.fenitop.mma:[MMA diag] it=15 raw objective f=8.383355e-01, |grad|=1.4760e-01, max|grad|=1.7027e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799295 h_value=7.0515e-05
+INFO:src.fenitop.mma:[MMA opt] it=15 stat_rel=0.08046 (abs=0.0005031) feas=0 comp=0.03391 dx=0.02 [|grad f|=0.1476, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.006 solve=0.900 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.004 solve=0.721 sens=0.009
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.004 solve=0.671 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (12.34s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=16: mu_C=0.273196 sigma_C=0.14075 E[V]=0.0799628 J=0.836195 (fea_batches=16)
+INFO:src.fenitop.mma:[MMA diag] it=16 raw objective f=8.361946e-01, |grad|=1.4525e-01, max|grad|=1.7134e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799628 h_value=3.7205e-05
+INFO:src.fenitop.mma:[MMA opt] it=16 stat_rel=0.1001 (abs=0.0006162) feas=0 comp=0.01789 dx=0.02 [|grad f|=0.1453, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.012 solve=1.519 sens=0.011
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.011 solve=1.671 sens=0.019
+INFO:src.surrogate.fea_at_samples:eta=0.038 proj=0.001 solve=1.394 sens=0.018
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (27.58s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=17: mu_C=0.273201 sigma_C=0.140929 E[V]=0.0799226 J=0.836916 (fea_batches=17)
+INFO:src.fenitop.mma:[MMA diag] it=17 raw objective f=8.369165e-01, |grad|=1.4794e-01, max|grad|=1.6694e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799226 h_value=7.74137e-05
+INFO:src.fenitop.mma:[MMA opt] it=17 stat_rel=0.1146 (abs=0.0007249) feas=0 comp=0.03723 dx=0.02 [|grad f|=0.1479, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.011 solve=1.468 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.014 solve=1.690 sens=0.018
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.019 solve=1.509 sens=0.015
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (28.79s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=18: mu_C=0.272978 sigma_C=0.140383 E[V]=0.0799638 J=0.834512 (fea_batches=18)
+INFO:src.fenitop.mma:[MMA diag] it=18 raw objective f=8.345119e-01, |grad|=1.4493e-01, max|grad|=1.7109e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799638 h_value=3.62298e-05
+INFO:src.fenitop.mma:[MMA opt] it=18 stat_rel=0.1335 (abs=0.000796) feas=0 comp=0.01742 dx=0.02 [|grad f|=0.1449, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.016 solve=1.480 sens=0.017
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.015 solve=1.506 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.017 solve=1.577 sens=0.012
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (25.01s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=19: mu_C=0.27302 sigma_C=0.140584 E[V]=0.0799205 J=0.835358 (fea_batches=19)
+INFO:src.fenitop.mma:[MMA diag] it=19 raw objective f=8.353577e-01, |grad|=1.4794e-01, max|grad|=1.6412e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799205 h_value=7.95268e-05
+INFO:src.fenitop.mma:[MMA opt] it=19 stat_rel=0.1268 (abs=0.0008187) feas=0 comp=0.03825 dx=0.02 [|grad f|=0.1479, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.015 solve=1.237 sens=0.019
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.014 solve=1.079 sens=0.013
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.017 solve=1.039 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (15.19s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=20: mu_C=0.272737 sigma_C=0.140019 E[V]=0.0799654 J=0.832812 (fea_batches=20)
+INFO:src.fenitop.mma:[MMA diag] it=20 raw objective f=8.328121e-01, |grad|=1.4475e-01, max|grad|=1.6594e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799654 h_value=3.45594e-05
+INFO:src.fenitop.mma:[MMA opt] it=20 stat_rel=0.09705 (abs=0.0005748) feas=0 comp=0.01662 dx=0.02 [|grad f|=0.1447, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.013 solve=1.576 sens=0.019
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.013 solve=1.451 sens=0.015
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.019 solve=1.465 sens=0.015
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (30.55s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=21: mu_C=0.27282 sigma_C=0.140208 E[V]=0.0799233 J=0.833651 (fea_batches=21)
+INFO:src.fenitop.mma:[MMA diag] it=21 raw objective f=8.336505e-01, |grad|=1.4780e-01, max|grad|=1.6265e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799233 h_value=7.67227e-05
+INFO:src.fenitop.mma:[MMA opt] it=21 stat_rel=0.09137 (abs=0.0005823) feas=0 comp=0.0369 dx=0.02 [|grad f|=0.1478, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.020 solve=1.767 sens=0.017
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.011 solve=1.709 sens=0.017
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.023 solve=1.581 sens=0.020
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (29.84s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=22: mu_C=0.272536 sigma_C=0.139704 E[V]=0.0799636 J=0.831354 (fea_batches=22)
+INFO:src.fenitop.mma:[MMA diag] it=22 raw objective f=8.313537e-01, |grad|=1.4489e-01, max|grad|=1.6039e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799636 h_value=3.64113e-05
+INFO:src.fenitop.mma:[MMA opt] it=22 stat_rel=0.1006 (abs=0.0006046) feas=0 comp=0.01751 dx=0.02 [|grad f|=0.1449, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.016 solve=1.883 sens=0.014
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.013 solve=1.713 sens=0.022
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.021 solve=1.383 sens=0.018
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (26.75s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=23: mu_C=0.272631 sigma_C=0.139851 E[V]=0.0799273 J=0.832035 (fea_batches=23)
+INFO:src.fenitop.mma:[MMA diag] it=23 raw objective f=8.320348e-01, |grad|=1.4713e-01, max|grad|=1.6024e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799273 h_value=7.26777e-05
+INFO:src.fenitop.mma:[MMA opt] it=23 stat_rel=0.1106 (abs=0.0006757) feas=0 comp=0.03495 dx=0.02 [|grad f|=0.1471, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.012 solve=0.915 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.013 proj=0.013 solve=0.862 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.011 solve=0.869 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (16.70s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=24: mu_C=0.272395 sigma_C=0.139442 E[V]=0.0799578 J=0.830164 (fea_batches=24)
+INFO:src.fenitop.mma:[MMA diag] it=24 raw objective f=8.301641e-01, |grad|=1.4503e-01, max|grad|=1.5866e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799578 h_value=4.21525e-05
+INFO:src.fenitop.mma:[MMA opt] it=24 stat_rel=0.1261 (abs=0.0007667) feas=0 comp=0.02027 dx=0.02 [|grad f|=0.145, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.006 solve=1.705 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.010 solve=1.748 sens=0.013
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.015 solve=1.631 sens=0.015
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (28.75s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=25: mu_C=0.272467 sigma_C=0.139561 E[V]=0.0799257 J=0.830711 (fea_batches=25)
+INFO:src.fenitop.mma:[MMA diag] it=25 raw objective f=8.307111e-01, |grad|=1.4696e-01, max|grad|=1.5999e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799257 h_value=7.42596e-05
+INFO:src.fenitop.mma:[MMA opt] it=25 stat_rel=0.139 (abs=0.00085) feas=0 comp=0.03571 dx=0.02 [|grad f|=0.147, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.023 proj=0.010 solve=1.744 sens=0.018
+INFO:src.surrogate.fea_at_samples:eta=0.033 proj=0.001 solve=1.598 sens=0.021
+INFO:src.surrogate.fea_at_samples:eta=0.039 proj=0.001 solve=1.713 sens=0.021
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (29.12s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=26: mu_C=0.272258 sigma_C=0.13923 E[V]=0.0799491 J=0.829177 (fea_batches=26)
+INFO:src.fenitop.mma:[MMA diag] it=26 raw objective f=8.291774e-01, |grad|=1.4529e-01, max|grad|=1.5937e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799491 h_value=5.09065e-05
+INFO:src.fenitop.mma:[MMA opt] it=26 stat_rel=0.1193 (abs=0.0007276) feas=0 comp=0.02448 dx=0.02 [|grad f|=0.1453, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.015 solve=1.621 sens=0.016
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.015 solve=1.687 sens=0.014
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.017 solve=1.541 sens=0.019
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (26.14s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=27: mu_C=0.272316 sigma_C=0.139358 E[V]=0.0799188 J=0.829746 (fea_batches=27)
+INFO:src.fenitop.mma:[MMA diag] it=27 raw objective f=8.297462e-01, |grad|=1.4727e-01, max|grad|=1.6251e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799188 h_value=8.11715e-05
+INFO:src.fenitop.mma:[MMA opt] it=27 stat_rel=0.1303 (abs=0.0007935) feas=0 comp=0.03904 dx=0.02 [|grad f|=0.1473, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.003 solve=1.114 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.005 solve=0.846 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.005 solve=0.516 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (15.99s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=28: mu_C=0.272078 sigma_C=0.138991 E[V]=0.079948 J=0.828041 (fea_batches=28)
+INFO:src.fenitop.mma:[MMA diag] it=28 raw objective f=8.280405e-01, |grad|=1.4517e-01, max|grad|=1.5847e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.079948 h_value=5.20121e-05
+INFO:src.fenitop.mma:[MMA opt] it=28 stat_rel=0.1271 (abs=0.0007669) feas=0 comp=0.02501 dx=0.02 [|grad f|=0.1452, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.018 proj=0.015 solve=1.614 sens=0.023
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.018 solve=1.481 sens=0.019
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.019 solve=1.482 sens=0.019
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (28.91s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=29: mu_C=0.272167 sigma_C=0.139176 E[V]=0.0799121 J=0.828873 (fea_batches=29)
+INFO:src.fenitop.mma:[MMA diag] it=29 raw objective f=8.288726e-01, |grad|=1.4771e-01, max|grad|=1.6348e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.0799121 h_value=8.79494e-05
+INFO:src.fenitop.mma:[MMA opt] it=29 stat_rel=0.124 (abs=0.0007626) feas=0 comp=0.0423 dx=0.02 [|grad f|=0.1477, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.033 proj=0.001 solve=1.747 sens=0.018
+INFO:src.surrogate.fea_at_samples:eta=0.034 proj=0.001 solve=1.765 sens=0.020
+INFO:src.surrogate.fea_at_samples:eta=0.037 proj=0.001 solve=1.716 sens=0.010
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (29.77s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=30: mu_C=0.2718 sigma_C=0.138654 E[V]=0.079962 J=0.826414 (fea_batches=30)
+INFO:src.fenitop.mma:[MMA diag] it=30 raw objective f=8.264138e-01, |grad|=1.4427e-01, max|grad|=1.5987e-03
+INFO:src.optimization.saa_robust_driver:constraint check: vol_frac=0.08 E[V]=0.079962 h_value=3.80411e-05
+INFO:src.fenitop.mma:[MMA opt] it=30 stat_rel=0.1244 (abs=0.0007363) feas=0 comp=0.01829 dx=0.02 [|grad f|=0.1443, diagnostic only]
+INFO:src.surrogate.fea_at_samples:eta=0.016 proj=0.006 solve=1.236 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.014 proj=0.006 solve=1.080 sens=0.010
+INFO:src.surrogate.fea_at_samples:eta=0.017 proj=0.007 solve=1.154 sens=0.008
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 16/16 solves (20.36s for last batch)
+INFO:src.optimization.saa_robust_driver:[SAA] outer_iter=31: mu_C=0.271953 sigma_C=0.138976 E[V]=0.0799101 J=0.827856 (fea_batches=31)
+WARNING:src.fenitop.mma:[MMA opt] iteration budget (30) exhausted WITHOUT meeting the first-order conditions: stat_rel=0.1244 (abs=0.0007363) feas=0 comp=0.01829 dx=0.02 [|grad f|=0.1443, diagnostic only]. Reporting DIVERGED_MAXITS -- the returned design is the best iterate reached, not a converged optimum.
+WARNING:src.optimization.saa_robust_driver:TAO MMA did NOT reach first-order optimality for lambda=4 (reason=-2). Returning the best feasible design evaluated; it is NOT a converged optimum and must not be reported as one. Final optimality: stat_rel=0.1244 (abs=0.0007363) feas=0 comp=0.01829 dx=0.02 [|grad f|=0.1443, diagnostic only]
+INFO:src.optimization.saa_robust_driver:SAA lambda=4 beta=128 done: mu_C=0.2718 sigma_C=0.138654 E[V]=0.079962 (violation 0%) M_nd=0.234% converged=False reason=-2 (31 FEA batches of N=64) | stat_rel=0.1244 (abs=0.0007363) feas=0 comp=0.01829 dx=0.02 [|grad f|=0.1443, diagnostic only]
+INFO:src.provenance:Run manifest written to output/studies/uniform_eta/manifest_optimize_uniform.json
+EXIT_A=0
+########## P0-B correlation_length fixed ##########
+WARNING:src.config.loader:optimization.lambda_sweep has only 3 points. That is enough to compare designs but too few to present as a Pareto front.
+INFO:src.meshing.box_source:Traction patch: half-width 0.9375 (auto max(0.5, 1.5h)), area 1.5625, traction_z -0.2048 (total force 0.32 held fixed across refinement levels)
+INFO:src.meshing.box_source:Built box-mesh fenitop dicts (beam_3d.py reference): cell_type=tetrahedron, domain=[[0, 0, 0], [10, 30, 10]], refinement=0.64 -> elements=[16, 48, 16], h=0.625, R=0.6 (R/h=0.96, FIXED across levels), E=100, nu=0.25, vol_frac=0.08
+WARNING:src.provenance:2 config value(s) are OVERRIDDEN in code and did not affect this run as written in config.yaml: filter_radius, vol_frac. The effective values are recorded in the manifest; cite those, not the YAML.
+WARNING:src.fenitop.topopt:No 'solid' cell_tags/solid_tag found in fem dict -- bolt/mount regions will NOT be hard-pinned to solid density. This mirrors the exact bug that caused bolt bosses to be optimized away; check fenitop_adapter.py wires cell_tags + solid_tag through.
+opt_iter: 1, opt_time: 0.33 (s), beta: 1, C: 36.291, V: 0.071, U: 0.000, change: 0.020
+opt_iter: 2, opt_time: 0.172 (s), beta: 1, C: 21.199, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 3, opt_time: 0.167 (s), beta: 1, C: 14.756, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 4, opt_time: 0.203 (s), beta: 1, C: 11.195, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 5, opt_time: 0.196 (s), beta: 1, C: 8.992, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 6, opt_time: 0.366 (s), beta: 1, C: 7.495, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 7, opt_time: 0.419 (s), beta: 1, C: 6.387, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 8, opt_time: 0.391 (s), beta: 1, C: 5.515, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 9, opt_time: 0.351 (s), beta: 1, C: 4.801, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 10: max |u| over all load cases = 1.320315e+01 m (13203.146022 mm)
+opt_iter: 10, opt_time: 0.197 (s), beta: 1, C: 4.210, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 11, opt_time: 0.333 (s), beta: 1, C: 3.720, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 12, opt_time: 0.431 (s), beta: 1, C: 3.316, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 13, opt_time: 0.32 (s), beta: 1, C: 2.981, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 14, opt_time: 0.297 (s), beta: 1, C: 2.703, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 15, opt_time: 0.25 (s), beta: 1, C: 2.469, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 16, opt_time: 0.3 (s), beta: 1, C: 2.272, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 17, opt_time: 0.379 (s), beta: 1, C: 2.103, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 18, opt_time: 0.374 (s), beta: 1, C: 1.958, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 19, opt_time: 0.316 (s), beta: 1, C: 1.831, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 20: max |u| over all load cases = 5.385902e+00 m (5385.902037 mm)
+opt_iter: 20, opt_time: 0.291 (s), beta: 1, C: 1.720, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 21, opt_time: 0.341 (s), beta: 1, C: 1.622, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 22, opt_time: 0.322 (s), beta: 1, C: 1.535, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 23, opt_time: 0.325 (s), beta: 1, C: 1.457, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 24, opt_time: 0.487 (s), beta: 1, C: 1.387, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 25, opt_time: 0.325 (s), beta: 1, C: 1.323, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 26, opt_time: 0.304 (s), beta: 1, C: 1.265, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 27, opt_time: 0.371 (s), beta: 1, C: 1.212, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 28, opt_time: 0.403 (s), beta: 1, C: 1.163, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 29, opt_time: 0.359 (s), beta: 1, C: 1.118, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 30: max |u| over all load cases = 3.369765e+00 m (3369.765372 mm)
+opt_iter: 30, opt_time: 0.246 (s), beta: 1, C: 1.076, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 31, opt_time: 0.354 (s), beta: 1, C: 1.036, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 32, opt_time: 0.362 (s), beta: 1, C: 0.999, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 33, opt_time: 0.381 (s), beta: 1, C: 0.963, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 34, opt_time: 0.413 (s), beta: 1, C: 0.928, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 35, opt_time: 0.367 (s), beta: 1, C: 0.893, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 36, opt_time: 0.384 (s), beta: 1, C: 0.859, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 37, opt_time: 0.434 (s), beta: 1, C: 0.825, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 38, opt_time: 0.251 (s), beta: 1, C: 0.791, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 39, opt_time: 0.338 (s), beta: 1, C: 0.759, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 40: max |u| over all load cases = 2.380865e+00 m (2380.865482 mm)
+opt_iter: 40, opt_time: 0.393 (s), beta: 1, C: 0.727, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 41, opt_time: 0.588 (s), beta: 1, C: 0.697, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 42, opt_time: 0.511 (s), beta: 1, C: 0.669, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 43, opt_time: 0.737 (s), beta: 1, C: 0.643, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 44, opt_time: 1.05 (s), beta: 1, C: 0.618, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 45, opt_time: 1.35 (s), beta: 1, C: 0.594, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 46, opt_time: 1.81 (s), beta: 1, C: 0.573, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 47, opt_time: 0.422 (s), beta: 1, C: 0.552, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 48, opt_time: 0.338 (s), beta: 1, C: 0.540, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 49, opt_time: 0.411 (s), beta: 1, C: 0.530, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 50: max |u| over all load cases = 1.883953e+00 m (1883.952559 mm)
+opt_iter: 50, opt_time: 0.49 (s), beta: 2, C: 0.530, V: 0.073, U: 0.000, change: 0.020
+opt_iter: 51, opt_time: 0.326 (s), beta: 2, C: 0.493, V: 0.076, U: 0.000, change: 0.020
+opt_iter: 52, opt_time: 0.326 (s), beta: 2, C: 0.458, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 53, opt_time: 0.399 (s), beta: 2, C: 0.448, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 54, opt_time: 0.431 (s), beta: 2, C: 0.439, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 55, opt_time: 0.376 (s), beta: 2, C: 0.432, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 56, opt_time: 0.204 (s), beta: 2, C: 0.426, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 57, opt_time: 0.387 (s), beta: 2, C: 0.420, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 58, opt_time: 0.342 (s), beta: 2, C: 0.415, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 59, opt_time: 0.355 (s), beta: 2, C: 0.411, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 60: max |u| over all load cases = 1.536061e+00 m (1536.061316 mm)
+opt_iter: 60, opt_time: 0.336 (s), beta: 2, C: 0.407, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 61, opt_time: 0.221 (s), beta: 2, C: 0.403, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 62, opt_time: 0.298 (s), beta: 2, C: 0.400, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 63, opt_time: 0.332 (s), beta: 2, C: 0.397, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 64, opt_time: 0.321 (s), beta: 2, C: 0.394, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 65, opt_time: 0.348 (s), beta: 2, C: 0.391, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 66, opt_time: 0.241 (s), beta: 2, C: 0.389, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 67, opt_time: 0.235 (s), beta: 2, C: 0.387, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 68, opt_time: 0.301 (s), beta: 2, C: 0.385, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 69, opt_time: 0.399 (s), beta: 2, C: 0.383, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 70: max |u| over all load cases = 1.457917e+00 m (1457.916578 mm)
+opt_iter: 70, opt_time: 0.293 (s), beta: 2, C: 0.382, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 71, opt_time: 0.266 (s), beta: 2, C: 0.380, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 72, opt_time: 0.24 (s), beta: 2, C: 0.379, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 73, opt_time: 0.322 (s), beta: 2, C: 0.378, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 74, opt_time: 0.362 (s), beta: 2, C: 0.377, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 75, opt_time: 0.316 (s), beta: 2, C: 0.376, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 76, opt_time: 0.27 (s), beta: 2, C: 0.375, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 77, opt_time: 0.247 (s), beta: 2, C: 0.375, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 78, opt_time: 0.29 (s), beta: 2, C: 0.374, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 79, opt_time: 0.313 (s), beta: 2, C: 0.374, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 80: max |u| over all load cases = 1.426712e+00 m (1426.712209 mm)
+opt_iter: 80, opt_time: 0.309 (s), beta: 2, C: 0.373, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 81, opt_time: 0.242 (s), beta: 2, C: 0.373, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 82, opt_time: 0.284 (s), beta: 2, C: 0.372, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 83, opt_time: 0.404 (s), beta: 2, C: 0.372, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 84, opt_time: 0.333 (s), beta: 2, C: 0.371, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 85, opt_time: 0.229 (s), beta: 2, C: 0.371, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 86, opt_time: 0.204 (s), beta: 2, C: 0.371, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 87, opt_time: 0.27 (s), beta: 2, C: 0.370, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 88, opt_time: 0.298 (s), beta: 2, C: 0.370, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 89, opt_time: 0.319 (s), beta: 2, C: 0.370, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 90: max |u| over all load cases = 1.412259e+00 m (1412.258575 mm)
+opt_iter: 90, opt_time: 0.295 (s), beta: 2, C: 0.369, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 91, opt_time: 0.254 (s), beta: 2, C: 0.369, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 92, opt_time: 0.233 (s), beta: 2, C: 0.369, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 93, opt_time: 0.262 (s), beta: 2, C: 0.369, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 94, opt_time: 0.307 (s), beta: 2, C: 0.368, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 95, opt_time: 0.333 (s), beta: 2, C: 0.368, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 96, opt_time: 0.33 (s), beta: 2, C: 0.368, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 97, opt_time: 0.213 (s), beta: 2, C: 0.368, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 98, opt_time: 0.249 (s), beta: 2, C: 0.368, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 99, opt_time: 0.287 (s), beta: 2, C: 0.367, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 100: max |u| over all load cases = 1.283749e+00 m (1283.748710 mm)
+opt_iter: 100, opt_time: 0.502 (s), beta: 4, C: 0.336, V: 0.070, U: 0.000, change: 0.020
+opt_iter: 101, opt_time: 0.363 (s), beta: 4, C: 0.325, V: 0.072, U: 0.000, change: 0.020
+opt_iter: 102, opt_time: 0.356 (s), beta: 4, C: 0.312, V: 0.074, U: 0.000, change: 0.020
+opt_iter: 103, opt_time: 0.3 (s), beta: 4, C: 0.299, V: 0.076, U: 0.000, change: 0.020
+opt_iter: 104, opt_time: 0.397 (s), beta: 4, C: 0.286, V: 0.078, U: 0.000, change: 0.020
+opt_iter: 105, opt_time: 0.346 (s), beta: 4, C: 0.275, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 106, opt_time: 0.361 (s), beta: 4, C: 0.274, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 107, opt_time: 0.445 (s), beta: 4, C: 0.273, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 108, opt_time: 0.313 (s), beta: 4, C: 0.272, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 109, opt_time: 0.396 (s), beta: 4, C: 0.271, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 110: max |u| over all load cases = 1.074807e+00 m (1074.807276 mm)
+opt_iter: 110, opt_time: 0.36 (s), beta: 4, C: 0.270, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 111, opt_time: 0.327 (s), beta: 4, C: 0.270, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 112, opt_time: 0.314 (s), beta: 4, C: 0.269, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 113, opt_time: 0.325 (s), beta: 4, C: 0.269, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 114, opt_time: 0.503 (s), beta: 4, C: 0.268, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 115, opt_time: 0.346 (s), beta: 4, C: 0.268, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 116, opt_time: 0.469 (s), beta: 4, C: 0.267, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 117, opt_time: 0.461 (s), beta: 4, C: 0.267, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 118, opt_time: 0.475 (s), beta: 4, C: 0.266, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 119, opt_time: 0.429 (s), beta: 4, C: 0.266, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 120: max |u| over all load cases = 1.060550e+00 m (1060.549560 mm)
+opt_iter: 120, opt_time: 0.373 (s), beta: 4, C: 0.265, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 121, opt_time: 0.472 (s), beta: 4, C: 0.265, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 122, opt_time: 0.371 (s), beta: 4, C: 0.265, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 123, opt_time: 0.351 (s), beta: 4, C: 0.264, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 124, opt_time: 0.424 (s), beta: 4, C: 0.264, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 125, opt_time: 0.379 (s), beta: 4, C: 0.264, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 126, opt_time: 0.519 (s), beta: 4, C: 0.264, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 127, opt_time: 0.384 (s), beta: 4, C: 0.263, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 128, opt_time: 0.367 (s), beta: 4, C: 0.263, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 129, opt_time: 0.45 (s), beta: 4, C: 0.263, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 130: max |u| over all load cases = 1.048191e+00 m (1048.191145 mm)
+opt_iter: 130, opt_time: 0.506 (s), beta: 4, C: 0.263, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 131, opt_time: 0.366 (s), beta: 4, C: 0.262, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 132, opt_time: 0.443 (s), beta: 4, C: 0.262, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 133, opt_time: 0.525 (s), beta: 4, C: 0.262, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 134, opt_time: 0.368 (s), beta: 4, C: 0.262, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 135, opt_time: 0.323 (s), beta: 4, C: 0.261, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 136, opt_time: 0.421 (s), beta: 4, C: 0.261, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 137, opt_time: 0.478 (s), beta: 4, C: 0.261, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 138, opt_time: 0.345 (s), beta: 4, C: 0.261, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 139, opt_time: 0.344 (s), beta: 4, C: 0.261, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 140: max |u| over all load cases = 1.037181e+00 m (1037.181192 mm)
+opt_iter: 140, opt_time: 0.442 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 141, opt_time: 0.537 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 142, opt_time: 0.398 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 143, opt_time: 0.359 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 144, opt_time: 0.365 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 145, opt_time: 0.384 (s), beta: 4, C: 0.260, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 146, opt_time: 0.449 (s), beta: 4, C: 0.259, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 147, opt_time: 0.538 (s), beta: 4, C: 0.259, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 148, opt_time: 0.39 (s), beta: 4, C: 0.259, V: 0.080, U: 0.000, change: 0.020
+opt_iter: 149, opt_time: 0.394 (s), beta: 4, C: 0.259, V: 0.080, U: 0.000, change: 0.020
+  [diag] opt_iter 150: max |u| over all load cases = 8.687925e-01 m (868.792540 mm)
+opt_iter: 150, opt_time: 0.69 (s), beta: 8, C: 0.211, V: 0.074, U: 0.000, change: 0.020
+2026-07-29 16:48:47.300 (  61.838s) [    7F61A542E140]vtkXOpenGLRenderWindow.:1460  WARN| bad X server connection. DISPLAY=
+INFO:src.random_fields.kernel:Built squared-exponential kernel: sigma=1, l=1 mm, dim=3
+INFO:src.random_fields.kl_expansion:KL expansion truncated at N_kl=183 modes (95.13% variance explained, threshold=95%)
+INFO:src.random_fields.kl_expansion:KL expansion cached to output/cache/kl_expansion/kl_e1ca12fabf35f40003861062.npz
+INFO:src.random_fields.threshold_transform:Initialized threshold marginal transform: eta in [0.250, 0.750], Beta(alpha=2.00, beta=2.00)
+INFO:src.topology.heaviside_projection_glue:RandomFieldHeaviside ready: N_kl=183, variance_explained=0.9513, n_local_dofs=417 matched to global KL nodes
+INFO:src.random_fields.threshold_transform:Initialized threshold marginal transform: eta in [0.250, 0.750], Beta(alpha=2.00, beta=2.00)
+INFO:src.topology.heaviside_projection_glue:RandomFieldHeaviside ready: N_kl=183, variance_explained=0.9513, n_local_dofs=1822 matched to global KL nodes
+INFO:src.optimization.dolfiny_mma_driver:Sample-parallelism enabled: 4 group(s) x 8 rank(s); each PCE/MC sample batch is split across groups and solved concurrently.
+INFO:src.surrogate.fea_at_samples:eta=0.030 proj=0.005 solve=0.479 sens=0.008
+INFO:src.surrogate.fea_at_samples:eta=0.043 proj=0.000 solve=0.398 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.032 proj=0.007 solve=0.434 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 50/250 solves (26.29s for last batch)
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 100/250 solves (25.04s for last batch)
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 150/250 solves (26.13s for last batch)
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 200/250 solves (23.19s for last batch)
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 250/250 solves (25.14s for last batch)
+INFO:__main__:l_c=1        n_kl=183  var_expl=0.9513  mu_C=0.679517 sigma_C=0.838287 cv=1.2337
+INFO:src.random_fields.kernel:Built squared-exponential kernel: sigma=1, l=2 mm, dim=3
+INFO:src.random_fields.kl_expansion:KL expansion truncated at N_kl=141 modes (95.00% variance explained, threshold=95%)
+INFO:src.random_fields.kl_expansion:KL expansion cached to output/cache/kl_expansion/kl_fcbfc2d63ff7f65318e579eb.npz
+INFO:src.random_fields.threshold_transform:Initialized threshold marginal transform: eta in [0.250, 0.750], Beta(alpha=2.00, beta=2.00)
+INFO:src.topology.heaviside_projection_glue:RandomFieldHeaviside ready: N_kl=141, variance_explained=0.9500, n_local_dofs=417 matched to global KL nodes
+INFO:src.random_fields.threshold_transform:Initialized threshold marginal transform: eta in [0.250, 0.750], Beta(alpha=2.00, beta=2.00)
+INFO:src.topology.heaviside_projection_glue:RandomFieldHeaviside ready: N_kl=141, variance_explained=0.9500, n_local_dofs=1710 matched to global KL nodes
+INFO:src.optimization.dolfiny_mma_driver:Sample-parallelism enabled: 4 group(s) x 8 rank(s); each PCE/MC sample batch is split across groups and solved concurrently.
+INFO:src.surrogate.fea_at_samples:eta=0.027 proj=0.006 solve=0.524 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.005 solve=0.466 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.026 proj=0.008 solve=0.476 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 50/250 solves (25.90s for last batch)
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 100/250 solves (25.36s for last batch)
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 150/250 solves (24.32s for last batch)
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 200/250 solves (26.27s for last batch)
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 250/250 solves (24.52s for last batch)
+INFO:__main__:l_c=2        n_kl=141  var_expl=0.9500  mu_C=0.693039 sigma_C=1.01263 cv=1.4611
+INFO:src.random_fields.kl_expansion:KL expansion cache hit: loading output/cache/kl_expansion/kl_7b7f32d923c29f6ec2ef5ea2.npz
+INFO:src.random_fields.kl_expansion:KL expansion loaded from cache: N_kl=37 modes (95.10% variance explained, threshold=95%)
+INFO:src.random_fields.threshold_transform:Initialized threshold marginal transform: eta in [0.250, 0.750], Beta(alpha=2.00, beta=2.00)
+INFO:src.topology.heaviside_projection_glue:RandomFieldHeaviside ready: N_kl=37, variance_explained=0.9510, n_local_dofs=417 matched to global KL nodes
+INFO:src.random_fields.threshold_transform:Initialized threshold marginal transform: eta in [0.250, 0.750], Beta(alpha=2.00, beta=2.00)
+INFO:src.topology.heaviside_projection_glue:RandomFieldHeaviside ready: N_kl=37, variance_explained=0.9510, n_local_dofs=1759 matched to global KL nodes
+INFO:src.optimization.dolfiny_mma_driver:Sample-parallelism enabled: 4 group(s) x 8 rank(s); each PCE/MC sample batch is split across groups and solved concurrently.
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.004 solve=0.472 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.002 solve=0.333 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.022 proj=0.002 solve=0.375 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 50/250 solves (20.94s for last batch)
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 100/250 solves (23.07s for last batch)
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 150/250 solves (22.05s for last batch)
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 200/250 solves (22.00s for last batch)
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 250/250 solves (21.96s for last batch)
+INFO:__main__:l_c=4        n_kl=37   var_expl=0.9510  mu_C=0.824028 sigma_C=1.59076 cv=1.9305
+INFO:src.random_fields.kernel:Built squared-exponential kernel: sigma=1, l=8 mm, dim=3
+INFO:src.random_fields.kl_expansion:KL expansion truncated at N_kl=9 modes (95.41% variance explained, threshold=95%)
+INFO:src.random_fields.kl_expansion:KL expansion cached to output/cache/kl_expansion/kl_7eb022b797f92b67a7c23b9e.npz
+INFO:src.random_fields.threshold_transform:Initialized threshold marginal transform: eta in [0.250, 0.750], Beta(alpha=2.00, beta=2.00)
+INFO:src.topology.heaviside_projection_glue:RandomFieldHeaviside ready: N_kl=9, variance_explained=0.9541, n_local_dofs=417 matched to global KL nodes
+INFO:src.random_fields.threshold_transform:Initialized threshold marginal transform: eta in [0.250, 0.750], Beta(alpha=2.00, beta=2.00)
+INFO:src.topology.heaviside_projection_glue:RandomFieldHeaviside ready: N_kl=9, variance_explained=0.9541, n_local_dofs=1727 matched to global KL nodes
+INFO:src.optimization.dolfiny_mma_driver:Sample-parallelism enabled: 4 group(s) x 8 rank(s); each PCE/MC sample batch is split across groups and solved concurrently.
+INFO:src.surrogate.fea_at_samples:eta=0.025 proj=0.000 solve=0.543 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.006 solve=0.370 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.015 proj=0.005 solve=0.411 sens=0.006
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 50/250 solves (21.42s for last batch)
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 100/250 solves (19.78s for last batch)
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 150/250 solves (19.99s for last batch)
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 200/250 solves (21.06s for last batch)
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 250/250 solves (19.45s for last batch)
+INFO:__main__:l_c=8        n_kl=9    var_expl=0.9541  mu_C=1.11355 sigma_C=2.61705 cv=2.3502
+INFO:src.random_fields.kernel:Built squared-exponential kernel: sigma=1, l=16 mm, dim=3
+INFO:src.random_fields.kl_expansion:KL expansion truncated at N_kl=4 modes (96.46% variance explained, threshold=95%)
+INFO:src.random_fields.kl_expansion:KL expansion cached to output/cache/kl_expansion/kl_90988b34802e81615865ca16.npz
+INFO:src.random_fields.threshold_transform:Initialized threshold marginal transform: eta in [0.250, 0.750], Beta(alpha=2.00, beta=2.00)
+INFO:src.topology.heaviside_projection_glue:RandomFieldHeaviside ready: N_kl=4, variance_explained=0.9646, n_local_dofs=417 matched to global KL nodes
+INFO:src.random_fields.threshold_transform:Initialized threshold marginal transform: eta in [0.250, 0.750], Beta(alpha=2.00, beta=2.00)
+INFO:src.topology.heaviside_projection_glue:RandomFieldHeaviside ready: N_kl=4, variance_explained=0.9646, n_local_dofs=1732 matched to global KL nodes
+INFO:src.optimization.dolfiny_mma_driver:Sample-parallelism enabled: 4 group(s) x 8 rank(s); each PCE/MC sample batch is split across groups and solved concurrently.
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.001 solve=0.494 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.000 solve=0.384 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.000 solve=0.343 sens=0.009
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 50/250 solves (19.85s for last batch)
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 100/250 solves (19.92s for last batch)
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 150/250 solves (22.47s for last batch)
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 200/250 solves (19.56s for last batch)
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 250/250 solves (20.33s for last batch)
+INFO:__main__:l_c=16       n_kl=4    var_expl=0.9646  mu_C=0.921684 sigma_C=2.789 cv=3.026
+INFO:src.random_fields.kernel:Built squared-exponential kernel: sigma=1, l=32 mm, dim=3
+INFO:src.random_fields.kl_expansion:KL expansion truncated at N_kl=2 modes (98.27% variance explained, threshold=95%)
+INFO:src.random_fields.kl_expansion:KL expansion cached to output/cache/kl_expansion/kl_3d54d6230cfc051fe4d4e9aa.npz
+INFO:src.random_fields.threshold_transform:Initialized threshold marginal transform: eta in [0.250, 0.750], Beta(alpha=2.00, beta=2.00)
+INFO:src.topology.heaviside_projection_glue:RandomFieldHeaviside ready: N_kl=2, variance_explained=0.9827, n_local_dofs=417 matched to global KL nodes
+INFO:src.random_fields.threshold_transform:Initialized threshold marginal transform: eta in [0.250, 0.750], Beta(alpha=2.00, beta=2.00)
+INFO:src.topology.heaviside_projection_glue:RandomFieldHeaviside ready: N_kl=2, variance_explained=0.9827, n_local_dofs=1746 matched to global KL nodes
+INFO:src.optimization.dolfiny_mma_driver:Sample-parallelism enabled: 4 group(s) x 8 rank(s); each PCE/MC sample batch is split across groups and solved concurrently.
+INFO:src.surrogate.fea_at_samples:eta=0.021 proj=0.002 solve=0.488 sens=0.006
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.000 solve=0.360 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.000 solve=0.395 sens=0.007
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 50/250 solves (22.55s for last batch)
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 100/250 solves (24.98s for last batch)
+WARNING:src.fenitop.utility:KSP solve failed to converge (reason=-4, reuse_pc=False, warm_start=True); retrying once from a zero initial guess with a freshly built preconditioner.
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 150/250 solves (22.03s for last batch)
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 200/250 solves (22.97s for last batch)
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 250/250 solves (21.08s for last batch)
+INFO:__main__:l_c=32       n_kl=2    var_expl=0.9827  mu_C=0.848571 sigma_C=2.80526 cv=3.3059
+INFO:src.random_fields.kl_expansion:KL expansion cache hit: loading output/cache/kl_expansion/kl_7b7f32d923c29f6ec2ef5ea2.npz
+INFO:src.random_fields.kl_expansion:KL expansion loaded from cache: N_kl=37 modes (95.10% variance explained, threshold=95%)
+INFO:src.random_fields.threshold_transform:Initialized threshold marginal transform: eta in [0.250, 0.750], Beta(alpha=2.00, beta=2.00)
+INFO:src.topology.heaviside_projection_glue:RandomFieldHeaviside ready: N_kl=1, variance_explained=1.0000, n_local_dofs=417 matched to global KL nodes
+INFO:src.random_fields.threshold_transform:Initialized threshold marginal transform: eta in [0.250, 0.750], Beta(alpha=2.00, beta=2.00)
+INFO:src.topology.heaviside_projection_glue:RandomFieldHeaviside ready: N_kl=1, variance_explained=1.0000, n_local_dofs=1702 matched to global KL nodes
+INFO:src.optimization.dolfiny_mma_driver:Sample-parallelism enabled: 4 group(s) x 8 rank(s); each PCE/MC sample batch is split across groups and solved concurrently.
+INFO:src.surrogate.fea_at_samples:eta=0.020 proj=0.000 solve=0.468 sens=0.006
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.000 solve=0.363 sens=0.007
+INFO:src.surrogate.fea_at_samples:eta=0.019 proj=0.001 solve=0.391 sens=0.006
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 50/250 solves (20.91s for last batch)
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 100/250 solves (20.67s for last batch)
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 150/250 solves (20.65s for last batch)
+WARNING:src.fenitop.utility:KSP solve failed to converge (reason=-4, reuse_pc=False, warm_start=True); retrying once from a zero initial guess with a freshly built preconditioner.
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 200/250 solves (20.87s for last batch)
+WARNING:src.fenitop.utility:KSP solve failed to converge (reason=-4, reuse_pc=False, warm_start=True); retrying once from a zero initial guess with a freshly built preconditioner.
+WARNING:src.fenitop.utility:KSP solve failed to converge (reason=-4, reuse_pc=False, warm_start=True); retrying once from a zero initial guess with a freshly built preconditioner.
+INFO:src.surrogate.fea_at_samples:FEA-at-samples: completed 250/250 solves (19.86s for last batch)
+INFO:__main__:l_c=uniform  n_kl=1    var_expl=1.0000  mu_C=0.864989 sigma_C=2.74966 cv=3.1788
+INFO:__main__:PEAK at l_c=32 (cv=3.3059); uniform limit cv=3.1788 -> the worst correlation length is +4% above the uniform case.
+WARNING:__main__:That peak sits at an ENDPOINT of the swept range, so cv is MONOTONIC here and there is no interior worst-case correlation length. If the maximum is at the large-l_c end the uniform case is the worst case, which SUPPORTS the single-l_c conclusion of Schevenels et al. (2011) and undercuts the premise that a spatially-correlated model is needed. Widen L_C_LEVELS before concluding either way.
+INFO:src.provenance:Run manifest written to output/studies/correlation_length/20260729T164747Z_nogit/manifest.json
+EXIT_B=0
+########## PHASE0 DONE ##########

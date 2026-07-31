@@ -27,7 +27,10 @@ WHAT IT WRITES (output/paraview/)
   01_mean_shape.vtp              the ensemble-mean boundary, as a reference
 
   02_ensemble_fea.pvd            enriched per-realization fields, as a time
-                                 series (one timestep = one realization)
+                                 series (one timestep = one realization).
+                                 Uses the smoothed rho = iso boundary surfaces
+                                 when enrich_ensemble_fea.py wrote them
+                                 (surfaces/), else the raw full-volume tets.
   02_ensemble_density.pvd        the raw density-only ensemble, same idea
 
   03_risk_delta.vtu              every design's mean/std/prob_void plus the
@@ -153,10 +156,12 @@ def export_ensemble(fea_dir: Path, mc_dir: Path, out: Path,
                     notes: list[str]) -> None:
     ranges: dict[str, tuple[float, float, float, float]] = {}
 
-    def collect(ens_dir: Path, pvd_name: str, label: str, do_ranges: bool) -> None:
-        vtus = sorted(ens_dir.glob("sample_*.vtu"))
+    def collect(ens_dir: Path, pvd_name: str, label: str, do_ranges: bool,
+                pattern: str = "sample_*.vtu") -> None:
+        vtus = sorted(ens_dir.glob(pattern))
         if not vtus:
-            notes.append(f"{pvd_name} skipped: no VTUs under {ens_dir}.")
+            notes.append(f"{pvd_name} skipped: no files matching {pattern} "
+                         f"under {ens_dir}.")
             return
         entries = [(float(t), os.path.relpath(p, start=out))
                    for t, p in enumerate(vtus)]
@@ -186,9 +191,20 @@ def export_ensemble(fea_dir: Path, mc_dir: Path, out: Path,
             ranges[name] = (lo, hi, float(np.percentile(a, 1)),
                             float(np.percentile(a, 99)))
 
-    if fea_dir.exists():
+    if (fea_dir / "surfaces").exists():
+        # Smoothed rho = iso boundary with eta / displacement / von Mises /
+        # SED carried along as point data -- reads as an actual manufactured
+        # part instead of the raw tet-mesh block. Falls back to the full
+        # volume below only for runs made before enrich_ensemble_fea.py grew
+        # surface output.
+        collect(fea_dir / "surfaces", "02_ensemble_fea.pvd",
+                "enriched, smoothed rho=iso boundary", True,
+                pattern="sample_*.vtp")
+    elif fea_dir.exists():
         collect(fea_dir / "ensemble", "02_ensemble_fea.pvd",
-                "enriched: eta / displacement / von Mises / SED", True)
+                "enriched: eta / displacement / von Mises / SED "
+                "(full volume -- Threshold density > 0.5 before viewing)",
+                True)
     else:
         notes.append("02_ensemble_fea.pvd skipped: run "
                      "`mpirun -n 8 python viz/enrich_ensemble_fea.py`.")
@@ -305,14 +321,23 @@ GLOBAL SETUP, DO THIS ONCE
 --------------------------------------------------------------------------
 02 -- FEA FIELDS PER REALIZATION
 --------------------------------------------------------------------------
-  02_ensemble_fea.pvd      one timestep per realization; use the VCR controls
+  02_ensemble_fea.pvd      one timestep per realization; use the VCR controls.
+                           Each frame is the smoothed rho = iso boundary (from
+                           viz/enrich_ensemble_fea.py's surfaces/ output) with
+                           every field below already carried onto it as point
+                           data -- open and colour directly, no Threshold or
+                           Contour needed. (Older enrich_ensemble_fea.py runs
+                           without surfaces/ fall back to the raw full-volume
+                           tets; apply Threshold on density in [0.5, 1] first
+                           in that case.)
   02_ensemble_density.pvd  the original density-only ensemble
 
-  Apply Threshold on density in [0.5, 1] FIRST, then colour. Fields:
+  Fields:
       eta                    the sampled manufacturing threshold -- the CAUSE.
                              eta > 0.5 = under-deposition at that point.
-      von_mises              macroscopic stress. MEANINGLESS in void: it
-                             carries the SIMP scaling. Always threshold first.
+      von_mises              macroscopic stress. MEANINGLESS in void; on the
+                             surface path you are already at rho = iso so
+                             this is safe to colour by directly.
       von_mises_solid        stress in the actual solid phase, SIMP factor
                              divided out. This is the yielding-relevant number
                              and the one that spikes in thin ligaments.

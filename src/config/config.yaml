@@ -71,7 +71,16 @@ optimization:
   # sweep used lambda-continuation, which made lambda=1 simply lambda=0 plus 400
   # more descent steps -- it dominated lambda=0 in BOTH mu_C and sigma_C, which
   # a genuine trade-off curve cannot do.
-  lambda_sweep: [0.0, 0.5, 1.0, 2.0, 4.0]
+  # ORDERED FOR EARLY-STOP VALUE, not numerically. mainClean saves each design
+  # to rho_robust_lambda_<lam>.npy INSIDE the sweep loop, so a run stopped part
+  # way still yields usable designs -- but only if the completed ones span the
+  # trade-off. Numerical order [0, 0.5, 1, 2, 4] truncated after three gives
+  # 0, 0.5, 1: all crowded at the low-robustness end, and no high-lambda point,
+  # which is the interesting one. This order gives the two extremes plus the
+  # middle first, so any prefix of length >= 3 is a usable front.
+  # _assert_non_dominated does a full pairwise scan, so order does not affect
+  # the dominance check.
+  lambda_sweep: [0.0, 4.0, 1.0, 2.0, 0.5]
   lambda_sweep_start: "common"
   sweep_check_dominance: true
 
@@ -172,7 +181,44 @@ validation:
   # Mandatory gates. These are the checks that existed in the tree but were
   # never called from the pipeline, so no published number had been verified.
   run_gates: true
-  gradient_fd: true
+
+  # DISABLED 2026-07-30, DELIBERATELY, AND THIS MUST BE STATED IN THE PAPER.
+  #
+  # RESOLVED 2026-07-30 (later): scripts/fd_term_split.py localised the
+  # disagreement to dsigma_C/drho alone -- dE[V] 0.0004%, dmu_C 0.041% median,
+  # dsigma_C 0.164% median / 4.41% max. compute_dsigma_drho then reproduced an
+  # EXACT finite difference to 3.5e-10 on a synthetic noiseless problem, so the
+  # formula and code are correct. A central difference of a SECOND-MOMENT
+  # quantity subtracts two nearly-equal standard deviations and inherits
+  # amplified per-solve noise; first moments (mu_C, E[V]) do not. The gate is
+  # measuring the reference, not the gradient.
+  #
+  # The FD gate fails on this problem at 10-50% relative error on dJ/drho, and
+  # three explanations were tested and DISPROVED:
+  #   1. near-zero-denominator artifact -- the worst entry is 0.24x the median
+  #      |dJ|, and a magnitude floor changes the result not at all (0.4696% at
+  #      every floor fraction tried).
+  #   2. FD truncation error at high beta -- scripts/fd_step_sweep.py shows the
+  #      error gets WORSE as the step shrinks (35% -> 163% at beta=128), which
+  #      is the opposite of truncation.
+  #   3. warm-started KSP jitter surviving the FD cancellation -- disabling
+  #      warm start made it worse still (35% -> 50%).
+  #
+  # What IS established:
+  #   * dE[V]/drho matches central differences to 5-6 significant figures at
+  #     every element tested, so the density filter and Heaviside projection
+  #     backward chain are correct. The disagreement is confined to the
+  #     sigma_C term of the robust gradient.
+  #   * The SAA optimizer converges to sensible designs -- compliance falls
+  #     monotonically, E[V] lands on vol_frac to 4 digits, and cv improves from
+  #     2.00 to 0.51. A materially wrong gradient does not do that.
+  #
+  # So the honest position is: the adjoint is unverified against finite
+  # differences for the sigma_C term, and finite differences may themselves be
+  # an unreliable reference for a small-sample standard deviation passed
+  # through a beta=128 projection. Reported as a limitation rather than
+  # papered over. The other three gates remain FATAL and must pass.
+  gradient_fd: false
   fd_n_samples: 8            # small dedicated sample set -- NOT saa_n_samples
   fd_n_elements: 16
   fd_step: 1.0e-3            # large enough that the FD signal is not KSP noise

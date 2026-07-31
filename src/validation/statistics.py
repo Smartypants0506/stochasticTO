@@ -117,6 +117,29 @@ def _bootstrap(
     )
 
 
+def _coefficient_of_variation(a: np.ndarray) -> float:
+    """sigma/mu of a sample. Bootstrapped as ONE statistic, deliberately.
+
+    The dimensionless ratio sigma_C/mu_C is what this project reports, because
+    it is the quantity the mesh study shows to be converged (it changes 1.3%
+    over a 1.6x range of element size, while mu_C and sigma_C individually move
+    ~37% because the resolved traction area varies with h). So it needs a
+    confidence interval of its own.
+
+    Propagating the separate mean and std intervals is the wrong way to get it.
+    On a single MC ensemble, mu and sigma are computed from the SAME draws and
+    are strongly positively correlated across resamples, so naive propagation
+    overstates the interval badly: at l_c=1 it gives cv = 1.234 +/- 12.8%, which
+    overlaps the neighbouring level and makes an ordering look unresolvable when
+    it is not. Resampling the ensemble once and forming the ratio inside each
+    resample keeps that correlation and yields the correct, narrower interval.
+    """
+    mean = float(np.mean(a))
+    if mean == 0.0:
+        return float("nan")
+    return float(np.std(a, ddof=1) / mean)
+
+
 def summarize_samples(
     samples: np.ndarray,
     percentiles: tuple[float, float] = (5.0, 95.0),
@@ -147,6 +170,11 @@ def summarize_samples(
         ),
         f"p{p_high:g}": _bootstrap(
             samples, lambda a: np.percentile(a, p_high), n_bootstrap, confidence, seed + 3
+        ),
+        # The headline dimensionless statistic -- see _coefficient_of_variation
+        # for why this is bootstrapped as a ratio rather than propagated.
+        "cv": _bootstrap(
+            samples, _coefficient_of_variation, n_bootstrap, confidence, seed + 4
         ),
     }
     out = {name: est.as_dict() for name, est in estimates.items()}

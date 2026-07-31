@@ -372,6 +372,65 @@ def pointwise_std(kl_result: KLExpansionResult, eps: float = 1e-12) -> np.ndarra
     return np.sqrt(np.maximum(variance, eps * eps))
 
 
+def build_uniform_eta_kl(kl_result: KLExpansionResult) -> KLExpansionResult:
+    """Degenerate one-mode expansion whose realizations are spatially CONSTANT.
+
+    This is the uniform-manufacturing-error control of Schevenels, Lazarov &
+    Sigmund (CMAME 200:3613-3627, 2011) Section 3.1: eta as a random VARIABLE
+    rather than a random FIELD. Their central finding is that, for a 2D
+    compliant mechanism and a 2D heat sink, the design optimized against uniform
+    errors is as robust to non-uniform errors as the design optimized against
+    non-uniform ones -- the spatial correlation bought nothing. Until this
+    project runs that comparison in 3D compliance it cannot claim its KL field
+    is doing any work, and the ~170x cost of the sample-average loop over a
+    scalar threshold is unjustified. See scripts/uniform_eta_baseline.py.
+
+    WHY THIS NEEDS NO CHANGES ANYWHERE ELSE
+    ---------------------------------------
+    RandomFieldHeaviside divides G(x) by pointwise_std() BEFORE the marginal
+    transform (heaviside_projection_glue.py, `self._field_std`), so the transform
+    always receives an exact unit-variance normal and eta is exactly
+    Beta(alpha,beta) on [eta_min,eta_max] regardless of the eigenvalues, the
+    modes, or the truncation level. A single mode with a CONSTANT eigenfunction
+    therefore gives
+
+        G(x)          = sqrt(lambda_1) * 1 * xi_1        (constant in x)
+        pointwise_std = sqrt(lambda_1)                   (constant in x)
+        G(x)/std      = xi_1                             (one scalar N(0,1))
+        eta(x)        = T(xi_1)                          (one scalar Beta draw)
+
+    -- a spatially uniform threshold from the IDENTICAL marginal as the field
+    arm. The SAA driver, the batched FEA, the projection and the transform are
+    all reused byte-for-byte; only the expansion handed to them differs. That is
+    what makes the two arms comparable: any difference in the result is the
+    spatial correlation and nothing else. tests/test_uniform_eta_baseline.py
+    pins both halves of that claim.
+
+    The eigenvalue is set to sigma^2 so pointwise_std matches the stationary
+    variance of the real field. The value is in fact inert -- it cancels in the
+    standardization above -- but matching it keeps the artifact readable.
+
+    Args:
+        kl_result: The real, spatially-correlated expansion for this mesh. Its
+            node_coordinates MUST be carried over unchanged, or the projection
+            glue's local-dof-to-global-node coordinate matching will fail.
+
+    Returns:
+        A KLExpansionResult with n_kl=1 whose realizations are constant in space.
+    """
+    n_nodes = kl_result.node_coordinates.shape[0]
+    return KLExpansionResult(
+        eigenvalues=np.array([kl_result.kernel_params.sigma ** 2], dtype=float),
+        modes=np.ones((n_nodes, 1), dtype=float),
+        mean_field=np.zeros(n_nodes, dtype=float),
+        # A rank-one expansion with a constant mode carries its whole field.
+        variance_explained=1.0,
+        n_kl=1,
+        node_coordinates=kl_result.node_coordinates,
+        kernel_params=kl_result.kernel_params,
+    )
+
+
 def evaluate_field_from_xi(kl_result: KLExpansionResult, xi: np.ndarray) -> np.ndarray:
     """Evaluate G(x) at an explicit, caller-supplied KL coefficient vector.
 

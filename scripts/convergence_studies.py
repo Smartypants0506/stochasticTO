@@ -198,6 +198,10 @@ def study_mesh(cfg, run_dir: Path, manifest: RunManifest) -> dict:
                               seed=cfg.mc_validation.bootstrap_seed)
             if comm.rank == 0 else None
         )
+        # Keep the raw ensemble so new statistics never require re-running FEA.
+        if comm.rank == 0:
+            np.save(run_dir / f"compliance_samples_refinement_{refinement:g}.npy",
+                    np.asarray(evaluation.compliance_samples))
         results.append({
             "refinement": refinement,
             "elements": elements,
@@ -347,6 +351,9 @@ def study_n_fixed_design(cfg, run_dir: Path, manifest: RunManifest) -> dict:
                               seed=cfg.mc_validation.bootstrap_seed)
             if comm.rank == 0 else None
         )
+        if comm.rank == 0:
+            np.save(run_dir / f"compliance_samples_N{n}.npy",
+                    np.asarray(evaluation.compliance_samples))
         results.append({
             "N": n, "mu_C": evaluation.mu_C, "sigma_C": evaluation.sigma_C,
             "statistics": summary,

@@ -16,7 +16,8 @@
 #
 # Indicative costs on 64 ranks (8 groups x 8):
 #   one lambda, N=128, 150 iters ....... 0.7 h
-#   SAA gap study, 10 replications ..... 7 h
+#   one lambda, N=512, 150 iters ....... 2.5 h   (measured, n-opt manifest)
+#   SAA gap study, 10 replications ..... 26 h    (at saa_n_samples: 512 below)
 #   N-convergence, re-optimizing ....... 5 h
 #   N-convergence, fixed design ........ 20 min
 #   erode/dilate baseline .............. 3 min
@@ -36,7 +37,7 @@ optimization:
   epsilon: 1.0e-4
 
   robust_method: "saa"
-  saa_n_samples: 128
+  saa_n_samples: 512
   # monte_carlo, NOT lhs, for study runs. An optimized LHS design is NOT nested:
   # the first 512 points of a 1024-point design are not a 512-point design. So an
   # LHS N-convergence curve carries design-to-design jitter that looks like, but
